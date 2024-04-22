@@ -34,11 +34,7 @@ namespace SpinBladeArena
 
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            string? authKey = configuration["Key"];
-            if (authKey == null)
-            {
-                throw new Exception("Please provide a key in the configuration");
-            }
+            string? authKey = configuration["Key"] ?? throw new Exception("Please provide a key in the configuration");
 
             // Add services to the container.
             services.AddHttpContextAccessor();

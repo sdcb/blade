@@ -4,10 +4,8 @@ using SpinBladeArena.LogicCenter;
 
 namespace SpinBladeArena.Pages;
 
-public class LobbyModel(ILogger<LobbyModel> logger, GameManager gameManager) : PageModel
+public class LobbyModel(GameManager gameManager) : PageModel
 {
-    private readonly ILogger<LobbyModel> _logger = logger;
-
     [BindProperty(SupportsGet = true)]
     public int LobbyId { get; set; }
 

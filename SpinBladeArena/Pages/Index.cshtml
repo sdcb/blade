@@ -24,7 +24,7 @@
             </tr>
         </thead>
         <tbody id="room-list">
-            @foreach (var room in GameManager.Lobbies.OrderByDescending(x => x.Id))
+            @foreach (var room in GameManager.Lobbies.Values.OrderByDescending(x => x.Id))
             {
                 <tr>
                     <td>@room.Id</td>

@@ -2,7 +2,7 @@
 
 public class GameManager
 {
-    public List<Lobby> Lobbies { get; } = [];
+    public Dictionary<int, Lobby> Lobbies { get; } = [];
 
     public int CreateLobby(int userId)
     {
@@ -10,7 +10,7 @@ public class GameManager
         lock (Lobbies)
         {
             nextLobbyId = Lobbies.Count + 1;
-            Lobbies.Add(new Lobby(nextLobbyId, userId, DateTime.Now));
+            Lobbies[nextLobbyId] = new Lobby(nextLobbyId, userId, DateTime.Now);
         }
         return nextLobbyId;
     }

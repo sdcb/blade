@@ -7,6 +7,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime)
 {
     public Vector2 MaxSize = new(1000, 1000);
     public Player[] Players = [];
+    public Dictionary<int, int> PlayerIdMap = [];
     public PickableBonus[] PickableBonuses = [];
     public Player[] DeadPlayers = [];
     private CancellationTokenSource? _cancellationTokenSource = null;
@@ -17,6 +18,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime)
         ref Player player = ref Players[^1];
         player.Name = name;
         player.Position = new (Random.Shared.NextSingle() * MaxSize.X, Random.Shared.NextSingle() * MaxSize.Y);
+        PlayerIdMap[player.Id] = Players.Length - 1;
     }
 
     public void AddPickableBonus(Vector2 position)
@@ -98,6 +100,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime)
                     Array.Copy(Players, i + 1, Players, i, Players.Length - i - 1);
                     Array.Resize(ref Players, Players.Length - 1);
                     --i;
+                    PlayerIdMap.Remove(player.Id);
                 }
             }
 
@@ -127,5 +130,18 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime)
                 }
             }
         }
+    }
+
+    internal void SetPlayerDestination(int userId, float x, float y)
+    {
+        if (PlayerIdMap.TryGetValue(userId, out int index))
+        {
+            ref Player player = ref Players[index];
+            if (player.Id == userId)
+            {
+                player.Destination = new(x, y);
+            }
+        }
+        // else ignore, because dead or not in this lobby
     }
 }

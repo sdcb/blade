@@ -7,7 +7,7 @@ namespace SpinBladeArena.Controllers;
 
 public class UserController(TokenValidationParameters _tvp) : Controller
 {
-    static Dictionary<string, int> _userNameMap = new();
+    static readonly Dictionary<string, int> _userNameMap = [];
 
     [Route("token")]
     public string CreateToken(string userName)
