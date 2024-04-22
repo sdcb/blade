@@ -1,6 +1,7 @@
 ﻿@page
 @using SpinBladeArena.Controllers
 @using SpinBladeArena.LogicCenter
+@inject GameManager GameManager
 @model SpinBladeArena.Pages.IndexModel
 @{
 }
@@ -23,7 +24,7 @@
             </tr>
         </thead>
         <tbody id="room-list">
-            @foreach (var room in GameManager.Instance.Lobbies)
+            @foreach (var room in GameManager.Lobbies.OrderByDescending(x => x.Id))
             {
                 <tr>
                     <td>@room.Id</td>

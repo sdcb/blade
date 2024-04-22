@@ -8,31 +8,11 @@ namespace SpinBladeArena
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddHttpContextAccessor();
-            builder.Services.AddScoped<CurrentUser>();
-            builder.Services.AddRazorPages();
-            TokenValidationParameters tvp = new ()
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = nameof(SpinBladeArena),
-                ValidAudience = nameof(SpinBladeArena),
-                NameClaimType = "jti",
-                IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(builder.Configuration["Key"]))
-            };
-            builder.Services.AddSingleton(tvp);
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = tvp;
-                });
+            ConfigureServices(builder.Services, builder.Configuration);
 
-            var app = builder.Build();
+            WebApplication app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -50,6 +30,38 @@ namespace SpinBladeArena
             app.MapRazorPages();
 
             app.Run();
+        }
+
+        private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+        {
+            string? authKey = configuration["Key"];
+            if (authKey == null)
+            {
+                throw new Exception("Please provide a key in the configuration");
+            }
+
+            // Add services to the container.
+            services.AddHttpContextAccessor();
+            services.AddScoped<CurrentUser>();
+            services.AddRazorPages();
+            services.AddSingleton<GameManager>();
+            TokenValidationParameters tvp = new()
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = nameof(SpinBladeArena),
+                ValidAudience = nameof(SpinBladeArena),
+                NameClaimType = "jti",
+                IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(authKey))
+            };
+            services.AddSingleton(tvp);
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = tvp;
+                });
         }
     }
 }

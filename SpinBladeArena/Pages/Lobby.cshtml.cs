@@ -4,7 +4,7 @@ using SpinBladeArena.LogicCenter;
 
 namespace SpinBladeArena.Pages;
 
-public class LobbyModel(ILogger<LobbyModel> logger) : PageModel
+public class LobbyModel(ILogger<LobbyModel> logger, GameManager gameManager) : PageModel
 {
     private readonly ILogger<LobbyModel> _logger = logger;
 
@@ -15,6 +15,6 @@ public class LobbyModel(ILogger<LobbyModel> logger) : PageModel
 
     public void OnGet()
     {
-        Lobby = GameManager.Instance.Lobbies[LobbyId];
+        Lobby = gameManager.Lobbies[LobbyId];
     }
 }

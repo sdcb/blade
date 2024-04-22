@@ -4,8 +4,6 @@ public class GameManager
 {
     public List<Lobby> Lobbies { get; } = [];
 
-    public static GameManager Instance { get; } = new();
-
     public int CreateLobby(int userId)
     {
         int nextLobbyId;

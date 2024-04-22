@@ -5,11 +5,11 @@ using SpinBladeArena.LogicCenter;
 namespace SpinBladeArena.Controllers;
 
 [Authorize]
-public class LobbyController(CurrentUser user) : Controller
+public class LobbyController(CurrentUser user, GameManager gameManager) : Controller
 {
     [HttpPost, Route("lobby")]
     public int CreateLobby()
     {
-        return GameManager.Instance.CreateLobby(user.Id);
+        return gameManager.CreateLobby(user.Id);
     }
 }
