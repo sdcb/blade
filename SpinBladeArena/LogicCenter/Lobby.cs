@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter;
 
-public class Lobby
+public record Lobby(string Name)
 {
     public Vector2 MaxSize = new(1000, 1000);
     public Player[] Players = [];

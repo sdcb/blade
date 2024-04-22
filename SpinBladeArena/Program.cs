@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
 namespace SpinBladeArena
 {
     public class Program
@@ -8,6 +11,22 @@ namespace SpinBladeArena
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+            TokenValidationParameters tvp = new ()
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = nameof(SpinBladeArena),
+                ValidAudience = nameof(SpinBladeArena),
+                IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(builder.Configuration["Key"]))
+            };
+            builder.Services.AddSingleton(tvp);
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = tvp;
+                });
 
             var app = builder.Build();
 
@@ -20,8 +39,10 @@ namespace SpinBladeArena
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
+            app.MapControllers();
             app.MapRazorPages();
 
             app.Run();
