@@ -1,6 +1,9 @@
-﻿namespace SpinBladeArena.LogicCenter;
+﻿using Microsoft.AspNetCore.SignalR;
+using SpinBladeArena.Hubs;
 
-public class GameManager
+namespace SpinBladeArena.LogicCenter;
+
+public class GameManager(IHubContext<GameHub, IGameHubClient> Hub)
 {
     public Dictionary<int, Lobby> Lobbies { get; } = [];
 
@@ -10,7 +13,7 @@ public class GameManager
         lock (Lobbies)
         {
             nextLobbyId = Lobbies.Count + 1;
-            Lobbies[nextLobbyId] = new Lobby(nextLobbyId, userId, DateTime.Now);
+            Lobbies[nextLobbyId] = new Lobby(nextLobbyId, userId, DateTime.Now, Hub);
         }
         return nextLobbyId;
     }

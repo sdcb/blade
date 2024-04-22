@@ -1,19 +1,23 @@
 ﻿// 确保在 DOM 加载完成后执行脚本
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     /** @type {HTMLCanvasElement} */
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
-    // 动态设置画布大小匹配屏幕分辨率，并响应窗口尺寸变化
     const resizeCanvas = () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
     }
 
     window.addEventListener('resize', resizeCanvas, false);
-
-    // 首次调用，初始化画布尺寸
     resizeCanvas();
+
+    const connection = new signalR.HubConnectionBuilder().withUrl("/gameHub", {
+        accessTokenFactory: ensureToken
+    }).build();
+    connection.on('update', (a, b, c) => console.log(a, b, c));
+    await connection.start();
+    await connection.invoke('JoinLobby', parseInt(location.href.split('/').pop()))
 
     render(ctx, canvas);
 });

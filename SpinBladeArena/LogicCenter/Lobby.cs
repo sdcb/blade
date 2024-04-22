@@ -1,9 +1,11 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.AspNetCore.SignalR;
+using SpinBladeArena.Hubs;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter;
 
-public record Lobby(int Id, int CreateUserId, DateTime CreateTime)
+public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<GameHub, IGameHubClient> Hub)
 {
     public Vector2 MaxSize = new(1000, 1000);
     public Player[] Players = [];
@@ -12,13 +14,15 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime)
     public Player[] DeadPlayers = [];
     private CancellationTokenSource? _cancellationTokenSource = null;
 
-    public void AddPlayerToRandomPosition(string name)
+    public void AddPlayerToRandomPosition(int userId, string userName, string connectionId)
     {
         Array.Resize(ref Players, Players.Length + 1);
         ref Player player = ref Players[^1];
-        player.Name = name;
+        player.UserName = userName;
+        player.UserId = userId;
+        player.ConnectionId = connectionId;
         player.Position = new (Random.Shared.NextSingle() * MaxSize.X, Random.Shared.NextSingle() * MaxSize.Y);
-        PlayerIdMap[player.Id] = Players.Length - 1;
+        PlayerIdMap[player.UserId] = Players.Length - 1;
     }
 
     public void AddPickableBonus(Vector2 position)
@@ -29,8 +33,11 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime)
 
     public void Start()
     {
-        _cancellationTokenSource = new();
-        new Thread(() => Run(_cancellationTokenSource.Token)).Start();
+        if (_cancellationTokenSource == null)
+        {
+            _cancellationTokenSource = new();
+            new Thread(() => Run(_cancellationTokenSource.Token)).Start();
+        }
     }
 
     public void Terminate() => _cancellationTokenSource?.Cancel();
@@ -100,7 +107,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime)
                     Array.Copy(Players, i + 1, Players, i, Players.Length - i - 1);
                     Array.Resize(ref Players, Players.Length - 1);
                     --i;
-                    PlayerIdMap.Remove(player.Id);
+                    PlayerIdMap.Remove(player.UserId);
                 }
             }
 
@@ -122,13 +129,24 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime)
                 if (sw.Elapsed.TotalSeconds - player.DeadTime > DeadRespawnTimeInSeconds)
                 {
                     // insert into players
-                    AddPlayerToRandomPosition(player.Name);
+                    AddPlayerToRandomPosition(player.UserId, player.UserName, player.ConnectionId);
                     // remove from dead players
                     Array.Copy(DeadPlayers, i + 1, DeadPlayers, i, DeadPlayers.Length - i - 1);
                     Array.Resize(ref DeadPlayers, DeadPlayers.Length - 1);
                     --i;
                 }
             }
+
+            DispatchMessage();
+        }
+    }
+
+    private void DispatchMessage()
+    {
+        for (int i = 0; i < Players.Length; ++i)
+        {
+            ref Player player = ref Players[i];
+            Hub.Clients.Client(player.ConnectionId).Update(Players, PickableBonuses, DeadPlayers);
         }
     }
 
@@ -137,7 +155,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime)
         if (PlayerIdMap.TryGetValue(userId, out int index))
         {
             ref Player player = ref Players[index];
-            if (player.Id == userId)
+            if (player.UserId == userId)
             {
                 player.Destination = new(x, y);
             }

@@ -4,7 +4,7 @@ using SpinBladeArena.Primitives;
 
 namespace SpinBladeArena.LogicCenter;
 
-public record struct Player(int Id, string Name, Vector2 Position)
+public record struct Player(int UserId, string UserName, string ConnectionId, Vector2 Position)
 {
     public float Health = 1;
     public float Size = 50;

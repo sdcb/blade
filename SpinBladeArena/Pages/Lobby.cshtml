@@ -1,4 +1,4 @@
-﻿@page "/lobby/{id:int}"
+﻿@page "/lobby/{lobbyId:int}"
 @model LobbyModel
 <html lang="zh-hans">
 <head>
@@ -24,6 +24,8 @@
 </head>
 <body>
     <canvas id="canvas">您的浏览器不支持Canvas元素</canvas>
+    <script src="~/libs/signalr.js"></script>
+    <script src="~/usermanager.js"></script>
     <script src="~/game.js"></script>
 </body>
 </html>

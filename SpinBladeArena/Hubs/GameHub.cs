@@ -10,7 +10,10 @@ public class GameHub(GameManager gameManager, CurrentUser user) : Hub<IGameHubCl
 {
     public void JoinLobby(int lobbyId)
     {
-        gameManager.Lobbies[lobbyId].AddPlayerToRandomPosition(user.Name);
+        Lobby lobby = gameManager.Lobbies[lobbyId];
+        lobby.AddPlayerToRandomPosition(user.Id, user.Name, Context.ConnectionId);
+        Groups.AddToGroupAsync(Context.ConnectionId, lobbyId.ToString());
+        lobby.Start();
     }
 
     public void SetDestination(int lobbyId, float x, float y)
@@ -21,4 +24,5 @@ public class GameHub(GameManager gameManager, CurrentUser user) : Hub<IGameHubCl
 
 public interface IGameHubClient
 {
+    Task Update(Player[] players, PickableBonus[] pickableBonuses, Player[] deadPlayers);
 }
