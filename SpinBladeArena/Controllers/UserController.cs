@@ -35,6 +35,8 @@ public class UserController(TokenValidationParameters _tvp) : Controller
     [Route("userList")]
     public Dictionary<string, int> UserList() => _userNameMap;
 
+    public static string GetUserNameById(int id) => _userNameMap.FirstOrDefault(x => x.Value == id).Key;
+
     static int EnsureNewUser(string userName)
     {
         if (_userNameMap.TryGetValue(userName, out int val))

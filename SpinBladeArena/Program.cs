@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using SpinBladeArena.LogicCenter;
 
 namespace SpinBladeArena
 {
@@ -10,6 +11,8 @@ namespace SpinBladeArena
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<CurrentUser>();
             builder.Services.AddRazorPages();
             TokenValidationParameters tvp = new ()
             {
@@ -19,6 +22,7 @@ namespace SpinBladeArena
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = nameof(SpinBladeArena),
                 ValidAudience = nameof(SpinBladeArena),
+                NameClaimType = "jti",
                 IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(builder.Configuration["Key"]))
             };
             builder.Services.AddSingleton(tvp);

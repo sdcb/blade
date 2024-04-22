@@ -1,29 +1,64 @@
 ﻿@page
-@model IndexModel
+@using SpinBladeArena.Controllers
+@using SpinBladeArena.LogicCenter
+@model SpinBladeArena.Pages.IndexModel
+@{
+}
+
 <html lang="zh-hans">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-    <title>旋刃竞技场</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        #canvas {
-            background: cornflowerblue;
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-    </style>
+    <title>旋刃竞技场 - 房间列表</title>
 </head>
 <body>
-    <canvas id="canvas">您的浏览器不支持Canvas元素</canvas>
-    <script src="~/game.js"></script>
+    <h1>房间列表</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>房间号</th>
+                <th>创建者</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="room-list">
+            @foreach (var room in GameManager.Instance.Lobbies)
+            {
+                <tr>
+                    <td>@room.Id</td>
+                    <td>@UserController.GetUserNameById(room.CreateUserId)</td>
+                    <td>@room.CreateTime</td>
+                    <td><button type="button" onclick="join(@room.Id)">加入</button></td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3">
+                    <button onclick="createRoom()">创建新房间</button>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    <script src="~/usermanager.js"></script>
+    <script>
+        async function createRoom() {
+            const createLobbyResp = await fetch('/lobby', {
+                method: 'POST',
+                headers: {
+                    Authorization: `bearer ${await ensureToken()}`,
+                },
+            });
+            if (createLobbyResp.ok) {
+                const lobbyId = await createLobbyResp.text();
+                window.location.href = `/lobby/${lobbyId}`;
+            }
+        }
+
+        function join(lobbyId) {
+            window.location.href = `/lobby/${lobbyId}`;
+        }
+    </script>
 </body>
 </html>

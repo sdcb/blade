@@ -24,7 +24,7 @@ let x = 0;
  * 渲染函数
  * @param {CanvasRenderingContext2D} ctx
  * @param {HTMLCanvasElement} canvas
- */
+  */
 function render(ctx, canvas) {
     // clear
     ctx.beginPath();
