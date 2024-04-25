@@ -24,5 +24,5 @@ public class GameHub(GameManager gameManager, CurrentUser user) : Hub<IGameHubCl
 
 public interface IGameHubClient
 {
-    Task Update(Player[] players, PickableBonus[] pickableBonuses, Player[] deadPlayers);
+    Task Update(PlayerDto[] players, PickableBonusDto[] pickableBonuses, PlayerDto[] deadPlayers);
 }

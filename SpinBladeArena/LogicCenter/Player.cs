@@ -18,7 +18,7 @@ public record struct Player(int UserId, string UserName, string ConnectionId, Ve
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly LineSegment GetBladeLineSegment(int bladeIndex)
     {
-        ref PlayerBladeInfo blade = ref Blades.Blades[bladeIndex];
+        ref PlayerBladeInfo blade = ref Blades.Infos[bladeIndex];
         Vector2 bladeStart = Position + new Vector2(MathF.Sin(blade.RotationAngle), -MathF.Cos(blade.RotationAngle)) * Size;
         Vector2 bladeEnd = Position + new Vector2(MathF.Sin(blade.RotationAngle), -MathF.Cos(blade.RotationAngle)) * (Size + Blades.Length);
         return new(bladeStart, bladeEnd);
@@ -59,7 +59,7 @@ public record struct Player(int UserId, string UserName, string ConnectionId, Ve
         {
             for (int i = 0; i < p1.Blades.Count; ++i)
             {
-                ref PlayerBladeInfo blade = ref p1.Blades.Blades[i];
+                ref PlayerBladeInfo blade = ref p1.Blades.Infos[i];
                 LineSegment ls = p1.GetBladeLineSegment(i);
 
                 if (PrimitiveUtils.IsLineIntersectingCircle(ls, p2.Position, p2.Size))
@@ -97,6 +97,20 @@ public record struct Player(int UserId, string UserName, string ConnectionId, Ve
             }
         }
     }
+
+    public readonly PlayerDto ToDto()
+    {
+        return new PlayerDto
+        {
+            UserId = UserId,
+            UserName = UserName,
+            Position = [Position.X, Position.Y],
+            Health = Health,
+            Size = Size,
+            Blades = Blades.ToDto(),
+            DeadTime = DeadTime
+        };
+    }
 }
 
 public record struct PlayerBlades()
@@ -104,43 +118,63 @@ public record struct PlayerBlades()
     public float RotationDegreePerSecond = 2;
     public float Length = 40;
     public float Damage = 1;
-    public readonly int Count => Blades.Length;
-    public PlayerBladeInfo[] Blades = [];
+    public readonly int Count => Infos.Length;
+    public PlayerBladeInfo[] Infos = [];
 
     public static PlayerBlades Default => new()
     {
-        Blades = [new PlayerBladeInfo()]
+        Infos = [new PlayerBladeInfo()]
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DestroyBladeAt(int bladeIndex)
     {
-        if (Blades.Length == 0) return;
+        if (Infos.Length == 0) return;
 
-        PlayerBladeInfo[] newBlades = new PlayerBladeInfo[Blades.Length - 1];
+        PlayerBladeInfo[] newBlades = new PlayerBladeInfo[Infos.Length - 1];
         for (int i = 0; i < bladeIndex; ++i)
-            newBlades[i] = Blades[i];
-        for (int i = bladeIndex + 1; i < Blades.Length; ++i)
-            newBlades[i - 1] = Blades[i];
+            newBlades[i] = Infos[i];
+        for (int i = bladeIndex + 1; i < Infos.Length; ++i)
+            newBlades[i - 1] = Infos[i];
 
-        Blades = newBlades;
+        Infos = newBlades;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void AddBlade(int bladeCountAmount)
     {
-        Array.Resize(ref Blades, Blades.Length + bladeCountAmount);
+        Array.Resize(ref Infos, Infos.Length + bladeCountAmount);
 
-        float startAngle = Blades.Length == 0 ? 0 : Blades[^1].RotationAngle;
-        for (int i = 0; i < Blades.Length; ++i)
+        float startAngle = Infos.Length == 0 ? 0 : Infos[^1].RotationAngle;
+        for (int i = 0; i < Infos.Length; ++i)
         {
-            ref PlayerBladeInfo info = ref Blades[i];
-            Blades[i].RotationAngle = 2 * MathF.PI / Blades.Length * i + startAngle;
+            ref PlayerBladeInfo info = ref Infos[i];
+            Infos[i].RotationAngle = 2 * MathF.PI / Infos.Length * i + startAngle;
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly PlayerBladesDto ToDto()
+    {
+        return new PlayerBladesDto
+        {
+            Length = Length,
+            Damage = Damage,
+            Blades = Infos.Select(bladeInfo => bladeInfo.ToDto()).ToArray()
+        };
     }
 }
 
 public record struct PlayerBladeInfo
 {
     public float RotationAngle;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly PlayerBladeInfoDto ToDto()
+    {
+        return new PlayerBladeInfoDto
+        {
+            RotationAngle = RotationAngle
+        };
+    }
 }

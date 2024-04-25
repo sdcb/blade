@@ -17,12 +17,8 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
     public void AddPlayerToRandomPosition(int userId, string userName, string connectionId)
     {
         Array.Resize(ref Players, Players.Length + 1);
-        ref Player player = ref Players[^1];
-        player.UserName = userName;
-        player.UserId = userId;
-        player.ConnectionId = connectionId;
-        player.Position = new (Random.Shared.NextSingle() * MaxSize.X, Random.Shared.NextSingle() * MaxSize.Y);
-        PlayerIdMap[player.UserId] = Players.Length - 1;
+        Players[^1] = new Player(userId, userName, connectionId, new(Random.Shared.NextSingle() * MaxSize.X, Random.Shared.NextSingle() * MaxSize.Y));
+        PlayerIdMap[userId] = Players.Length - 1;
     }
 
     public void AddPickableBonus(Vector2 position)
@@ -143,11 +139,10 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
 
     private void DispatchMessage()
     {
-        for (int i = 0; i < Players.Length; ++i)
-        {
-            ref Player player = ref Players[i];
-            Hub.Clients.Client(player.ConnectionId).Update(Players, PickableBonuses, DeadPlayers);
-        }
+        PlayerDto[] playerDtos = Players.Select(x => x.ToDto()).ToArray();
+        PickableBonusDto[] pickableBonusDtos = PickableBonuses.Select(x => x.ToDto()).ToArray();
+        PlayerDto[] deadPlayerDtos = DeadPlayers.Select(x => x.ToDto()).ToArray();
+        Hub.Clients.Group(Id.ToString()).Update(playerDtos, pickableBonusDtos, deadPlayerDtos);
     }
 
     internal void SetPlayerDestination(int userId, float x, float y)

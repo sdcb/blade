@@ -75,6 +75,15 @@ public record struct PickableBonus(string Name, Vector2 Position)
     ];
 
     public static PickableBonus CreateRandom(Vector2 position) => All[System.Random.Shared.Next(All.Length)](position);
+
+    public readonly PickableBonusDto ToDto()
+    {
+        return new PickableBonusDto
+        {
+            Name = Name,
+            Position = [Position.X, Position.Y]
+        };
+    }
 }
 
 public delegate void PickableBonusApplier(ref Player player);
