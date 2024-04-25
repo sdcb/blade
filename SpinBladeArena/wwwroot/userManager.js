@@ -15,9 +15,18 @@ async function ensureToken() {
     }
     
     const resp = await fetch('/token?userName=' + encodeURIComponent(userName));
-    token = await resp.text();
+    const tokenObj = await resp.json();
 
-    localStorage.token = token;
+    localStorage.token = tokenObj.token;
+    localStorage.userId = tokenObj.userId;
     localStorage.tokenValidUntil = new Date(new Date().getTime() + 1000 * 60 * 60);
-    return token;
+    return localStorage.token;
+}
+
+function getUserId() {
+    return parseInt(localStorage.userId);
+}
+
+function getUserName() {
+    return localStorage.userName;
 }

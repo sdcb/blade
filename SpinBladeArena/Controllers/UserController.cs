@@ -10,7 +10,7 @@ public class UserController(TokenValidationParameters _tvp) : Controller
     static readonly Dictionary<string, int> _userNameMap = [];
 
     [Route("token")]
-    public string CreateToken(string userName)
+    public object CreateToken(string userName)
     {
         int userId = EnsureNewUser(userName);
 
@@ -29,7 +29,11 @@ public class UserController(TokenValidationParameters _tvp) : Controller
             signingCredentials: new SigningCredentials((SymmetricSecurityKey)_tvp.IssuerSigningKey, SecurityAlgorithms.HmacSha256),
             claims: claims);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return new
+        {
+            UserId = userId,
+            Token = new JwtSecurityTokenHandler().WriteToken(token)
+        };
     }
 
     [Route("userList")]

@@ -1,4 +1,27 @@
-﻿// 确保在 DOM 加载完成后执行脚本
+﻿/// <reference path="defs.d.ts" />
+
+const state = {
+    /**
+     * @type {PlayerDto[]}
+     */
+    players: [], 
+    /**
+     * @type {PickableBonusDto[]}
+     */
+    pickableBonus: [], 
+    /**
+     * @type {PlayerDto[]}
+     */
+    deadPlayers: [],
+
+    center: { x: 0, y: 0 }
+
+    onUpdated() {
+
+    }
+}
+
+// 确保在 DOM 加载完成后执行脚本
 document.addEventListener('DOMContentLoaded', async () => {
     /** @type {HTMLCanvasElement} */
     const canvas = document.getElementById('canvas');
@@ -7,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resizeCanvas = () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        console.log('resize', canvas.width, canvas.height);
     }
 
     window.addEventListener('resize', resizeCanvas, false);
@@ -15,20 +39,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const connection = new signalR.HubConnectionBuilder().withUrl("/gameHub", {
         accessTokenFactory: ensureToken
     }).build();
-    connection.on('update', (a, b, c) => console.log(a, b, c));
+    connection.on('update', (players, pickableBonus, deadPlayers) => {
+        state.players = players;
+        state.pickableBonus = pickableBonus;
+        state.deadPlayers = deadPlayers;
+    });
     await connection.start();
     await connection.invoke('JoinLobby', parseInt(location.href.split('/').pop()))
 
     render(ctx, canvas);
 });
 
-let x = 0;
-
 /**
- * 渲染函数
+ * 
  * @param {CanvasRenderingContext2D} ctx
  * @param {HTMLCanvasElement} canvas
-  */
+ */
 function render(ctx, canvas) {
     // clear
     ctx.beginPath();
@@ -36,10 +62,11 @@ function render(ctx, canvas) {
     ctx.fillStyle = 'cornflowerblue';
     ctx.fill();
 
-    ctx.beginPath();
-    ctx.rect(x++, 100, 100, 100);
-    ctx.fillStyle = 'red';
-    ctx.fill();
+    drawGrid(ctx, canvas);
 
     requestAnimationFrame(() => render(ctx, canvas));
+}
+
+function drawGrid(ctx, canvas) {
+    
 }
