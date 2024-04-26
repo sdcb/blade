@@ -9,16 +9,30 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
 {
     public Vector2 MaxSize = new(1000, 1000);
     public Player[] Players = [];
+    // Key: UserId, Value: User index in Players
     public Dictionary<int, int> PlayerIdMap = [];
     public PickableBonus[] PickableBonuses = [];
     public Player[] DeadPlayers = [];
     private CancellationTokenSource? _cancellationTokenSource = null;
+    // Key: UserId
+    private Dictionary<int, AddPlayerRequest> _addPlayerRequests = [];
 
-    public void AddPlayerToRandomPosition(int userId, string userName, string connectionId)
+    public void AddPlayerToRandomPosition(AddPlayerRequest req)
     {
-        Array.Resize(ref Players, Players.Length + 1);
-        Players[^1] = new Player(userId, userName, connectionId, new(Random.Shared.NextSingle() * MaxSize.X, Random.Shared.NextSingle() * MaxSize.Y));
-        PlayerIdMap[userId] = Players.Length - 1;
+        if (PlayerIdMap.TryGetValue(req.UserId, out int userIndex))
+        {
+            ref Player player = ref Players[userIndex];
+            player.ConnectionId = req.ConnectionId;
+        }
+        else
+        {
+            _addPlayerRequests[req.UserId] = req;
+        }
+    }
+
+    public Vector2 RandomPosition()
+    {
+        return new(Random.Shared.NextSingle() * MaxSize.X - MaxSize.Y / 2, Random.Shared.NextSingle() * MaxSize.Y - MaxSize.Y / 2);
     }
 
     public void AddPickableBonus(Vector2 position)
@@ -27,7 +41,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
         PickableBonuses[^1] = PickableBonus.CreateRandom(position);
     }
 
-    public void Start()
+    public void EnsureStart()
     {
         if (_cancellationTokenSource == null)
         {
@@ -53,6 +67,19 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
             Thread.Sleep(Math.Max(1, (int)(30 - deltaTime)));
             deltaTime = MathF.Min((float)sw.Elapsed.TotalSeconds - oldTime, 0.25f);
             oldTime = (float)sw.Elapsed.TotalSeconds;
+
+            // handle add player requests
+            {
+                int playerIndex = Players.Length;
+                Array.Resize(ref Players, Players.Length + _addPlayerRequests.Count);
+                foreach (AddPlayerRequest req in _addPlayerRequests.Values)
+                {
+                    Players[playerIndex] = new Player(req.UserId, req.UserName, req.ConnectionId, RandomPosition());
+                    PlayerIdMap[req.UserId] = playerIndex;
+                    playerIndex++;
+                }
+                _addPlayerRequests.Clear();
+            }
 
             // handle move
             for (int i = 0; i < Players.Length; ++i)
@@ -125,7 +152,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                 if (sw.Elapsed.TotalSeconds - player.DeadTime > DeadRespawnTimeInSeconds)
                 {
                     // insert into players
-                    AddPlayerToRandomPosition(player.UserId, player.UserName, player.ConnectionId);
+                    AddPlayerToRandomPosition(new (player.UserId, player.UserName, player.ConnectionId));
                     // remove from dead players
                     Array.Copy(DeadPlayers, i + 1, DeadPlayers, i, DeadPlayers.Length - i - 1);
                     Array.Resize(ref DeadPlayers, DeadPlayers.Length - 1);
@@ -158,3 +185,5 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
         // else ignore, because dead or not in this lobby
     }
 }
+
+public record AddPlayerRequest(int UserId, string UserName, string ConnectionId);

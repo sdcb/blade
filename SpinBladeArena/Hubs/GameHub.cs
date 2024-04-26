@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using SpinBladeArena.Controllers;
 using SpinBladeArena.LogicCenter;
 
 namespace SpinBladeArena.Hubs;
@@ -11,9 +10,9 @@ public class GameHub(GameManager gameManager, CurrentUser user) : Hub<IGameHubCl
     public void JoinLobby(int lobbyId)
     {
         Lobby lobby = gameManager.Lobbies[lobbyId];
-        lobby.AddPlayerToRandomPosition(user.Id, user.Name, Context.ConnectionId);
+        lobby.AddPlayerToRandomPosition(new (user.Id, user.Name, Context.ConnectionId));
         Groups.AddToGroupAsync(Context.ConnectionId, lobbyId.ToString());
-        lobby.Start();
+        lobby.EnsureStart();
     }
 
     public void SetDestination(int lobbyId, float x, float y)
