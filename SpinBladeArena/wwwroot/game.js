@@ -176,6 +176,13 @@ function drawUnits(ctx) {
             ctx.stroke();
         }
     }
+
+    const deadMe = state.deadPlayers.find(p => p.userId === userId);
+    if (deadMe) {
+        // draw dead player
+        ctx.font = '100px Arial';
+        ctx.fillText('你挂了', state.center.x, state.center.y);
+    }
 }
 
 /**

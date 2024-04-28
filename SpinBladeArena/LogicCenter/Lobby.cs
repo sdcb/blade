@@ -145,7 +145,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                 if (sw.Elapsed.TotalSeconds - player.DeadTime > DeadRespawnTimeInSeconds)
                 {
                     // insert into players
-                    AddPlayerToRandomPosition(new(player.UserId, player.UserName, player.ConnectionId));
+                    _addPlayerRequests[player.UserId] = new(player.UserId, player.UserName, player.ConnectionId);
                     // remove from dead players
                     DeadPlayers.RemoveAt(i);
                     --i;

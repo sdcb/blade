@@ -22,7 +22,8 @@ public class Player(int userId, string userName, string connectionId, Vector2 po
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public LineSegment GetBladeLineSegment(int bladeIndex)
     {
-        float angle = Blades.Angles[bladeIndex];
+        float degree = Blades.Angles[bladeIndex];
+        float angle = MathF.PI * degree / 180;
         Vector2 bladeStart = Position + new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * Size;
         Vector2 bladeEnd = Position + new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * (Size + Blades.Length);
         return new(bladeStart, bladeEnd);
@@ -52,7 +53,7 @@ public class Player(int userId, string userName, string connectionId, Vector2 po
             Blades.Angles[i] = MathF.IEEERemainder(Blades.Angles[i] + Blades.RotationDegreePerSecond * deltaTime, 360) switch
             {
                 var x when x < 0 => x + 360,
-                var x => x, 
+                var x => x,
             };
         }
     }
