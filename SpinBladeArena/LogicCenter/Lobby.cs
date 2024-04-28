@@ -37,11 +37,6 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
         return new(Random.Shared.NextSingle() * MaxSize.X - MaxSize.Y / 2, Random.Shared.NextSingle() * MaxSize.Y - MaxSize.Y / 2);
     }
 
-    public void AddPickableBonusAtRandomPosition()
-    {
-        PickableBonuses.Add(PickableBonus.CreateRandom(RandomPosition()));
-    }
-
     public void EnsureStart()
     {
         if (_cancellationTokenSource == null)
@@ -94,9 +89,9 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                         if (Vector2.Distance(player.Position, bonus.Position) < player.Size)
                         {
                             bonus.Apply(player);
+                            toRemove.Add(bonus);
                         }
 
-                        toRemove.Add(bonus);
                     }
                 }
 
@@ -138,7 +133,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
             {
                 if (PickableBonuses.Count < maxBonusCount)
                 {
-                    AddPickableBonusAtRandomPosition();
+                    PickableBonuses.Add(PickableBonus.CreateRandom(RandomPosition()));
                 }
                 bonusSpawnTimer -= bonusSpawnCooldown;
             }

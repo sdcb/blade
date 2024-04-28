@@ -2,6 +2,7 @@ type PlayerDto = {
     userId: number;
     userName: string;
     position: number[];
+    destination: number[];
     health: number;
     size: number;
     blades: PlayerBladesDto;
@@ -11,11 +12,7 @@ type PlayerDto = {
 type PlayerBladesDto = {
     length: number;
     damage: number;
-    blades: PlayerBladeInfoDto[];
-};
-
-type PlayerBladeInfoDto = {
-    rotationAngle: number;
+    angles: number[];
 };
 
 type PickableBonusDto = {

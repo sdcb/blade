@@ -13,7 +13,7 @@ public class Player(int userId, string userName, string connectionId, Vector2 po
     public float Health = 1;
     public float Size = 50;
     public Vector2 Destination = position;
-    public float MovementSpeedPerSecond = 10;
+    public float MovementSpeedPerSecond = 50;
     public PlayerBlades Blades = PlayerBlades.Default;
     public double DeadTime = 0;
 
@@ -44,6 +44,16 @@ public class Player(int userId, string userName, string connectionId, Vector2 po
         {
             Vector2 Direction = Vector2.Normalize(Destination - Position);
             Position += Direction * MovementSpeedPerSecond * deltaTime;
+        }
+
+        // Rotate blades
+        for (int i = 0; i < Blades.Count; ++i)
+        {
+            Blades.Angles[i] = MathF.IEEERemainder(Blades.Angles[i] + Blades.RotationDegreePerSecond * deltaTime, 360) switch
+            {
+                var x when x < 0 => x + 360,
+                var x => x, 
+            };
         }
     }
 
@@ -108,6 +118,7 @@ public class Player(int userId, string userName, string connectionId, Vector2 po
             UserId = UserId,
             UserName = UserName,
             Position = [Position.X, Position.Y],
+            Destination = [Destination.X, Destination.Y],
             Health = Health,
             Size = Size,
             Blades = Blades.ToDto(),
@@ -141,8 +152,9 @@ public class PlayerBlades
     internal void AddBlade(int addBladeCount)
     {
         int bladeCount = Angles.Count + addBladeCount;
+        float initialAngle = Angles.Count == 0 ? 0 : Angles[0];
         Angles = Enumerable.Range(0, bladeCount)
-            .Select(i => 2 * MathF.PI / bladeCount * i)
+            .Select(i => initialAngle + 360 / bladeCount * i)
             .ToList();
     }
 

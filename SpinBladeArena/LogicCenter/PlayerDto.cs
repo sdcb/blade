@@ -7,6 +7,7 @@ public class PlayerDto
     public int UserId { get; init; }
     public required string UserName { get; init; }
     public required float[] Position { get; init; }
+    public required float[] Destination { get; init; }
     public float Health { get; init; }
     public float Size { get; init; }
     public required PlayerBladesDto Blades { get; init; }

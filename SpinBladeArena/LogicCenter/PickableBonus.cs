@@ -32,7 +32,7 @@ public class PickableBonus(string name, Vector2 position)
         Apply = (Player player) => player.Blades.AddBlade(bladeCountAmount)
     };
 
-    public static PickableBonus BladeLength(Vector2 position, float bladeLengthAmount = 1) => new("刀长", position)
+    public static PickableBonus BladeLength(Vector2 position, float bladeLengthAmount = 5) => new("刀长", position)
     {
         Apply = (Player player) => player.Blades.Length += bladeLengthAmount
     };

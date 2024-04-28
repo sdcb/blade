@@ -1,7 +1,5 @@
 ﻿/// <reference path="defs.d.ts" />
 
-const userId = getUserId();;
-
 const lobbyId = parseInt(location.href.split('/').pop());
 
 class State {
@@ -25,6 +23,7 @@ class State {
     cursorPosition = { x: 0, y: 0 };
 
     onUpdated() {
+        const userId = getUserId();
         const user = this.players.find(p => p.userId === userId);
         if (!user) user = this.deadPlayers.find(p => p.userId === userId);
 
@@ -98,8 +97,11 @@ function render(ctx, canvas) {
     ctx.scale(state.scale, state.scale);
     ctx.translate(canvas.width / 2 / state.scale, canvas.height / 2 / state.scale);
     drawGrid(ctx);
-    drawPlayers(ctx);
+    drawUnits(ctx);
     ctx.restore();
+
+    ctx.fillStyle = 'black';
+    ctx.fillText("test", 0, 0);
 
     requestAnimationFrame(() => render(ctx, canvas));
 }
@@ -108,11 +110,13 @@ function render(ctx, canvas) {
  * 
  * @param {CanvasRenderingContext2D} ctx
  */
-function drawPlayers(ctx) {
-    for (const player of state.players) {
+function drawUnits(ctx) {
+    const userId = getUserId();
+
+    for (const bonus of state.pickableBonus) {
         ctx.beginPath();
-        ctx.arc(player.position[0], player.position[1], player.size, 0, Math.PI * 2);
-        ctx.fillStyle = player.userId === userId ? 'crimson' : 'dodgerblue';
+        ctx.arc(bonus.position[0], bonus.position[1], 25, 0, Math.PI * 2);
+        ctx.fillStyle = 'green';
         ctx.fill();
         ctx.strokeStyle = 'white';
         ctx.stroke();
@@ -120,7 +124,57 @@ function drawPlayers(ctx) {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = 'black';
+        ctx.fillText(bonus.name, bonus.position[0], bonus.position[1]);
+    }
+
+    const me = state.players.find(p => p.userId === userId);
+    if (me && me.destination[0] !== me.position[0] && me.destination[1] !== me.position[1]) {
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'blue';
+        ctx.fillText('X', me.destination[0], me.destination[1]);
+
+        ctx.beginPath();
+        ctx.moveTo(me.position[0], me.position[1]);
+        ctx.lineTo(me.destination[0], me.destination[1]);
+        ctx.strokeStyle = 'blue';
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+    }
+
+    for (const player of state.players) {
+        ctx.beginPath();
+        ctx.arc(player.position[0], player.position[1], player.size, 0, Math.PI * 2);
+        ctx.fillStyle = player.userId === userId ? 'dodgerblue' : 'crimson';
+        ctx.fill();
+
+        for (let hp = 0; hp < player.health; ++hp) {
+            ctx.beginPath();
+            ctx.arc(player.position[0], player.position[1], player.size + hp, 0, Math.PI * 2);
+            ctx.strokeStyle = 'white';
+            ctx.setLineDash([1, 0]);
+            ctx.stroke();
+        }
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'black';
         ctx.fillText(player.userName, player.position[0], player.position[1]);
+
+        // player blades
+        ctx.strokeStyle = 'red';
+        for (const degree of player.blades.angles) {
+            let angle = degree * Math.PI / 180;
+            const sin = Math.sin(angle);
+            const cos = Math.cos(angle);
+
+            ctx.beginPath();
+            ctx.moveTo(player.position[0] + sin * player.size, player.position[1] + -cos * player.size);
+            const len = player.blades.length + player.size;
+            ctx.lineWidth = player.blades.damage;
+            ctx.lineTo(player.position[0] + sin * len, player.position[1] + -cos * len);
+            ctx.stroke();
+        }
     }
 }
 
@@ -174,5 +228,5 @@ function getScale(resolutionX, resolutionY) {
     // 限制最小缩放比例为1，避免放大地图，因为地图只有1000x1000
     scale = Math.max(1, scale);
 
-    return scale;
+    return 1;
 }
