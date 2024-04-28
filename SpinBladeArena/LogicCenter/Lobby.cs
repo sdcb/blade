@@ -8,20 +8,22 @@ namespace SpinBladeArena.LogicCenter;
 public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<GameHub, IGameHubClient> Hub)
 {
     public Vector2 MaxSize = new(1000, 1000);
-    public Player[] Players = [];
-    // Key: UserId, Value: User index in Players
-    public Dictionary<int, int> PlayerIdMap = [];
-    public PickableBonus[] PickableBonuses = [];
-    public Player[] DeadPlayers = [];
+    public List<Player> Players = [];
+    public HashSet<PickableBonus> PickableBonuses = [];
+    public List<Player> DeadPlayers = [];
     private CancellationTokenSource? _cancellationTokenSource = null;
     // Key: UserId
-    private Dictionary<int, AddPlayerRequest> _addPlayerRequests = [];
+    private readonly Dictionary<int, AddPlayerRequest> _addPlayerRequests = [];
+
+    public Player? FindPlayer(int userId) => Players.FirstOrDefault(x => x.UserId == userId) ?? DeadPlayers.FirstOrDefault(x => x.UserId == userId);
 
     public void AddPlayerToRandomPosition(AddPlayerRequest req)
     {
-        if (PlayerIdMap.TryGetValue(req.UserId, out int userIndex))
+        Player? player = FindPlayer(req.UserId);
+
+        if (player != null)
         {
-            ref Player player = ref Players[userIndex];
+            // existing user, update connection id
             player.ConnectionId = req.ConnectionId;
         }
         else
@@ -35,10 +37,9 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
         return new(Random.Shared.NextSingle() * MaxSize.X - MaxSize.Y / 2, Random.Shared.NextSingle() * MaxSize.Y - MaxSize.Y / 2);
     }
 
-    public void AddPickableBonus(Vector2 position)
+    public void AddPickableBonusAtRandomPosition()
     {
-        Array.Resize(ref PickableBonuses, PickableBonuses.Length + 1);
-        PickableBonuses[^1] = PickableBonus.CreateRandom(position);
+        PickableBonuses.Add(PickableBonus.CreateRandom(RandomPosition()));
     }
 
     public void EnsureStart()
@@ -70,67 +71,64 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
 
             // handle add player requests
             {
-                int playerIndex = Players.Length;
-                Array.Resize(ref Players, Players.Length + _addPlayerRequests.Count);
+                int destinationSize = Players.Count + _addPlayerRequests.Count;
+                Players.EnsureCapacity(destinationSize);
                 foreach (AddPlayerRequest req in _addPlayerRequests.Values)
                 {
-                    Players[playerIndex] = new Player(req.UserId, req.UserName, req.ConnectionId, RandomPosition());
-                    PlayerIdMap[req.UserId] = playerIndex;
-                    playerIndex++;
+                    Player newPlayer = new(req.UserId, req.UserName, req.ConnectionId, RandomPosition());
+                    Players.Add(newPlayer);
                 }
                 _addPlayerRequests.Clear();
             }
 
             // handle move
-            for (int i = 0; i < Players.Length; ++i)
-            {
-                ref Player player = ref Players[i];
-                player.Move(deltaTime);
-            }
+            foreach (Player player in Players) player.Move(deltaTime);
 
             // handle bonus
-            for (int i = 0; i < Players.Length; ++i)
             {
-                ref Player player = ref Players[i];
-                for (int j = 0; j < PickableBonuses.Length; ++j)
+                List<PickableBonus> toRemove = new(capacity: PickableBonuses.Count / 2);
+                foreach (Player player in Players)
                 {
-                    ref PickableBonus bonus = ref PickableBonuses[j];
-                    if (Vector2.Distance(player.Position, bonus.Position) < player.Size)
+                    foreach (PickableBonus bonus in PickableBonuses)
                     {
-                        bonus.Apply(ref player);
-                        Array.Copy(PickableBonuses, j + 1, PickableBonuses, j, PickableBonuses.Length - j - 1);
-                        Array.Resize(ref PickableBonuses, PickableBonuses.Length - 1);
-                        break;
+                        if (Vector2.Distance(player.Position, bonus.Position) < player.Size)
+                        {
+                            bonus.Apply(player);
+                        }
+
+                        toRemove.Add(bonus);
                     }
+                }
+
+                foreach (PickableBonus bonus in toRemove)
+                {
+                    PickableBonuses.Remove(bonus);
                 }
             }
 
             // handle attack
-            for (int i = 0; i < Players.Length - 1; ++i)
+            for (int i = 0; i < Players.Count - 1; ++i)
             {
-                ref Player p1 = ref Players[i];
-                for (int j = i + 1; j < Players.Length; ++j)
+                Player p1 = Players[i];
+                for (int j = i + 1; j < Players.Count; ++j)
                 {
-                    ref Player p2 = ref Players[j];
-                    Player.Attack(ref p1, ref p2);
+                    Player p2 = Players[j];
+                    Player.AttackEachOther(p1, p2);
                 }
             }
 
             // handle dead
-            for (int i = 0; i < Players.Length; ++i)
+            for (int i = 0; i < Players.Count; ++i)
             {
-                ref Player player = ref Players[i];
+                Player player = Players[i];
                 if (player.Dead)
                 {
                     player.DeadTime = sw.Elapsed.TotalSeconds;
                     // insert into dead players
-                    Array.Resize(ref DeadPlayers, DeadPlayers.Length + 1);
-                    DeadPlayers[^1] = player;
+                    DeadPlayers.Add(player);
                     // remove from players
-                    Array.Copy(Players, i + 1, Players, i, Players.Length - i - 1);
-                    Array.Resize(ref Players, Players.Length - 1);
+                    Players.RemoveAt(i);
                     --i;
-                    PlayerIdMap.Remove(player.UserId);
                 }
             }
 
@@ -138,24 +136,23 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
             bonusSpawnTimer += deltaTime;
             while (bonusSpawnTimer > bonusSpawnCooldown)
             {
-                if (PickableBonuses.Length < maxBonusCount)
+                if (PickableBonuses.Count < maxBonusCount)
                 {
-                    AddPickableBonus(new(Random.Shared.NextSingle() * MaxSize.X, Random.Shared.NextSingle() * MaxSize.Y));
+                    AddPickableBonusAtRandomPosition();
                 }
                 bonusSpawnTimer -= bonusSpawnCooldown;
             }
 
             // handle player respawn
-            for (int i = 0; i < DeadPlayers.Length; ++i)
+            for (int i = 0; i < DeadPlayers.Count; ++i)
             {
-                ref Player player = ref DeadPlayers[i];
+                Player player = DeadPlayers[i];
                 if (sw.Elapsed.TotalSeconds - player.DeadTime > DeadRespawnTimeInSeconds)
                 {
                     // insert into players
-                    AddPlayerToRandomPosition(new (player.UserId, player.UserName, player.ConnectionId));
+                    AddPlayerToRandomPosition(new(player.UserId, player.UserName, player.ConnectionId));
                     // remove from dead players
-                    Array.Copy(DeadPlayers, i + 1, DeadPlayers, i, DeadPlayers.Length - i - 1);
-                    Array.Resize(ref DeadPlayers, DeadPlayers.Length - 1);
+                    DeadPlayers.RemoveAt(i);
                     --i;
                 }
             }
@@ -174,15 +171,14 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
 
     internal void SetPlayerDestination(int userId, float x, float y)
     {
-        if (PlayerIdMap.TryGetValue(userId, out int index))
+        x = Math.Clamp(x, -MaxSize.X / 2, MaxSize.X / 2);
+        y = Math.Clamp(y, -MaxSize.Y / 2, MaxSize.Y / 2);
+
+        Player? player = FindPlayer(userId);
+        if (player != null)
         {
-            ref Player player = ref Players[index];
-            if (player.UserId == userId)
-            {
-                player.Destination = new(x, y);
-            }
+            player.Destination = new(x, y);
         }
-        // else ignore, because dead or not in this lobby
     }
 }
 

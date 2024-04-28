@@ -4,23 +4,27 @@ using SpinBladeArena.Primitives;
 
 namespace SpinBladeArena.LogicCenter;
 
-public record struct Player(int UserId, string UserName, string ConnectionId, Vector2 Position)
+public class Player(int userId, string userName, string connectionId, Vector2 position)
 {
+    public int UserId { get; } = userId;
+    public string UserName { get; } = userName;
+    public string ConnectionId = connectionId;
+    public Vector2 Position = position;
     public float Health = 1;
     public float Size = 50;
-    public Vector2 Destination = Position;
+    public Vector2 Destination = position;
     public float MovementSpeedPerSecond = 10;
     public PlayerBlades Blades = PlayerBlades.Default;
     public double DeadTime = 0;
 
-    public readonly bool Dead => Health <= 0;
+    public bool Dead => Health <= 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly LineSegment GetBladeLineSegment(int bladeIndex)
+    public LineSegment GetBladeLineSegment(int bladeIndex)
     {
-        ref PlayerBladeInfo blade = ref Blades.Infos[bladeIndex];
-        Vector2 bladeStart = Position + new Vector2(MathF.Sin(blade.RotationAngle), -MathF.Cos(blade.RotationAngle)) * Size;
-        Vector2 bladeEnd = Position + new Vector2(MathF.Sin(blade.RotationAngle), -MathF.Cos(blade.RotationAngle)) * (Size + Blades.Length);
+        float angle = Blades.Angles[bladeIndex];
+        Vector2 bladeStart = Position + new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * Size;
+        Vector2 bladeEnd = Position + new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * (Size + Blades.Length);
         return new(bladeStart, bladeEnd);
     }
 
@@ -44,22 +48,21 @@ public record struct Player(int UserId, string UserName, string ConnectionId, Ve
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Attack(ref Player p1, ref Player p2)
+    public static void AttackEachOther(Player p1, Player p2)
     {
         if (p1.Dead || p2.Dead) return;
 
         if (Vector2.Distance(p1.Position, p2.Position) > p1.Size + p1.Blades.Length + p2.Size + p2.Blades.Length) return;
 
-        P1AttachP2(ref p1, ref p2);
-        P1AttachP2(ref p2, ref p1);
-        BladeAttack(ref p1, ref p2);
+        P1AttackP2(p1, p2);
+        P1AttackP2(p2, p1);
+        BladeAttack(p1, p2);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void P1AttachP2(ref Player p1, ref Player p2)
+        static void P1AttackP2(Player p1, Player p2)
         {
             for (int i = 0; i < p1.Blades.Count; ++i)
             {
-                ref PlayerBladeInfo blade = ref p1.Blades.Infos[i];
                 LineSegment ls = p1.GetBladeLineSegment(i);
 
                 if (PrimitiveUtils.IsLineIntersectingCircle(ls, p2.Position, p2.Size))
@@ -71,11 +74,11 @@ public record struct Player(int UserId, string UserName, string ConnectionId, Ve
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void BladeAttack(ref Player p1, ref Player p2)
+        static void BladeAttack(Player p1, Player p2)
         {
             for (int p1i = 0; p1i < p1.Blades.Count; ++p1i)
             {
-                ref PlayerBlades p1PlayerBlades = ref p1.Blades;
+                PlayerBlades p1PlayerBlades = p1.Blades;
                 LineSegment bladeLine1 = p1.GetBladeLineSegment(p1i);
 
                 for (int p2i = 0; p2i < p2.Blades.Count; ++p2i)
@@ -98,7 +101,7 @@ public record struct Player(int UserId, string UserName, string ConnectionId, Ve
         }
     }
 
-    public readonly PlayerDto ToDto()
+    public PlayerDto ToDto()
     {
         return new PlayerDto
         {
@@ -113,68 +116,44 @@ public record struct Player(int UserId, string UserName, string ConnectionId, Ve
     }
 }
 
-public record struct PlayerBlades()
+public class PlayerBlades
 {
     public float RotationDegreePerSecond = 2;
     public float Length = 40;
     public float Damage = 1;
-    public readonly int Count => Infos.Length;
-    public PlayerBladeInfo[] Infos = [];
+    public int Count => Angles.Count;
+    public List<float> Angles = [];
 
     public static PlayerBlades Default => new()
     {
-        Infos = [new PlayerBladeInfo()]
+        Angles = [0]
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DestroyBladeAt(int bladeIndex)
     {
-        if (Infos.Length == 0) return;
+        if (Count == 0) return;
 
-        PlayerBladeInfo[] newBlades = new PlayerBladeInfo[Infos.Length - 1];
-        for (int i = 0; i < bladeIndex; ++i)
-            newBlades[i] = Infos[i];
-        for (int i = bladeIndex + 1; i < Infos.Length; ++i)
-            newBlades[i - 1] = Infos[i];
-
-        Infos = newBlades;
+        Angles.RemoveAt(bladeIndex);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void AddBlade(int bladeCountAmount)
+    internal void AddBlade(int addBladeCount)
     {
-        Array.Resize(ref Infos, Infos.Length + bladeCountAmount);
-
-        float startAngle = Infos.Length == 0 ? 0 : Infos[^1].RotationAngle;
-        for (int i = 0; i < Infos.Length; ++i)
-        {
-            ref PlayerBladeInfo info = ref Infos[i];
-            Infos[i].RotationAngle = 2 * MathF.PI / Infos.Length * i + startAngle;
-        }
+        int bladeCount = Angles.Count + addBladeCount;
+        Angles = Enumerable.Range(0, bladeCount)
+            .Select(i => 2 * MathF.PI / bladeCount * i)
+            .ToList();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly PlayerBladesDto ToDto()
+    public PlayerBladesDto ToDto()
     {
         return new PlayerBladesDto
         {
             Length = Length,
             Damage = Damage,
-            Blades = Infos.Select(bladeInfo => bladeInfo.ToDto()).ToArray()
-        };
-    }
-}
-
-public record struct PlayerBladeInfo
-{
-    public float RotationAngle;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly PlayerBladeInfoDto ToDto()
-    {
-        return new PlayerBladeInfoDto
-        {
-            RotationAngle = RotationAngle
+            Angles = [.. Angles]
         };
     }
 }

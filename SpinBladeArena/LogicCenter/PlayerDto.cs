@@ -17,12 +17,7 @@ public class PlayerBladesDto
 {
     public float Length { get; init; }
     public float Damage { get; init; }
-    public required PlayerBladeInfoDto[] Blades { get; init; }
-}
-
-public class PlayerBladeInfoDto
-{
-    public float RotationAngle { get; init; }
+    public required float[] Angles { get; init; }
 }
 
 public class PickableBonusDto

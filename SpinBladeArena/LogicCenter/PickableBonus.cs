@@ -3,22 +3,21 @@ using System.Runtime.CompilerServices;
 
 namespace SpinBladeArena.LogicCenter;
 
-public record struct PickableBonus(string Name, Vector2 Position)
+public class PickableBonus(string name, Vector2 position)
 {
-    public PickableBonusApplier Apply;
+    public string Name { get; init; } = name;
+    public Vector2 Position { get; init; } = position;
 
-    public static PickableBonus Health(Vector2 position, float healthAmount = 1) => new()
+    public required PickableBonusApplier Apply { get; init; }
+
+    public static PickableBonus Health(Vector2 position, float healthAmount = 1) => new("生命", position)
     {
-        Name = "生命",
-        Position = position,
-        Apply = (ref Player player) => player.Health += healthAmount
+        Apply = (Player player) => player.Health += healthAmount
     };
 
-    public static PickableBonus Speed(Vector2 position, float speedAmount = 2) => new()
+    public static PickableBonus Speed(Vector2 position, float speedAmount = 2) => new("移动速度", position)
     {
-        Name = "移动速度",
-        Position = position,
-        Apply = (ref Player player) => AbsAdd(player.MovementSpeedPerSecond, speedAmount)
+        Apply = (Player player) => AbsAdd(player.MovementSpeedPerSecond, speedAmount)
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -28,39 +27,29 @@ public record struct PickableBonus(string Name, Vector2 Position)
         return isPositive ? val + addValue : val - addValue;
     }
 
-    public static PickableBonus BladeCount(Vector2 position, int bladeCountAmount = 1) => new()
+    public static PickableBonus BladeCount(Vector2 position, int bladeCountAmount = 1) => new("刀数", position)
     {
-        Name = "刀数",
-        Position = position,
-        Apply = (ref Player player) => player.Blades.AddBlade(bladeCountAmount)
+        Apply = (Player player) => player.Blades.AddBlade(bladeCountAmount)
     };
 
-    public static PickableBonus BladeLength(Vector2 position, float bladeLengthAmount = 1) => new()
+    public static PickableBonus BladeLength(Vector2 position, float bladeLengthAmount = 1) => new("刀长", position)
     {
-        Name = "刀长",
-        Position = position,
-        Apply = (ref Player player) => player.Blades.Length += bladeLengthAmount
+        Apply = (Player player) => player.Blades.Length += bladeLengthAmount
     };
 
-    public static PickableBonus BladeDamage(Vector2 position, float bladeDamageAmount = 1) => new()
+    public static PickableBonus BladeDamage(Vector2 position, float bladeDamageAmount = 1) => new("刀伤", position)
     {
-        Name = "刀伤",
-        Position = position,
-        Apply = (ref Player player) => player.Blades.Damage += bladeDamageAmount
+        Apply = (Player player) => player.Blades.Damage += bladeDamageAmount
     };
 
-    public static PickableBonus BladeSpeed(Vector2 position, float rotationDegreePerSecond = 2) => new()
+    public static PickableBonus BladeSpeed(Vector2 position, float rotationDegreePerSecond = 2) => new("刀速", position)
     {
-        Name = "刀速",
-        Position = position,
-        Apply = (ref Player player) => player.Blades.RotationDegreePerSecond += rotationDegreePerSecond
+        Apply = (Player player) => player.Blades.RotationDegreePerSecond += rotationDegreePerSecond
     };
 
-    public static PickableBonus Random(Vector2 position) => new()
+    public static PickableBonus Random(Vector2 position) => new("随机", position)
     {
-        Name = "随机",
-        Position = position,
-        Apply = (ref Player player) => All[System.Random.Shared.Next(All.Length)](position).Apply(ref player)
+        Apply = (Player player) => All[System.Random.Shared.Next(All.Length)](position).Apply(player)
     };
 
     internal static Func<Vector2, PickableBonus>[] All =
@@ -76,7 +65,7 @@ public record struct PickableBonus(string Name, Vector2 Position)
 
     public static PickableBonus CreateRandom(Vector2 position) => All[System.Random.Shared.Next(All.Length)](position);
 
-    public readonly PickableBonusDto ToDto()
+    public PickableBonusDto ToDto()
     {
         return new PickableBonusDto
         {
@@ -86,4 +75,4 @@ public record struct PickableBonus(string Name, Vector2 Position)
     }
 }
 
-public delegate void PickableBonusApplier(ref Player player);
+public delegate void PickableBonusApplier(Player player);
