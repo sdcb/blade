@@ -8,6 +8,9 @@ public class PickableBonus(string name, Vector2 position)
     public string Name { get; init; } = name;
     public Vector2 Position { get; init; } = position;
 
+    // 超过指定分数之后，进行惩罚
+    public const int ScoreThreshold = 10;
+
     public required PickableBonusApplier Apply { get; init; }
 
     public static PickableBonus Health(Vector2 position, float healthAmount = 2) => new("生命", position)
@@ -20,12 +23,27 @@ public class PickableBonus(string name, Vector2 position)
         Apply = (Player player) => player.Size = Math.Clamp(player.Size / 2, 20, 100)
     };
 
-    public static PickableBonus Speed(Vector2 position, float speedAmount = 5) => new("移动速度", position)
+    public static PickableBonus Speed(Vector2 position, float speedAmount = 5) => new("移速+5", position)
     {
         Apply = (Player player) =>
         {
             player.MovementSpeedPerSecond = AbsAdd(player.MovementSpeedPerSecond, speedAmount);
-            player.Size = Math.Clamp(player.Size + 5, 20, 200);
+            if (player.Score > ScoreThreshold)
+            {
+                player.Size = Math.Clamp(player.Size + 5, 20, 200);
+            }
+        }
+    };
+
+    public static PickableBonus Speed20(Vector2 position, float speedAmount = 20) => new("移速+20", position)
+    {
+        Apply = (Player player) =>
+        {
+            player.MovementSpeedPerSecond = AbsAdd(player.MovementSpeedPerSecond, speedAmount);
+            if (player.Score > ScoreThreshold)
+            {
+                player.Size = Math.Clamp(player.Size + 20, 20, 200);
+            }
         }
     };
 
@@ -41,9 +59,12 @@ public class PickableBonus(string name, Vector2 position)
         Apply = (Player player) =>
         {
             player.Blades.AddBlade(bladeCountAmount);
-            player.Size = Math.Clamp(player.Size + 10, 20, 200);
-            player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 10, 10, 100);
-            player.Blades.RotationDegreePerSecond = Math.Clamp(player.Blades.RotationDegreePerSecond - 2, 1, 10);
+            if (player.Score > ScoreThreshold)
+            {
+                player.Size = Math.Clamp(player.Size + 10, 20, 200);
+                player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 10, 10, 100);
+                player.Blades.RotationDegreePerSecond = Math.Clamp(player.Blades.RotationDegreePerSecond - 2, 1, 10);
+            }
         }
     };
 
@@ -52,9 +73,12 @@ public class PickableBonus(string name, Vector2 position)
         Apply = (Player player) =>
         {
             player.Blades.AddBlade(bladeCountAmount);
-            player.Size = Math.Clamp(player.Size + 30, 20, 200);
-            player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
-            player.Blades.RotationDegreePerSecond = Math.Clamp(player.Blades.RotationDegreePerSecond - 5, 1, 10);
+            if (player.Score > ScoreThreshold)
+            {
+                player.Size = Math.Clamp(player.Size + 30, 20, 200);
+                player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
+                player.Blades.RotationDegreePerSecond = Math.Clamp(player.Blades.RotationDegreePerSecond - 5, 1, 10);
+            }
         }
     };
 
@@ -68,9 +92,12 @@ public class PickableBonus(string name, Vector2 position)
         Apply = (Player player) =>
         {
             player.Blades.Length += bladeLengthAmount;
-            player.Size = Math.Clamp(player.Size + 30, 20, 200);
-            player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
-            player.Blades.RotationDegreePerSecond = Math.Clamp(player.Blades.RotationDegreePerSecond - 5, 1, 10);
+            if (player.Score > ScoreThreshold)
+            {
+                player.Size = Math.Clamp(player.Size + 30, 20, 200);
+                player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
+                player.Blades.RotationDegreePerSecond = Math.Clamp(player.Blades.RotationDegreePerSecond - 5, 1, 10);
+            }
         }
     };
 
@@ -84,8 +111,11 @@ public class PickableBonus(string name, Vector2 position)
         Apply = (Player player) =>
         {
             player.Blades.RotationDegreePerSecond += rotationDegreePerSecond;
-            player.Size = Math.Clamp(player.Size + 10, 20, 200);
-            player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 10, 10, 100);
+            if (player.Score > ScoreThreshold)
+            {
+                player.Size = Math.Clamp(player.Size + 10, 20, 200);
+                player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 10, 10, 100);
+            }
         }
     };
 
@@ -94,8 +124,11 @@ public class PickableBonus(string name, Vector2 position)
         Apply = (Player player) =>
         {
             player.Blades.RotationDegreePerSecond += rotationDegreePerSecond;
-            player.Size = Math.Clamp(player.Size + 30, 20, 200);
-            player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
+            if (player.Score > ScoreThreshold)
+            {
+                player.Size = Math.Clamp(player.Size + 30, 20, 200);
+                player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
+            }
         }
     };
 
@@ -108,6 +141,7 @@ public class PickableBonus(string name, Vector2 position)
     [
         p => Health(p),
         p => Speed(p),
+        p => Speed20(p),
         p => BladeCount(p),
         p => BladeLength(p),
         p => BladeLength20(p),

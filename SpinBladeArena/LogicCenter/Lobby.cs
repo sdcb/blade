@@ -7,13 +7,14 @@ namespace SpinBladeArena.LogicCenter;
 
 public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<GameHub, IGameHubClient> Hub, UserManager UserManager)
 {
-    public Vector2 MaxSize = new(1000, 1000);
+    public Vector2 MaxSize = new(2000, 2000);
     public List<Player> Players = [];
     public HashSet<PickableBonus> PickableBonuses = [];
     public List<Player> DeadPlayers = [];
     private CancellationTokenSource? _cancellationTokenSource = null;
     // Key: UserId
     private readonly Dictionary<int, AddPlayerRequest> _addPlayerRequests = [];
+    public DateTime LastUpdateTime { get; set; } = DateTime.Now;
 
     public Player? FindPlayer(int userId) => Players.FirstOrDefault(x => x.UserId == userId) ?? DeadPlayers.FirstOrDefault(x => x.UserId == userId);
 
@@ -33,7 +34,12 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
 
     public Vector2 RandomPosition()
     {
-        return new(Random.Shared.NextSingle() * MaxSize.X - MaxSize.Y / 2, Random.Shared.NextSingle() * MaxSize.Y - MaxSize.Y / 2);
+        Vector2 loc;
+        do
+        {
+            loc = new(Random.Shared.NextSingle() * MaxSize.X - MaxSize.Y / 2, Random.Shared.NextSingle() * MaxSize.Y - MaxSize.Y / 2);
+        } while (Players.Any(x => Vector2.Distance(x.Position, loc) < x.Size));
+        return loc;
     }
 
     public void EnsureStart()
@@ -49,9 +55,9 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
 
     public void Run(CancellationToken cancellationToken)
     {
-        const int DeadRespawnTimeInSeconds = 5;
-        float bonusSpawnCooldown = 5;
-        float maxBonusCount = 7;
+        const int DeadRespawnTimeInSeconds = 3;
+        float bonusSpawnCooldown = 1;
+        float maxBonusCount = 25;
         float bonusSpawnTimer = 0;
 
         Stopwatch sw = Stopwatch.StartNew();
@@ -59,6 +65,11 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
         float deltaTime = 0;
         while (!cancellationToken.IsCancellationRequested)
         {
+            if (DateTime.Now - LastUpdateTime > TimeSpan.FromSeconds(180))
+            {
+                return;
+            }
+
             Thread.Sleep(Math.Max(1, (int)(30 - deltaTime)));
             deltaTime = MathF.Min((float)sw.Elapsed.TotalSeconds - oldTime, 0.25f);
             oldTime = (float)sw.Elapsed.TotalSeconds;

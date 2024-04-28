@@ -81,7 +81,7 @@ public class Player(int userId, string userName, Vector2 position)
                     p2.Health -= p1.Blades.Damage;
                     if (p2.Health <= 0)
                     {
-                        p1.Score += p2.Score;
+                        p1.Score += p2.Score / 2;
                         for (int n = 0; n < p2.Score / 2; ++n)
                         {
                             PickableBonus.Random(Vector2.Zero).Apply(p1);

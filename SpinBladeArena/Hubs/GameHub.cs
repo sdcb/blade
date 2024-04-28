@@ -12,12 +12,15 @@ public class GameHub(GameManager gameManager, CurrentUser user, UserManager user
         Lobby lobby = gameManager.Lobbies[lobbyId];
         lobby.AddPlayerToRandomPosition(new (user.Id, user.Name));
         Groups.AddToGroupAsync(Context.ConnectionId, lobbyId.ToString());
+        lobby.LastUpdateTime = DateTime.Now;
         lobby.EnsureStart();
     }
 
     public void SetDestination(int lobbyId, float x, float y)
     {
-        gameManager.Lobbies[lobbyId].SetPlayerDestination(user.Id, x, y);
+        Lobby lobby = gameManager.Lobbies[lobbyId];
+        lobby.SetPlayerDestination(user.Id, x, y);
+        lobby.LastUpdateTime = DateTime.Now;
     }
 
     public override Task OnConnectedAsync()

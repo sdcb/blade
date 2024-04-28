@@ -24,13 +24,19 @@ class State {
 
     onUpdated() {
         const userId = getUserId();
-        const user = this.players.find(p => p.userId === userId);
-        if (!user) user = this.deadPlayers.find(p => p.userId === userId);
+        this.me = this.players.find(p => p.userId === userId);
+        if (!this.me) this.me = this.deadPlayers.find(p => p.userId === userId);
 
-        if (user) {
-            this.center = { x: user.position[0], y: user.position[1] };
+        if (this.me) {
+            this.center = { x: this.me.position[0], y: this.me.position[1] };
         }
+        this.scale = getScale(this.me.size, window.innerWidth, window.innerHeight);
     }
+
+    /**
+     * @type {PlayerDto}
+    */
+    me = null;
 }
 const state = new State();
 
@@ -91,7 +97,6 @@ function render(ctx, canvas) {
     ctx.fillStyle = 'cornflowerblue';
     ctx.fill();
 
-    state.scale = getScale(canvas.width, canvas.height);
     ctx.save();
     ctx.translate(-state.center.x * state.scale, -state.center.y * state.scale);
     ctx.scale(state.scale, state.scale);
@@ -117,7 +122,7 @@ function render(ctx, canvas) {
         y += 20;
     }
     ctx.restore();
-    
+
 
     requestAnimationFrame(() => render(ctx, canvas));
 }
@@ -143,7 +148,7 @@ function drawUnits(ctx) {
         ctx.fillText(bonus.name, bonus.position[0], bonus.position[1]);
     }
 
-    const me = state.players.find(p => p.userId === userId);
+    const me = state.me;
     if (me && me.destination[0] !== me.position[0] && me.destination[1] !== me.position[1]) {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -193,8 +198,7 @@ function drawUnits(ctx) {
         }
     }
 
-    const deadMe = state.deadPlayers.find(p => p.userId === userId);
-    if (deadMe) {
+    if (state.me?.health <= 0) {
         // draw dead player
         ctx.font = '100px Arial';
         ctx.fillText('你挂了', state.center.x, state.center.y);
@@ -206,50 +210,55 @@ function drawUnits(ctx) {
  * @param {CanvasRenderingContext2D} ctx
  */
 function drawGrid(ctx) {
+    const size = 2000;
     // clear
     ctx.beginPath();
-    ctx.rect(-500, -500, 1000, 1000);
+    ctx.rect(-size / 2, -size / 2, size, size);
     ctx.fillStyle = 'gray';
     ctx.fill();
 
     // draw horizontal lines
-    for (let y = -500; y <= 500; y += 20) {
+    for (let y = -size / 2; y <= size / 2; y += 20) {
         ctx.lineDashOffset = 0;
         ctx.lineWidth = y % 100 === 0 ? 1 : 0.1;
         ctx.beginPath();
-        ctx.moveTo(-500, y);
-        ctx.lineTo(500, y);
+        ctx.moveTo(-size / 2, y);
+        ctx.lineTo(size / 2, y);
         ctx.stroke();
     }
 
     // draw vertical lines
-    for (let x = -500; x <= 500; x += 20) {
+    for (let x = -size / 2; x <= size / 2; x += 20) {
         ctx.lineDashOffset = 0;
         ctx.lineWidth = x % 100 === 0 ? 1 : 0.1;
         ctx.beginPath();
-        ctx.moveTo(x, -500);
-        ctx.lineTo(x, 500);
+        ctx.moveTo(x, -size / 2);
+        ctx.lineTo(x, size / 2);
         ctx.stroke();
     }
 }
 
-function getScale(resolutionX, resolutionY) {
+/**
+ * @param {PlayerDto} player
+ * @param {number} resolutionX 
+ * @param {number} resolutionY 
+ */
+function getScale(playerSize, resolutionX, resolutionY) {
     // 角色大小
-    const characterWidth = 50;
-    const characterHeight = 50;
+    const characterWidth = playerSize;
+    const characterHeight = playerSize;
 
     // 确定屏幕上角色占据的比例
-    const targetScreenWidthRatio = 1 / 10;
-    const targetScreenHeightRatio = 1 / 10;
+    const targetScreenWidthRatio = 1 / 20;
+    const targetScreenHeightRatio = 1 / 20;
 
     let scaleX = (resolutionX * targetScreenWidthRatio) / characterWidth;
     let scaleY = (resolutionY * targetScreenHeightRatio) / characterHeight;
 
     // 选择两者中更小的缩放比例来确保角色既不会太宽也不会太高
     let scale = Math.min(scaleX, scaleY);
-
-    // 限制最小缩放比例为1，避免放大地图，因为地图只有1000x1000
     scale = Math.max(1, scale);
+
 
     return scale;
 }
