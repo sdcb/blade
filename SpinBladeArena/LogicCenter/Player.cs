@@ -4,16 +4,15 @@ using SpinBladeArena.Primitives;
 
 namespace SpinBladeArena.LogicCenter;
 
-public class Player(int userId, string userName, string connectionId, Vector2 position)
+public class Player(int userId, string userName, Vector2 position)
 {
     public int UserId { get; } = userId;
     public string UserName { get; } = userName;
-    public string ConnectionId = connectionId;
     public Vector2 Position = position;
     public float Health = 1;
-    public float Size = 50;
+    public float Size = 30;
     public Vector2 Destination = position;
-    public float MovementSpeedPerSecond = 50;
+    public float MovementSpeedPerSecond = 75;
     public PlayerBlades Blades = PlayerBlades.Default;
     public double DeadTime = 0;
 
@@ -130,7 +129,7 @@ public class Player(int userId, string userName, string connectionId, Vector2 po
 
 public class PlayerBlades
 {
-    public float RotationDegreePerSecond = 2;
+    public float RotationDegreePerSecond = 10;
     public float Length = 40;
     public float Damage = 1;
     public int Count => Angles.Count;

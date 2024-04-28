@@ -197,9 +197,9 @@ function drawGrid(ctx) {
     ctx.fill();
 
     // draw horizontal lines
-    for (let y = -500; y <= 500; y += 10) {
+    for (let y = -500; y <= 500; y += 20) {
         ctx.lineDashOffset = 0;
-        ctx.lineWidth = y % 50 === 0 ? 1 : 0.1;
+        ctx.lineWidth = y % 100 === 0 ? 1 : 0.1;
         ctx.beginPath();
         ctx.moveTo(-500, y);
         ctx.lineTo(500, y);
@@ -207,9 +207,9 @@ function drawGrid(ctx) {
     }
 
     // draw vertical lines
-    for (let x = -500; x <= 500; x += 10) {
+    for (let x = -500; x <= 500; x += 20) {
         ctx.lineDashOffset = 0;
-        ctx.lineWidth = x % 50 === 0 ? 1 : 0.1;
+        ctx.lineWidth = x % 100 === 0 ? 1 : 0.1;
         ctx.beginPath();
         ctx.moveTo(x, -500);
         ctx.lineTo(x, 500);
@@ -235,5 +235,5 @@ function getScale(resolutionX, resolutionY) {
     // 限制最小缩放比例为1，避免放大地图，因为地图只有1000x1000
     scale = Math.max(1, scale);
 
-    return 1;
+    return scale;
 }

@@ -10,14 +10,23 @@ public class PickableBonus(string name, Vector2 position)
 
     public required PickableBonusApplier Apply { get; init; }
 
-    public static PickableBonus Health(Vector2 position, float healthAmount = 1) => new("生命", position)
+    public static PickableBonus Health(Vector2 position, float healthAmount = 2) => new("生命", position)
     {
         Apply = (Player player) => player.Health += healthAmount
     };
 
-    public static PickableBonus Speed(Vector2 position, float speedAmount = 2) => new("移动速度", position)
+    public static PickableBonus Thin(Vector2 position, float reduceSizeAmount = 15) => new("减肥", position)
     {
-        Apply = (Player player) => AbsAdd(player.MovementSpeedPerSecond, speedAmount)
+        Apply = (Player player) => player.Size = Math.Clamp(player.Size - reduceSizeAmount, 20, 100)
+    };
+
+    public static PickableBonus Speed(Vector2 position, float speedAmount = 5) => new("移动速度", position)
+    {
+        Apply = (Player player) =>
+        {
+            player.MovementSpeedPerSecond = AbsAdd(player.MovementSpeedPerSecond, speedAmount);
+            player.Size = Math.Clamp(player.Size + 5, 20, 200);
+        }
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -29,12 +38,40 @@ public class PickableBonus(string name, Vector2 position)
 
     public static PickableBonus BladeCount(Vector2 position, int bladeCountAmount = 1) => new("刀数", position)
     {
-        Apply = (Player player) => player.Blades.AddBlade(bladeCountAmount)
+        Apply = (Player player) =>
+        {
+            player.Blades.AddBlade(bladeCountAmount);
+            player.Size = Math.Clamp(player.Size + 10, 20, 200);
+            player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 10, 10, 100);
+            player.Blades.RotationDegreePerSecond = Math.Clamp(player.Blades.RotationDegreePerSecond - 2, 1, 10);
+        }
     };
 
-    public static PickableBonus BladeLength(Vector2 position, float bladeLengthAmount = 5) => new("刀长", position)
+    public static PickableBonus BladeCount3(Vector2 position, int bladeCountAmount = 3) => new("刀数+3", position)
+    {
+        Apply = (Player player) =>
+        {
+            player.Blades.AddBlade(bladeCountAmount);
+            player.Size = Math.Clamp(player.Size + 30, 20, 200);
+            player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
+            player.Blades.RotationDegreePerSecond = Math.Clamp(player.Blades.RotationDegreePerSecond - 5, 1, 10);
+        }
+    };
+
+    public static PickableBonus BladeLength(Vector2 position, float bladeLengthAmount = 5) => new("刀长+5", position)
     {
         Apply = (Player player) => player.Blades.Length += bladeLengthAmount
+    };
+
+    public static PickableBonus BladeLength20(Vector2 position, float bladeLengthAmount = 20) => new("刀长+20", position)
+    {
+        Apply = (Player player) =>
+        {
+            player.Blades.Length += bladeLengthAmount;
+            player.Size = Math.Clamp(player.Size + 30, 20, 200);
+            player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
+            player.Blades.RotationDegreePerSecond = Math.Clamp(player.Blades.RotationDegreePerSecond - 5, 1, 10);
+        }
     };
 
     public static PickableBonus BladeDamage(Vector2 position, float bladeDamageAmount = 1) => new("刀伤", position)
@@ -42,9 +79,24 @@ public class PickableBonus(string name, Vector2 position)
         Apply = (Player player) => player.Blades.Damage += bladeDamageAmount
     };
 
-    public static PickableBonus BladeSpeed(Vector2 position, float rotationDegreePerSecond = 2) => new("刀速", position)
+    public static PickableBonus BladeSpeed(Vector2 position, float rotationDegreePerSecond = 5) => new("刀速+5", position)
     {
-        Apply = (Player player) => player.Blades.RotationDegreePerSecond += rotationDegreePerSecond
+        Apply = (Player player) =>
+        {
+            player.Blades.RotationDegreePerSecond += rotationDegreePerSecond;
+            player.Size = Math.Clamp(player.Size + 10, 20, 200);
+            player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 10, 10, 100);
+        }
+    };
+
+    public static PickableBonus BladeSpeed20(Vector2 position, float rotationDegreePerSecond = 20) => new("刀速+20", position)
+    {
+        Apply = (Player player) =>
+        {
+            player.Blades.RotationDegreePerSecond += rotationDegreePerSecond;
+            player.Size = Math.Clamp(player.Size + 30, 20, 200);
+            player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
+        }
     };
 
     public static PickableBonus Random(Vector2 position) => new("随机", position)
@@ -58,8 +110,12 @@ public class PickableBonus(string name, Vector2 position)
         p => Speed(p),
         p => BladeCount(p),
         p => BladeLength(p),
+        p => BladeLength20(p),
         p => BladeDamage(p),
         p => BladeSpeed(p),
+        p => BladeSpeed20(p),
+        p => Thin(p),
+        p => BladeCount3(p),
         Random,
     ];
 

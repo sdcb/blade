@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter;
 
-public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<GameHub, IGameHubClient> Hub)
+public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<GameHub, IGameHubClient> Hub, UserManager UserManager)
 {
     public Vector2 MaxSize = new(1000, 1000);
     public List<Player> Players = [];
@@ -23,8 +23,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
 
         if (player != null)
         {
-            // existing user, update connection id
-            player.ConnectionId = req.ConnectionId;
+            // existing user, do nothing
         }
         else
         {
@@ -70,7 +69,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                 Players.EnsureCapacity(destinationSize);
                 foreach (AddPlayerRequest req in _addPlayerRequests.Values)
                 {
-                    Player newPlayer = new(req.UserId, req.UserName, req.ConnectionId, RandomPosition());
+                    Player newPlayer = new(req.UserId, req.UserName, RandomPosition());
                     Players.Add(newPlayer);
                 }
                 _addPlayerRequests.Clear();
@@ -144,8 +143,12 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                 Player player = DeadPlayers[i];
                 if (sw.Elapsed.TotalSeconds - player.DeadTime > DeadRespawnTimeInSeconds)
                 {
-                    // insert into players
-                    _addPlayerRequests[player.UserId] = new(player.UserId, player.UserName, player.ConnectionId);
+                    if (UserManager.IsUserOnline(player.UserId))
+                    {
+                        // insert into players
+                        _addPlayerRequests[player.UserId] = new(player.UserId, player.UserName);
+                    }
+                    
                     // remove from dead players
                     DeadPlayers.RemoveAt(i);
                     --i;
@@ -177,4 +180,4 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
     }
 }
 
-public record AddPlayerRequest(int UserId, string UserName, string ConnectionId);
+public record AddPlayerRequest(int UserId, string UserName);

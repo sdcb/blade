@@ -3,7 +3,7 @@ using SpinBladeArena.Hubs;
 
 namespace SpinBladeArena.LogicCenter;
 
-public class GameManager(IHubContext<GameHub, IGameHubClient> Hub)
+public class GameManager(IHubContext<GameHub, IGameHubClient> Hub, UserManager UserManager)
 {
     public Dictionary<int, Lobby> Lobbies { get; } = [];
 
@@ -13,7 +13,7 @@ public class GameManager(IHubContext<GameHub, IGameHubClient> Hub)
         lock (Lobbies)
         {
             nextLobbyId = Lobbies.Count + 1;
-            Lobbies[nextLobbyId] = new Lobby(nextLobbyId, userId, DateTime.Now, Hub);
+            Lobbies[nextLobbyId] = new Lobby(nextLobbyId, userId, DateTime.Now, Hub, UserManager);
         }
         return nextLobbyId;
     }

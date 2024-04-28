@@ -44,6 +44,7 @@ namespace SpinBladeArena
             services.AddScoped<CurrentUser>();
             services.AddRazorPages();
             services.AddSingleton<GameManager>();
+            services.AddSingleton<UserManager>();
             TokenValidationParameters tvp = new()
             {
                 ValidateIssuer = true,

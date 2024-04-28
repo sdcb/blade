@@ -9,7 +9,7 @@ async function ensureToken() {
     }
 
     let userName = localStorage.userName;
-    if (!userName) {
+    while (!userName) {
         userName = prompt("请输入用户名");
         localStorage.userName = userName;
     }
