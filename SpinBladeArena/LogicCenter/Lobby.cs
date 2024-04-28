@@ -88,6 +88,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                         if (Vector2.Distance(player.Position, bonus.Position) < player.Size)
                         {
                             bonus.Apply(player);
+                            player.Score += 1;
                             toRemove.Add(bonus);
                         }
 

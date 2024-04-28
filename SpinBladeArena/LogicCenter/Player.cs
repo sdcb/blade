@@ -15,6 +15,7 @@ public class Player(int userId, string userName, Vector2 position)
     public float MovementSpeedPerSecond = 75;
     public PlayerBlades Blades = PlayerBlades.Default;
     public double DeadTime = 0;
+    public int Score = 1;
 
     public bool Dead => Health <= 0;
 
@@ -78,6 +79,14 @@ public class Player(int userId, string userName, Vector2 position)
                 if (PrimitiveUtils.IsLineIntersectingCircle(ls, p2.Position, p2.Size))
                 {
                     p2.Health -= p1.Blades.Damage;
+                    if (p2.Health <= 0)
+                    {
+                        p1.Score += p2.Score;
+                        for (int n = 0; n < p2.Score / 2; ++n)
+                        {
+                            PickableBonus.Random(Vector2.Zero).Apply(p1);
+                        }
+                    }
                     return;
                 }
             }
@@ -122,7 +131,7 @@ public class Player(int userId, string userName, Vector2 position)
             Health = Health,
             Size = Size,
             Blades = Blades.ToDto(),
-            DeadTime = DeadTime
+            Score = Score
         };
     }
 }

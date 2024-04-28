@@ -100,8 +100,24 @@ function render(ctx, canvas) {
     drawUnits(ctx);
     ctx.restore();
 
+    ctx.save();
     ctx.fillStyle = 'black';
-    ctx.fillText("test", 0, 0);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.font = '40px Arial';
+    ctx.fillStyle = 'white';
+    let y = 10;
+    ctx.fillText('积分榜', 10, y);
+    y += 40;
+    ctx.font = '20px Arial';
+    for (const p of state.players.concat().sort((a, b) => b.score - a.score)) {
+        const isYou = p.userId === getUserId();
+        ctx.fillStyle = isYou ? 'yellow' : 'white';
+        ctx.fillText(`${p.userName}: ${p.score}`, 10, y);
+        y += 20;
+    }
+    ctx.restore();
+    
 
     requestAnimationFrame(() => render(ctx, canvas));
 }

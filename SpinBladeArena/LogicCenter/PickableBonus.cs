@@ -15,9 +15,9 @@ public class PickableBonus(string name, Vector2 position)
         Apply = (Player player) => player.Health += healthAmount
     };
 
-    public static PickableBonus Thin(Vector2 position, float reduceSizeAmount = 15) => new("减肥", position)
+    public static PickableBonus Thin(Vector2 position) => new("减肥", position)
     {
-        Apply = (Player player) => player.Size = Math.Clamp(player.Size - reduceSizeAmount, 20, 100)
+        Apply = (Player player) => player.Size = Math.Clamp(player.Size / 2, 20, 100)
     };
 
     public static PickableBonus Speed(Vector2 position, float speedAmount = 5) => new("移动速度", position)

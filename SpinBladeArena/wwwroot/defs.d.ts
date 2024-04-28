@@ -6,7 +6,7 @@ type PlayerDto = {
     health: number;
     size: number;
     blades: PlayerBladesDto;
-    deadTime: number;
+    score: number;
 };
 
 type PlayerBladesDto = {
