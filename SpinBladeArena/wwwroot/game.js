@@ -112,7 +112,7 @@ function render(ctx, canvas) {
     ctx.font = '40px Arial';
     ctx.fillStyle = 'white';
     let y = 10;
-    ctx.fillText('积分榜', 10, y);
+    ctx.fillText(`积分榜（${state.players.length} 人）`, 10, y);
     y += 40;
     ctx.font = '20px Arial';
     for (const p of state.players.concat().sort((a, b) => b.score - a.score)) {
