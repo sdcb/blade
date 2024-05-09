@@ -12,7 +12,6 @@ public class GameHub(GameManager gameManager, CurrentUser user, UserManager user
         Lobby lobby = gameManager.Lobbies[lobbyId];
         lobby.AddPlayerToRandomPosition(new (user.Id, user.Name));
         Groups.AddToGroupAsync(Context.ConnectionId, lobbyId.ToString());
-        lobby.LastUpdateTime = DateTime.Now;
         lobby.EnsureStart();
     }
 
@@ -20,18 +19,18 @@ public class GameHub(GameManager gameManager, CurrentUser user, UserManager user
     {
         Lobby lobby = gameManager.Lobbies[lobbyId];
         lobby.SetPlayerDestination(user.Id, x, y);
-        lobby.LastUpdateTime = DateTime.Now;
+        userManager.OnUserActive(user.Id);
     }
 
     public override Task OnConnectedAsync()
     {
-        userManager.SetUserOnline(user.Id);
+        userManager.OnUserConnected(user.Id);
         return base.OnConnectedAsync();
     }
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
-        userManager.SetUserOffline(user.Id);
+        userManager.OnUserDisconnected(user.Id);
         return base.OnDisconnectedAsync(exception);
     }
 }

@@ -20,6 +20,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
 
     public void AddPlayerToRandomPosition(AddPlayerRequest req)
     {
+        LastUpdateTime = DateTime.Now;
         Player? player = FindPlayer(req.UserId);
 
         if (player != null)
@@ -42,12 +43,18 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
         return loc;
     }
 
+    Thread _runningThread;
+
     public void EnsureStart()
     {
-        if (_cancellationTokenSource == null)
+        lock (this)
         {
-            _cancellationTokenSource = new();
-            new Thread(() => Run(_cancellationTokenSource.Token)).Start();
+            if (_runningThread == null || _runningThread.ThreadState != System.Threading.ThreadState.Running)
+            {
+                _cancellationTokenSource = new();
+                _runningThread = new Thread(() => Run(_cancellationTokenSource.Token));
+                _runningThread.Start();
+            }
         }
     }
 
@@ -160,7 +167,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                         // insert into players
                         _addPlayerRequests[player.UserId] = new(player.UserId, player.UserName);
                     }
-                    
+
                     // remove from dead players
                     DeadPlayers.RemoveAt(i);
                     --i;
@@ -181,6 +188,8 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
 
     internal void SetPlayerDestination(int userId, float x, float y)
     {
+        LastUpdateTime = DateTime.Now;
+
         x = Math.Clamp(x, -MaxSize.X / 2, MaxSize.X / 2);
         y = Math.Clamp(y, -MaxSize.Y / 2, MaxSize.Y / 2);
 

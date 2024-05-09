@@ -1,14 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using SpinBladeArena.LogicCenter;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace SpinBladeArena.Controllers;
 
-public class UserController(TokenValidationParameters _tvp) : Controller
+public class UserController(TokenValidationParameters _tvp, UserManager userManager) : Controller
 {
-    static readonly Dictionary<string, int> _userNameMap = [];
-
     [Route("token")]
     public object CreateToken(string userName)
     {
@@ -37,7 +36,7 @@ public class UserController(TokenValidationParameters _tvp) : Controller
     }
 
     [Route("userList")]
-    public Dictionary<string, int> UserList() => _userNameMap;
+    public UserInfo UserList() => _userManager;
 
     public static string GetUserNameById(int id) => _userNameMap.FirstOrDefault(x => x.Value == id).Key;
 
