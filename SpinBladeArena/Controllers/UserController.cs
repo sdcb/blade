@@ -9,15 +9,15 @@ namespace SpinBladeArena.Controllers;
 public class UserController(TokenValidationParameters _tvp, UserManager userManager) : Controller
 {
     [Route("token")]
-    public object CreateToken(string userName)
+    public object CreateToken(string userName, string password)
     {
-        int userId = EnsureNewUser(userName);
+        UserInfo user = userManager.EnsureUser(userName, password);
 
         List<Claim> claims =
         [
             // Add any claims you need here
             new Claim(JwtRegisteredClaimNames.Sub, userName),
-            new Claim(JwtRegisteredClaimNames.Jti, userId.ToString()),
+            new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
             // other claims
         ];
 
@@ -30,30 +30,11 @@ public class UserController(TokenValidationParameters _tvp, UserManager userMana
 
         return new
         {
-            UserId = userId,
+            UserId = user.Id,
             Token = new JwtSecurityTokenHandler().WriteToken(token)
         };
     }
 
     [Route("userList")]
-    public UserInfo UserList() => _userManager;
-
-    public static string GetUserNameById(int id) => _userNameMap.FirstOrDefault(x => x.Value == id).Key;
-
-    static int EnsureNewUser(string userName)
-    {
-        if (_userNameMap.TryGetValue(userName, out int val))
-        {
-            return val;
-        }
-        else
-        {
-            lock (_userNameMap)
-            {
-                int nextUserId = _userNameMap.Count + 1;
-                _userNameMap[userName] = nextUserId;
-                return nextUserId;
-            }
-        }
-    }
+    public UserInfo[] UserList() => userManager.GetAllUsers();
 }

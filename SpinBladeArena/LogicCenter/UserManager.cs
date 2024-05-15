@@ -7,14 +7,20 @@ public class UserManager
     readonly Dictionary<int, UserInfo> _users = [];
     int _nextUserId = 1;
 
-    public void CreateUser(string userName)
+    public UserInfo EnsureUser(string userName, string password)
     {
         if (userName.Length > 10) throw new ArgumentException("User name is too long", nameof(userName));
-        if (_users.Values.Any(user => user.Name == userName)) throw new ArgumentException("User name already exists", nameof(userName));
+        UserInfo? user = _users.Values.FirstOrDefault(user => user.Name == userName);
+
+        if (user != null) return user;
 
         int userId = Interlocked.Increment(ref _nextUserId);
-        _users[userId] = new UserInfo(userId, userName, false, DateTime.Now);
+        UserInfo newUser = new(userId, userName, password, isOnline: false, DateTime.Now);
+        _users[userId] = newUser;
+        return newUser;
     }
+
+    public UserInfo[] GetAllUsers() => [.. _users.Values];
 
     public void OnUserConnected(int user)
     {
@@ -44,26 +50,20 @@ public class UserManager
         return null;
     }
 
-    internal void OnUserActive(int id)
+    internal void OnUserActive(int userId)
     {
-        if (_users.TryGetValue(id, out UserInfo? user))
+        if (_users.TryGetValue(userId, out UserInfo? user))
         {
             user.LatestActive = DateTime.Now;
         }
     }
-}
 
-public class UserInfo(int id, string name, bool isOnline, DateTime latestActive)
-{
-    public int Id { get; init; } = id;
-
-    public string Name { get; init; } = name;
-
-    public bool IsOnline { get; set; } = isOnline;
-
-    public DateTime LatestActive { get; set; } = latestActive;
-
-    public bool IsExpired => DateTime.Now - LatestActive > ExpirationTime;
-
-    public static TimeSpan ExpirationTime { get; } = TimeSpan.FromMinutes(15);
+    internal bool IsUserOnline(int userId)
+    {
+        if (_users.TryGetValue(userId, out UserInfo? user))
+        {
+            return user.IsOnline;
+        }
+        return false;
+    }
 }

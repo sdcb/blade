@@ -2,6 +2,7 @@
 @using SpinBladeArena.Controllers
 @using SpinBladeArena.LogicCenter
 @inject GameManager GameManager
+@inject UserManager UserManager
 @model SpinBladeArena.Pages.IndexModel
 @{
 }
@@ -30,7 +31,7 @@
                 <tr>
                     <td>@room.Id</td>
                     <td>@room.Players.Count</td>
-                    <td>@UserController.GetUserNameById(room.CreateUserId)</td>
+                    <td>@UserManager.GetUser(room.CreateUserId)?.Name</td>
                     <td>@room.CreateTime</td>
                     <td><button type="button" onclick="join(@room.Id)">加入</button></td>
                 </tr>
