@@ -43,7 +43,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
         return loc;
     }
 
-    Thread _runningThread;
+    Thread? _runningThread;
 
     public void EnsureStart()
     {

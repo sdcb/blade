@@ -12,14 +12,7 @@ public class PlayerDto
     public required float[] Destination { get; init; }
     public required float Health { get; init; }
     public required float Size { get; init; }
-    public required PlayerBladesDto Blades { get; init; }
-}
-
-public class PlayerBladesDto
-{
-    public float Length { get; init; }
-    public float Damage { get; init; }
-    public required float[] Angles { get; init; }
+    public required Blade[] Blades { get; init; }
 }
 
 public class PickableBonusDto

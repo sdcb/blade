@@ -1,22 +1,11 @@
-﻿/// <reference path="defs.d.ts" />
-
-const lobbyId = parseInt(location.href.split('/').pop());
+﻿const lobbyId = parseInt(location.href.split('/').pop());
 
 class State {
-    /**
-     * @type {PlayerDto[]}
-     */
-    players = [];
+    players = Array<PlayerDto>();
 
-    /**
-     * @type {PickableBonusDto[]}
-     */
-    pickableBonus = [];
+    pickableBonus = Array<PickableBonusDto>();
 
-    /**
-     * @type {PlayerDto[]}
-     */
-    deadPlayers = [];
+    deadPlayers = Array<PlayerDto>();
 
     center = { x: 0, y: 0 };
     scale = 1;
@@ -33,17 +22,13 @@ class State {
         this.scale = getScale(this.me.size, window.innerWidth, window.innerHeight);
     }
 
-    /**
-     * @type {PlayerDto}
-    */
-    me = null;
+    me: PlayerDto = null;
 }
 const state = new State();
 
 // 确保在 DOM 加载完成后执行脚本
 document.addEventListener('DOMContentLoaded', async () => {
-    /** @type {HTMLCanvasElement} */
-    const canvas = document.getElementById('canvas');
+    const canvas = <HTMLCanvasElement>document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
     const resizeCanvas = () => {
@@ -85,12 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     render(ctx, canvas);
 });
 
-/**
- * 
- * @param {CanvasRenderingContext2D} ctx
- * @param {HTMLCanvasElement} canvas
- */
-function render(ctx, canvas) {
+function render(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
     // clear
     ctx.beginPath();
     ctx.rect(0, 0, canvas.width, canvas.height);
@@ -127,11 +107,7 @@ function render(ctx, canvas) {
     requestAnimationFrame(() => render(ctx, canvas));
 }
 
-/**
- * 
- * @param {CanvasRenderingContext2D} ctx
- */
-function drawUnits(ctx) {
+function drawUnits(ctx: CanvasRenderingContext2D) {
     const userId = getUserId();
 
     for (const bonus of state.pickableBonus) {
@@ -184,15 +160,15 @@ function drawUnits(ctx) {
 
         // player blades
         ctx.strokeStyle = 'red';
-        for (const degree of player.blades.angles) {
-            let angle = degree * Math.PI / 180;
+        for (const blade of player.blades) {
+            let angle = blade.angle * Math.PI / 180;
             const sin = Math.sin(angle);
             const cos = Math.cos(angle);
 
             ctx.beginPath();
             ctx.moveTo(player.position[0] + sin * player.size, player.position[1] + -cos * player.size);
             const len = player.blades.length + player.size;
-            ctx.lineWidth = player.blades.damage;
+            ctx.lineWidth = blade.damage;
             ctx.lineTo(player.position[0] + sin * len, player.position[1] + -cos * len);
             ctx.stroke();
         }
@@ -205,11 +181,7 @@ function drawUnits(ctx) {
     }
 }
 
-/**
- * 
- * @param {CanvasRenderingContext2D} ctx
- */
-function drawGrid(ctx) {
+function drawGrid(ctx: CanvasRenderingContext2D) {
     const size = 2000;
     // clear
     ctx.beginPath();
@@ -238,27 +210,16 @@ function drawGrid(ctx) {
     }
 }
 
-/**
- * @param {PlayerDto} player
- * @param {number} resolutionX 
- * @param {number} resolutionY 
- */
-function getScale(playerSize, resolutionX, resolutionY) {
-    // 角色大小
-    const characterWidth = playerSize;
-    const characterHeight = playerSize;
-
+function getScale(playerSize: number, resolutionX: number, resolutionY: number) {
     // 确定屏幕上角色占据的比例
-    const targetScreenWidthRatio = 1 / 20;
-    const targetScreenHeightRatio = 1 / 20;
+    const targetScreenRatio = 1 / 20;
 
-    let scaleX = (resolutionX * targetScreenWidthRatio) / characterWidth;
-    let scaleY = (resolutionY * targetScreenHeightRatio) / characterHeight;
+    const scaleX = (resolutionX * targetScreenRatio) / playerSize;
+    const scaleY = (resolutionY * targetScreenRatio) / playerSize;
 
     // 选择两者中更小的缩放比例来确保角色既不会太宽也不会太高
     let scale = Math.min(scaleX, scaleY);
     scale = Math.max(1, scale);
-
 
     return scale;
 }

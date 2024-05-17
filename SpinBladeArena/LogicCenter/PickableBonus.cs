@@ -15,7 +15,11 @@ public class PickableBonus(string name, Vector2 position)
 
     public static PickableBonus Health(Vector2 position, float healthAmount = 2) => new("生命", position)
     {
-        Apply = (Player player) => player.Health += healthAmount
+        Apply = (Player player) =>
+        {
+            player.Health += healthAmount;
+            player.Size = Math.Clamp(player.Size - 5, 20, 100);
+        }
     };
 
     public static PickableBonus Thin(Vector2 position) => new("减肥", position)
@@ -58,12 +62,12 @@ public class PickableBonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Blades.AddBlade(bladeCountAmount);
+            player.Weapon.AddBlade(bladeCountAmount);
             if (player.Score > ScoreThreshold)
             {
                 player.Size = Math.Clamp(player.Size + 10, 20, 200);
                 player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 10, 10, 100);
-                player.Blades.RotationDegreePerSecond = Math.Clamp(player.Blades.RotationDegreePerSecond - 2, 1, 10);
+                player.Weapon.RotationDegreePerSecond = Math.Clamp(player.Weapon.RotationDegreePerSecond - 2, 1, 10);
             }
         }
     };
@@ -72,45 +76,45 @@ public class PickableBonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Blades.AddBlade(bladeCountAmount);
+            player.Weapon.AddBlade(bladeCountAmount);
             if (player.Score > ScoreThreshold)
             {
                 player.Size = Math.Clamp(player.Size + 30, 20, 200);
                 player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
-                player.Blades.RotationDegreePerSecond = Math.Clamp(player.Blades.RotationDegreePerSecond - 5, 1, 10);
+                player.Weapon.RotationDegreePerSecond = Math.Clamp(player.Weapon.RotationDegreePerSecond - 5, 1, 10);
             }
         }
     };
 
     public static PickableBonus BladeLength(Vector2 position, float bladeLengthAmount = 5) => new("刀长+5", position)
     {
-        Apply = (Player player) => player.Blades.Length += bladeLengthAmount
+        Apply = (Player player) => player.Weapon.AddLength(bladeLengthAmount)
     };
 
     public static PickableBonus BladeLength20(Vector2 position, float bladeLengthAmount = 20) => new("刀长+20", position)
     {
         Apply = (Player player) =>
         {
-            player.Blades.Length += bladeLengthAmount;
+            player.Weapon.AddLength(bladeLengthAmount);
             if (player.Score > ScoreThreshold)
             {
                 player.Size = Math.Clamp(player.Size + 30, 20, 200);
                 player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
-                player.Blades.RotationDegreePerSecond = Math.Clamp(player.Blades.RotationDegreePerSecond - 5, 1, 10);
+                player.Weapon.RotationDegreePerSecond = Math.Clamp(player.Weapon.RotationDegreePerSecond - 5, 1, 10);
             }
         }
     };
 
     public static PickableBonus BladeDamage(Vector2 position, float bladeDamageAmount = 1) => new("刀伤", position)
     {
-        Apply = (Player player) => player.Blades.Damage += bladeDamageAmount
+        Apply = (Player player) => player.Weapon.AddDamage(bladeDamageAmount)
     };
 
     public static PickableBonus BladeSpeed(Vector2 position, float rotationDegreePerSecond = 5) => new("刀速+5", position)
     {
         Apply = (Player player) =>
         {
-            player.Blades.RotationDegreePerSecond += rotationDegreePerSecond;
+            player.Weapon.RotationDegreePerSecond += rotationDegreePerSecond;
             if (player.Score > ScoreThreshold)
             {
                 player.Size = Math.Clamp(player.Size + 10, 20, 200);
@@ -123,7 +127,7 @@ public class PickableBonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Blades.RotationDegreePerSecond += rotationDegreePerSecond;
+            player.Weapon.RotationDegreePerSecond += rotationDegreePerSecond;
             if (player.Score > ScoreThreshold)
             {
                 player.Size = Math.Clamp(player.Size + 30, 20, 200);

@@ -1,0 +1,7 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "lib": [ "ES2023", "DOM" ],
+    "target": "es2022"
+  }
+}

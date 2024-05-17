@@ -1,7 +1,4 @@
-﻿/**
-    @returns {Promise<string>} token
-*/
-async function ensureToken() {
+﻿async function ensureToken(): Promise<string> {
     if (!localStorage.password) {
         localStorage.password = randomPassword();
     }
