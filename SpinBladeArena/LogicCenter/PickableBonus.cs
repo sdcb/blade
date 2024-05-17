@@ -13,12 +13,25 @@ public class PickableBonus(string name, Vector2 position)
 
     public required PickableBonusApplier Apply { get; init; }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void NoBladeBonus(Player player)
+    {
+        if (player.Weapon.Count == 0)
+        {
+            player.Weapon.AddBlade(1);
+        }
+    }
+
     public static PickableBonus Health(Vector2 position, float healthAmount = 2) => new("生命", position)
     {
         Apply = (Player player) =>
         {
             player.Health += healthAmount;
-            player.Size = Math.Clamp(player.Size - 5, 20, 100);
+            if (player.IsLarge)
+            {
+                player.Size = Math.Clamp(player.Size - 5, 20, 100);
+            }
+            NoBladeBonus(player);
         }
     };
 
@@ -36,6 +49,7 @@ public class PickableBonus(string name, Vector2 position)
             {
                 player.Size = Math.Clamp(player.Size + 5, 20, 200);
             }
+            NoBladeBonus(player);
         }
     };
 
@@ -48,6 +62,7 @@ public class PickableBonus(string name, Vector2 position)
             {
                 player.Size = Math.Clamp(player.Size + 20, 20, 200);
             }
+            NoBladeBonus(player);
         }
     };
 
@@ -62,6 +77,7 @@ public class PickableBonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
+            NoBladeBonus(player);
             player.Weapon.AddBlade(bladeCountAmount);
             if (player.Score > ScoreThreshold)
             {
@@ -76,6 +92,7 @@ public class PickableBonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
+            NoBladeBonus(player);
             player.Weapon.AddBlade(bladeCountAmount);
             if (player.Score > ScoreThreshold)
             {
@@ -88,13 +105,18 @@ public class PickableBonus(string name, Vector2 position)
 
     public static PickableBonus BladeLength(Vector2 position, float bladeLengthAmount = 5) => new("刀长+5", position)
     {
-        Apply = (Player player) => player.Weapon.AddLength(bladeLengthAmount)
+        Apply = (Player player) =>
+        {
+            NoBladeBonus(player);
+            player.Weapon.AddLength(bladeLengthAmount);
+        }
     };
 
     public static PickableBonus BladeLength20(Vector2 position, float bladeLengthAmount = 20) => new("刀长+20", position)
     {
         Apply = (Player player) =>
         {
+            NoBladeBonus(player);
             player.Weapon.AddLength(bladeLengthAmount);
             if (player.Score > ScoreThreshold)
             {
@@ -107,7 +129,11 @@ public class PickableBonus(string name, Vector2 position)
 
     public static PickableBonus BladeDamage(Vector2 position, float bladeDamageAmount = 1) => new("刀伤", position)
     {
-        Apply = (Player player) => player.Weapon.AddDamage(bladeDamageAmount)
+        Apply = (Player player) =>
+        {
+            NoBladeBonus(player);
+            player.Weapon.AddDamage(bladeDamageAmount);
+        }
     };
 
     public static PickableBonus BladeSpeed(Vector2 position, float rotationDegreePerSecond = 5) => new("刀速+5", position)
@@ -120,6 +146,7 @@ public class PickableBonus(string name, Vector2 position)
                 player.Size = Math.Clamp(player.Size + 10, 20, 200);
                 player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 10, 10, 100);
             }
+            NoBladeBonus(player);
         }
     };
 
@@ -133,6 +160,7 @@ public class PickableBonus(string name, Vector2 position)
                 player.Size = Math.Clamp(player.Size + 30, 20, 200);
                 player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
             }
+            NoBladeBonus(player);
         }
     };
 

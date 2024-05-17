@@ -11,8 +11,16 @@ public class LobbyModel(GameManager gameManager) : PageModel
 
     public Lobby Lobby { get; set; } = null!;
 
-    public void OnGet()
+    public IActionResult OnGet()
     {
-        Lobby = gameManager.Lobbies[LobbyId];
+        if (gameManager.Lobbies.TryGetValue(LobbyId, out Lobby? value))
+        {
+            Lobby = value;
+            return Page();
+        }
+        else
+        {
+            return RedirectToPage("/Index");
+        }
     }
 }

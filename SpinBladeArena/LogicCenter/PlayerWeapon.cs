@@ -48,7 +48,7 @@ public class PlayerWeapon : List<Blade>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Blade[] ToDto() => ToArray();
+    public BladeDto[] ToDto() => this.Select(x => x.ToDto()).ToArray();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RotateBlades(float deltaTime)
@@ -69,4 +69,11 @@ public class Blade(float angle = 0, float damage = 1, float length = 40)
     public float Angle = angle;
     public float Damage = damage;
     public float Length = length;
+
+    public BladeDto ToDto() => new()
+    {
+        Angle = Angle,
+        Damage = Damage,
+        Length = Length,
+    };
 }

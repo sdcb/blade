@@ -16,6 +16,7 @@ public class Player(int userId, string userName, Vector2 position)
     public PlayerWeapon Weapon = PlayerWeapon.Default;
     public double DeadTime = 0;
     public int Score = 1;
+    public bool IsLarge => Size > 75;
 
     public bool Dead => Health <= 0;
 
@@ -105,6 +106,7 @@ public class Player(int userId, string userName, Vector2 position)
                             if (p1b.Damage == 0)
                             {
                                 p1.Weapon.DestroyBladeAt(p1i);
+                                --p1i;
                             }
                         }
                         else if (p1b.Damage < p2b.Damage)
@@ -114,12 +116,15 @@ public class Player(int userId, string userName, Vector2 position)
                             if (p2b.Damage == 0)
                             {
                                 p2.Weapon.DestroyBladeAt(p2i);
+                                --p2i;
                             }
                         }
                         else
                         {
                             p1.Weapon.DestroyBladeAt(p1i);
                             p2.Weapon.DestroyBladeAt(p2i);
+                            --p1i;
+                            --p2i;
                         }
                         // Reverse rotation direction
                         p1.Weapon.RotationDegreePerSecond = -p1.Weapon.RotationDegreePerSecond;

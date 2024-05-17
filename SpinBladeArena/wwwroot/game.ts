@@ -145,13 +145,13 @@ function drawUnits(ctx: CanvasRenderingContext2D) {
         ctx.fillStyle = player.userId === userId ? 'dodgerblue' : 'crimson';
         ctx.fill();
 
-        for (let hp = 0; hp < player.health; ++hp) {
-            ctx.beginPath();
-            ctx.arc(player.position[0], player.position[1], player.size + hp, 0, Math.PI * 2);
-            ctx.strokeStyle = 'white';
-            ctx.setLineDash([1, 0]);
-            ctx.stroke();
-        }
+        // player health
+        ctx.beginPath();
+        ctx.arc(player.position[0], player.position[1], player.size + 1, 0, Math.PI * 2);
+        ctx.strokeStyle = 'white';
+        ctx.setLineDash([1, 0]);
+        ctx.lineWidth = player.health;
+        ctx.stroke();
 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -167,7 +167,7 @@ function drawUnits(ctx: CanvasRenderingContext2D) {
 
             ctx.beginPath();
             ctx.moveTo(player.position[0] + sin * player.size, player.position[1] + -cos * player.size);
-            const len = player.blades.length + player.size;
+            const len = blade.length + player.size;
             ctx.lineWidth = blade.damage;
             ctx.lineTo(player.position[0] + sin * len, player.position[1] + -cos * len);
             ctx.stroke();
