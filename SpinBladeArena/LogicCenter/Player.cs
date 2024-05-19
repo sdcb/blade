@@ -18,6 +18,8 @@ public class Player(int userId, string userName, Vector2 position)
     public int Score = 1;
     public bool IsLarge => Size > 75;
 
+    public bool IsStrong => Weapon.Count > 5;
+
     public bool Dead => Health <= 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -63,8 +65,9 @@ public class Player(int userId, string userName, Vector2 position)
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void P1AttackP2(Player p1, Player p2)
         {
-            foreach (Blade blade in p1.Weapon)
+            for (int i = 0; i < p1.Weapon.Count; i++)
             {
+                Blade blade = p1.Weapon[i];
                 LineSegment ls = p1.GetBladeLineSegment(blade);
 
                 if (PrimitiveUtils.IsLineIntersectingCircle(ls, p2.Position, p2.Size))

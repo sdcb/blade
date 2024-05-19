@@ -49,12 +49,18 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
     {
         lock (this)
         {
-            if (_runningThread == null || _runningThread.ThreadState != System.Threading.ThreadState.Running)
+            if (!IsThreadRunning(_runningThread))
             {
                 _cancellationTokenSource = new();
                 _runningThread = new Thread(() => Run(_cancellationTokenSource.Token));
                 _runningThread.Start();
             }
+        }
+
+        static bool IsThreadRunning(Thread? thread)
+        {
+            if (thread == null) return false;
+            return thread.ThreadState == System.Threading.ThreadState.Running || thread.ThreadState == System.Threading.ThreadState.WaitSleepJoin;
         }
     }
 

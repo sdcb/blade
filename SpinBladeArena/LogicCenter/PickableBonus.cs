@@ -8,9 +8,6 @@ public class PickableBonus(string name, Vector2 position)
     public string Name { get; init; } = name;
     public Vector2 Position { get; init; } = position;
 
-    // 超过指定分数之后，进行惩罚
-    public const int ScoreThreshold = 10;
-
     public required PickableBonusApplier Apply { get; init; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -45,7 +42,7 @@ public class PickableBonus(string name, Vector2 position)
         Apply = (Player player) =>
         {
             player.MovementSpeedPerSecond = AbsAdd(player.MovementSpeedPerSecond, speedAmount);
-            if (player.Score > ScoreThreshold)
+            if (player.IsStrong)
             {
                 player.Size = Math.Clamp(player.Size + 5, 20, 200);
             }
@@ -58,7 +55,7 @@ public class PickableBonus(string name, Vector2 position)
         Apply = (Player player) =>
         {
             player.MovementSpeedPerSecond = AbsAdd(player.MovementSpeedPerSecond, speedAmount);
-            if (player.Score > ScoreThreshold)
+            if (player.IsStrong)
             {
                 player.Size = Math.Clamp(player.Size + 20, 20, 200);
             }
@@ -79,7 +76,7 @@ public class PickableBonus(string name, Vector2 position)
         {
             NoBladeBonus(player);
             player.Weapon.AddBlade(bladeCountAmount);
-            if (player.Score > ScoreThreshold)
+            if (player.IsStrong)
             {
                 player.Size = Math.Clamp(player.Size + 10, 20, 200);
                 player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 10, 10, 100);
@@ -94,7 +91,7 @@ public class PickableBonus(string name, Vector2 position)
         {
             NoBladeBonus(player);
             player.Weapon.AddBlade(bladeCountAmount);
-            if (player.Score > ScoreThreshold)
+            if (player.IsStrong)
             {
                 player.Size = Math.Clamp(player.Size + 30, 20, 200);
                 player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
@@ -118,7 +115,7 @@ public class PickableBonus(string name, Vector2 position)
         {
             NoBladeBonus(player);
             player.Weapon.AddLength(bladeLengthAmount);
-            if (player.Score > ScoreThreshold)
+            if (player.IsStrong)
             {
                 player.Size = Math.Clamp(player.Size + 30, 20, 200);
                 player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
@@ -141,7 +138,7 @@ public class PickableBonus(string name, Vector2 position)
         Apply = (Player player) =>
         {
             player.Weapon.RotationDegreePerSecond += rotationDegreePerSecond;
-            if (player.Score > ScoreThreshold)
+            if (player.IsStrong)
             {
                 player.Size = Math.Clamp(player.Size + 10, 20, 200);
                 player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 10, 10, 100);
@@ -155,7 +152,7 @@ public class PickableBonus(string name, Vector2 position)
         Apply = (Player player) =>
         {
             player.Weapon.RotationDegreePerSecond += rotationDegreePerSecond;
-            if (player.Score > ScoreThreshold)
+            if (player.IsStrong)
             {
                 player.Size = Math.Clamp(player.Size + 30, 20, 200);
                 player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
