@@ -18,7 +18,7 @@ public class Player(int userId, string userName, Vector2 position)
     public int Score = 1;
     public bool IsLarge => Size > 75;
 
-    public bool IsStrong => Weapon.Count > 5;
+    public bool IsStrong => Weapon.Count > 8;
 
     public bool Dead => Health <= 0;
 
