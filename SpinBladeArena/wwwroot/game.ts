@@ -51,9 +51,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         state.cursorPosition = { x: state.center.x + offsetX / state.scale, y: state.center.y + offsetY / state.scale };
     });
 
-    const connection = new signalR.HubConnectionBuilder().withUrl("/gameHub", {
-        accessTokenFactory: ensureToken
-    }).build();
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/gameHub", {
+            accessTokenFactory: ensureToken
+        })
+        .withHubProtocol(new signalR.protocols.msgpack.MessagePackHubProtocol())
+        .build();
     connection.on('update', (players, pickableBonus, deadPlayers) => {
         state.players = players;
         state.pickableBonus = pickableBonus;

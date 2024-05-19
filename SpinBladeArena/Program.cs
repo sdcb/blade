@@ -57,7 +57,8 @@ namespace SpinBladeArena
                 IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(authKey)),
             };
             services.AddSingleton(tvp);
-            services.AddSignalR();
+            services.AddSignalR()
+                .AddMessagePackProtocol();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
