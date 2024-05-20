@@ -101,7 +101,11 @@ public class Player(int userId, string userName, Vector2 position)
                         if (p1b.Damage > p2b.Damage)
                         {
                             p2.Weapon.DestroyBladeAt(p2i);
-                            p1b.Damage -= 1;
+                            // 平衡性设计：如果刀比较少，对刀时不减少伤害
+                            if (p1.Weapon.Count > 2)
+                            {
+                                p1b.Damage -= 1;
+                            }
                             if (p1b.Damage == 0)
                             {
                                 p1.Weapon.DestroyBladeAt(p1i--);
@@ -110,7 +114,11 @@ public class Player(int userId, string userName, Vector2 position)
                         else if (p1b.Damage < p2b.Damage)
                         {
                             p1.Weapon.DestroyBladeAt(p1i);
-                            p2b.Damage -= 1;
+                            // 平衡性设计：如果刀比较少，对刀时不减少伤害
+                            if (p2.Weapon.Count > 2)
+                            {
+                                p2b.Damage -= 1;
+                            }
                             if (p2b.Damage == 0)
                             {
                                 p2.Weapon.DestroyBladeAt(p2i--);

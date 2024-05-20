@@ -93,6 +93,8 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
 
     public void Run(CancellationToken cancellationToken)
     {
+        EnsureAIPlayers();
+
         const int DeadRespawnTimeInSeconds = 3;
         float bonusSpawnCooldown = 1;
         float maxBonusCount = 25;
@@ -244,6 +246,11 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
 
             PerformanceManager.Add(stat.ToPerformanceData(iterationIndex));
         }
+    }
+
+    private void EnsureAIPlayers()
+    {
+
     }
 
     private void DispatchMessage()
