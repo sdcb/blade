@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using SpinBladeArena.Hubs;
 using SpinBladeArena.LogicCenter;
 using SpinBladeArena.Performance;
+using SpinBladeArena.Users;
 
 namespace SpinBladeArena
 {

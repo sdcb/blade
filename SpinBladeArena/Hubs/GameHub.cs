@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using SpinBladeArena.LogicCenter;
+using SpinBladeArena.Users;
 
 namespace SpinBladeArena.Hubs;
 

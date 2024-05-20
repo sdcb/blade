@@ -1,7 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace SpinBladeArena.LogicCenter;
+namespace SpinBladeArena.Users;
 
 public class CurrentUser(IHttpContextAccessor httpContextAccessor)
 {

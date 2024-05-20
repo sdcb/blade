@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SpinBladeArena.LogicCenter;
+using SpinBladeArena.Users;
 
 namespace SpinBladeArena.Controllers;
 

@@ -1,4 +1,4 @@
-﻿namespace SpinBladeArena.LogicCenter;
+﻿namespace SpinBladeArena.Users;
 
 public class UserInfo(int id, string name, string password, bool isOnline, DateTime latestActive)
 {

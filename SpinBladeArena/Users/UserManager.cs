@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace SpinBladeArena.LogicCenter;
+namespace SpinBladeArena.Users;
 
 public class UserManager
 {

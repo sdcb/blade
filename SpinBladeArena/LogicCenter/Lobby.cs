@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using SpinBladeArena.Hubs;
 using SpinBladeArena.Performance;
+using SpinBladeArena.Users;
 using System.Diagnostics;
 using System.Numerics;
 
