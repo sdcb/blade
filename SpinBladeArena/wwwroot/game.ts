@@ -115,7 +115,7 @@ function drawUnits(ctx: CanvasRenderingContext2D) {
 
     for (const bonus of state.pickableBonus) {
         ctx.beginPath();
-        ctx.arc(bonus.position[0], bonus.position[1], 25, 0, Math.PI * 2);
+        ctx.arc(bonus.position[0], bonus.position[1], 20, 0, Math.PI * 2);
         ctx.fillStyle = 'green';
         ctx.fill();
         ctx.strokeStyle = 'white';
