@@ -108,8 +108,7 @@ public class Player(int userId, string userName, Vector2 position)
                             p1b.Damage -= 1;
                             if (p1b.Damage == 0)
                             {
-                                p1.Weapon.DestroyBladeAt(p1i);
-                                --p1i;
+                                p1.Weapon.DestroyBladeAt(p1i--);
                             }
                         }
                         else if (p1b.Damage < p2b.Damage)
@@ -118,16 +117,13 @@ public class Player(int userId, string userName, Vector2 position)
                             p2b.Damage -= 1;
                             if (p2b.Damage == 0)
                             {
-                                p2.Weapon.DestroyBladeAt(p2i);
-                                --p2i;
+                                p2.Weapon.DestroyBladeAt(p2i--);
                             }
                         }
                         else
                         {
-                            p1.Weapon.DestroyBladeAt(p1i);
-                            p2.Weapon.DestroyBladeAt(p2i);
-                            --p1i;
-                            --p2i;
+                            p1.Weapon.DestroyBladeAt(p1i--);
+                            p2.Weapon.DestroyBladeAt(p2i--);
                         }
                         // Reverse rotation direction
                         p1.Weapon.RotationDegreePerSecond = -p1.Weapon.RotationDegreePerSecond;
