@@ -1,6 +1,4 @@
-﻿using SpinBladeArena.LogicCenter;
-
-namespace SpinBladeArena.Performance;
+﻿namespace SpinBladeArena.Performance;
 
 public class PerformanceManager
 {

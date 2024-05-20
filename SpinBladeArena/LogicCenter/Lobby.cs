@@ -49,6 +49,25 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
         return loc;
     }
 
+    private Vector2 RandomPositionWithin(Player player)
+    {
+        Vector2 loc;
+        do
+        {
+            float distanceToCenter = Random.Shared.NextSingle() * player.Size * 2f;
+            float angle = Random.Shared.NextSingle() * MathF.PI * 2;
+            loc = player.Position + new Vector2(MathF.Sin(angle), MathF.Cos(angle)) * distanceToCenter;
+        } while (InBounds(loc) && Players.Where(x => x != player).Any(x => Vector2.Distance(x.Position, loc) < x.Size));
+        return loc;
+    }
+
+    private bool InBounds(Vector2 position)
+    {
+        // -MaxSize.X / 2 <= x <= MaxSize.X / 2
+        // -MaxSize.Y / 2 <= y <= MaxSize.Y / 2
+        return position.X >= -MaxSize.X / 2 && position.X <= MaxSize.X / 2 && position.Y >= -MaxSize.Y / 2 && position.Y <= MaxSize.Y / 2;
+    }
+
     Thread? _runningThread;
 
     public void EnsureStart()
@@ -139,13 +158,18 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
             }
 
             // handle attack
+            List<KillingInfo> killingInfoConfirmedDeads = [];
             for (int i = 0; i < Players.Count - 1; ++i)
             {
                 Player p1 = Players[i];
                 for (int j = i + 1; j < Players.Count; ++j)
                 {
                     Player p2 = Players[j];
-                    Player.AttackEachOther(p1, p2);
+                    KillingInfo killingInfo = Player.AttackEachOther(p1, p2);
+                    if (killingInfo.AnyDead)
+                    {
+                        killingInfoConfirmedDeads.Add(killingInfo);
+                    }
                 }
             }
             stat.RecordAttack();
@@ -175,6 +199,24 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
                     PickableBonuses.Add(PickableBonus.CreateRandom(RandomPosition()));
                 }
                 bonusSpawnTimer -= bonusSpawnCooldown;
+            }
+            // handle bonus spawn from dead players
+            foreach (KillingInfo ki in killingInfoConfirmedDeads)
+            {
+                if (ki.Player1Dead)
+                {
+                    for (int i = 0; i < ki.Player1.Score / 2; ++i)
+                    {
+                        PickableBonuses.Add(PickableBonus.CreateRandom(RandomPositionWithin(ki.Player1)));
+                    }
+                }
+                if (ki.Player2Dead)
+                {
+                    for (int i = 0; i < ki.Player2.Score / 2; ++i)
+                    {
+                        PickableBonuses.Add(PickableBonus.CreateRandom(RandomPositionWithin(ki.Player2)));
+                    }
+                }
             }
             stat.RecordBonusSpawn();
 

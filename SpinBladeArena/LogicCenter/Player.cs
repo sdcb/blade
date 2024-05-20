@@ -54,16 +54,18 @@ public class Player(int userId, string userName, Vector2 position)
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void AttackEachOther(Player p1, Player p2)
+    public static KillingInfo AttackEachOther(Player p1, Player p2)
     {
-        if (p1.Dead || p2.Dead) return;
+        if (p1.Dead || p2.Dead) return new KillingInfo(p1, p2, false, false);
 
-        P1AttackP2(p1, p2);
-        P1AttackP2(p2, p1);
+        bool player2Dead = P1AttackP2(p1, p2);
+        bool player1Dead = P1AttackP2(p2, p1);
         BladeAttack(p1, p2);
 
+        return new(p1, p2, player1Dead, player2Dead);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void P1AttackP2(Player p1, Player p2)
+        static bool P1AttackP2(Player p1, Player p2)
         {
             for (int i = 0; i < p1.Weapon.Count; i++)
             {
@@ -73,17 +75,11 @@ public class Player(int userId, string userName, Vector2 position)
                 if (PrimitiveUtils.IsLineIntersectingCircle(ls, p2.Position, p2.Size))
                 {
                     p2.Health -= blade.Damage;
-                    if (p2.Health <= 0)
-                    {
-                        p1.Score += p2.Score / 2;
-                        for (int n = 0; n < p2.Score / 2; ++n)
-                        {
-                            PickableBonus.Random(Vector2.Zero).Apply(p1);
-                        }
-                    }
-                    return;
+                    return p2.Health <= 0;
                 }
             }
+
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

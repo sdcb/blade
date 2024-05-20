@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace SpinBladeArena.LogicCenter;
+namespace SpinBladeArena.Performance;
 
 public class CircularList<T>(int capacity) : IList<T>
 {
