@@ -1,12 +1,17 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using SpinBladeArena.Hubs;
+using SpinBladeArena.Performance;
 using System.Diagnostics;
 using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter;
 
-public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<GameHub, IGameHubClient> Hub, UserManager UserManager)
+public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvider ServiceProvider)
 {
+    private readonly IHubContext<GameHub, IGameHubClient> Hub = ServiceProvider.GetRequiredService<IHubContext<GameHub, IGameHubClient>>();
+    private readonly UserManager UserManager = ServiceProvider.GetRequiredService<UserManager>();
+    private readonly PerformanceManager PerformanceManager = ServiceProvider.GetRequiredService<PerformanceManager>();
+
     public Vector2 MaxSize = new(2000, 2000);
     public List<Player> Players = [];
     public HashSet<PickableBonus> PickableBonuses = [];
@@ -73,7 +78,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
         float maxBonusCount = 25;
         float bonusSpawnTimer = 0;
 
-        Stopwatch sw = Stopwatch.StartNew();
+        Stopwatch allTimeStopwatch = Stopwatch.StartNew();
         float oldTime = 0;
         float deltaTime = 0;
         while (!cancellationToken.IsCancellationRequested)
@@ -83,9 +88,11 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                 return;
             }
 
+            PerformanceCounter stat = PerformanceCounter.Start();
             Thread.Sleep(Math.Max(1, (int)(30 - deltaTime)));
-            deltaTime = MathF.Min((float)sw.Elapsed.TotalSeconds - oldTime, 0.25f);
-            oldTime = (float)sw.Elapsed.TotalSeconds;
+            deltaTime = MathF.Min((float)allTimeStopwatch.Elapsed.TotalSeconds - oldTime, 0.25f);
+            oldTime = (float)allTimeStopwatch.Elapsed.TotalSeconds;
+            stat.RecordSleep();
 
             // handle add player requests
             {
@@ -97,10 +104,14 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                     Players.Add(newPlayer);
                 }
                 _addPlayerRequests.Clear();
+                stat.RecordAddPlayerRequests();
             }
 
             // handle move
-            foreach (Player player in Players) player.Move(deltaTime);
+            {
+                foreach (Player player in Players) player.Move(deltaTime);
+                stat.RecordMove();
+            }
 
             // handle bonus
             {
@@ -123,6 +134,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                 {
                     PickableBonuses.Remove(bonus);
                 }
+                stat.RecordBonus();
             }
 
             // handle attack
@@ -135,6 +147,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                     Player.AttackEachOther(p1, p2);
                 }
             }
+            stat.RecordAttack();
 
             // handle dead
             for (int i = 0; i < Players.Count; ++i)
@@ -142,7 +155,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                 Player player = Players[i];
                 if (player.Dead)
                 {
-                    player.DeadTime = sw.Elapsed.TotalSeconds;
+                    player.DeadTime = allTimeStopwatch.Elapsed.TotalSeconds;
                     // insert into dead players
                     DeadPlayers.Add(player);
                     // remove from players
@@ -150,6 +163,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                     --i;
                 }
             }
+            stat.RecordDead();
 
             // handle bonus spawn cooldown
             bonusSpawnTimer += deltaTime;
@@ -161,12 +175,13 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                 }
                 bonusSpawnTimer -= bonusSpawnCooldown;
             }
+            stat.RecordBonusSpawn();
 
             // handle player respawn
             for (int i = 0; i < DeadPlayers.Count; ++i)
             {
                 Player player = DeadPlayers[i];
-                if (sw.Elapsed.TotalSeconds - player.DeadTime > DeadRespawnTimeInSeconds)
+                if (allTimeStopwatch.Elapsed.TotalSeconds - player.DeadTime > DeadRespawnTimeInSeconds)
                 {
                     if (UserManager.IsUserOnline(player.UserId))
                     {
@@ -179,8 +194,12 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IHubContext<G
                     --i;
                 }
             }
+            stat.RecordPlayerSpawn();
 
             DispatchMessage();
+            stat.RecordDispatchMessage();
+
+            PerformanceManager.Add(stat.ToPerformanceData());
         }
     }
 

@@ -1,0 +1,63 @@
+﻿@page
+@using Microsoft.AspNetCore.Html
+@using SpinBladeArena.Performance
+@inject PerformanceManager PerformanceManager
+@model SpinBladeArena.Pages.PerfModel
+@{
+    ViewData["Title"] = "性能";
+    PerformanceData latest = PerformanceManager.Latest;
+    PerformanceData average = PerformanceManager.Average;
+
+    static string FormatTime(TimeSpan time)
+    {
+        return time.TotalMilliseconds.ToString("0.00");
+    }
+
+    IHtmlContent RenderPerformanceRow(string label, PerformanceData data)
+    {
+        TagBuilder tr = new TagBuilder("tr");
+
+        void AddTd(string content)
+        {
+            var td = new TagBuilder("td");
+            td.InnerHtml.Append(content);
+            tr.InnerHtml.AppendHtml(td);
+        }
+
+        AddTd(label);
+        AddTd(FormatTime(data.Sleep));
+        AddTd(FormatTime(data.AllExceptSleep));
+        AddTd(FormatTime(data.AddPlayerRequest));
+        AddTd(FormatTime(data.Move));
+        AddTd(FormatTime(data.Bonus));
+        AddTd(FormatTime(data.Attack));
+        AddTd(FormatTime(data.Dead));
+        AddTd(FormatTime(data.BonusSpawn));
+        AddTd(FormatTime(data.PlayerSpawn));
+        AddTd(FormatTime(data.DispatchMessage));
+
+        return tr;
+    }
+}
+
+<table>
+    <thead>
+        <tr>
+            <th>项目</th>
+            <th>Sleep</th>
+            <th>AllExceptSleep</th>
+            <th>AddPlayerRequest</th>
+            <th>Move</th>
+            <th>Bonus</th>
+            <th>Attack</th>
+            <th>Dead</th>
+            <th>BonusSpawn</th>
+            <th>PlayerSpawn</th>
+            <th>DispatchMessage</th>
+        </tr>
+    </thead>
+    <tbody>
+        @RenderPerformanceRow("最新", latest)
+        @RenderPerformanceRow("平均", average)
+    </tbody>
+</table>

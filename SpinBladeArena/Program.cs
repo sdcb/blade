@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SpinBladeArena.Hubs;
 using SpinBladeArena.LogicCenter;
+using SpinBladeArena.Performance;
 
 namespace SpinBladeArena
 {
@@ -45,6 +46,7 @@ namespace SpinBladeArena
             services.AddRazorPages();
             services.AddSingleton<GameManager>();
             services.AddSingleton<UserManager>();
+            services.AddSingleton<PerformanceManager>();
             TokenValidationParameters tvp = new()
             {
                 ValidateIssuer = true,
