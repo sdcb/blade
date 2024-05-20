@@ -1,6 +1,8 @@
 ﻿namespace SpinBladeArena.Performance;
 
 public record PerformanceData(
+    long Id, 
+    DateTime CreatedAt,
     TimeSpan Sleep,
     TimeSpan AddPlayerRequest,
     TimeSpan Move,
@@ -12,9 +14,14 @@ public record PerformanceData(
     TimeSpan DispatchMessage
 )
 {
-    public TimeSpan AllExceptSleep => AddPlayerRequest + Move + Bonus + Attack + Dead + BonusSpawn + PlayerSpawn + DispatchMessage;
+    public TimeSpan AllExceptSleep { get; } = AddPlayerRequest + Move + Bonus + Attack + Dead + BonusSpawn + PlayerSpawn + DispatchMessage;
+    public TimeSpan All { get; } = Sleep + AddPlayerRequest + Move + Bonus + Attack + Dead + BonusSpawn + PlayerSpawn + DispatchMessage;
+
+    public double FPS => 1000 / All.TotalMilliseconds;
 
     public static PerformanceData Zero { get; } = new(
+        0, 
+        DateTime.Now,
         TimeSpan.Zero,
         TimeSpan.Zero,
         TimeSpan.Zero,
@@ -26,6 +33,8 @@ public record PerformanceData(
         TimeSpan.Zero);
 
     public static PerformanceData operator +(PerformanceData a, PerformanceData b) => new(
+        0, 
+        DateTime.Now,
         a.Sleep + b.Sleep,
         a.AddPlayerRequest + b.AddPlayerRequest,
         a.Move + b.Move,
@@ -37,6 +46,8 @@ public record PerformanceData(
         a.DispatchMessage + b.DispatchMessage);
 
     public static PerformanceData operator /(PerformanceData a, int b) => new(
+        0, 
+        DateTime.Now,
         TimeSpan.FromTicks(a.Sleep.Ticks / b),
         TimeSpan.FromTicks(a.AddPlayerRequest.Ticks / b),
         TimeSpan.FromTicks(a.Move.Ticks / b),

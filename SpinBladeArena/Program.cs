@@ -43,7 +43,11 @@ namespace SpinBladeArena
             // Add services to the container.
             services.AddHttpContextAccessor();
             services.AddScoped<CurrentUser>();
-            services.AddRazorPages();
+            services.AddRazorPages()
+#if DEBUG
+                .AddRazorRuntimeCompilation()
+#endif
+                ;
             services.AddSingleton<GameManager>();
             services.AddSingleton<UserManager>();
             services.AddSingleton<PerformanceManager>();

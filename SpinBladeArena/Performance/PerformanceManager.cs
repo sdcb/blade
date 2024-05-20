@@ -4,30 +4,30 @@ namespace SpinBladeArena.Performance;
 
 public class PerformanceManager
 {
-    private readonly CircularList<PerformanceData> _performanceCounters = new(120);
+    public CircularList<PerformanceData> PerformanceCounters { get; } = new(120);
 
-    public PerformanceData Latest => _performanceCounters.Count > 0 ? _performanceCounters[^1] : PerformanceData.Zero;
+    public PerformanceData Latest => PerformanceCounters.Count > 0 ? PerformanceCounters[^1] : PerformanceData.Zero;
 
     public PerformanceData Average
     {
         get
         {
-            if (_performanceCounters.Count == 0)
+            if (PerformanceCounters.Count == 0)
             {
                 return PerformanceData.Zero;
             }
 
             PerformanceData sum = PerformanceData.Zero;
-            foreach (PerformanceData data in _performanceCounters)
+            foreach (PerformanceData data in PerformanceCounters)
             {
                 sum += data;
             }
-            return sum / _performanceCounters.Count;
+            return sum / PerformanceCounters.Count;
         }
     }
     
     public void Add(PerformanceData performanceData)
     {
-        _performanceCounters.Add(performanceData);
+        PerformanceCounters.Add(performanceData);
     }
 }

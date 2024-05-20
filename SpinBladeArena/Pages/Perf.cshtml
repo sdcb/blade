@@ -10,6 +10,7 @@
 
     static string FormatTime(TimeSpan time)
     {
+
         return time.TotalMilliseconds.ToString("0.00");
     }
 
@@ -25,8 +26,9 @@
         }
 
         AddTd(label);
+        AddTd(data.Id.ToString());
+        AddTd(data.CreatedAt.ToString("HH:mm:ss.ff"));
         AddTd(FormatTime(data.Sleep));
-        AddTd(FormatTime(data.AllExceptSleep));
         AddTd(FormatTime(data.AddPlayerRequest));
         AddTd(FormatTime(data.Move));
         AddTd(FormatTime(data.Bonus));
@@ -35,29 +37,39 @@
         AddTd(FormatTime(data.BonusSpawn));
         AddTd(FormatTime(data.PlayerSpawn));
         AddTd(FormatTime(data.DispatchMessage));
+        AddTd(FormatTime(data.AllExceptSleep));
+        AddTd(data.FPS.ToString("0.00"));
 
         return tr;
     }
 }
 
-<table>
+<table border="1" style="border-collapse: collapse; border-color: red; text-align: center">
     <thead>
         <tr>
             <th>项目</th>
-            <th>Sleep</th>
-            <th>AllExceptSleep</th>
-            <th>AddPlayerRequest</th>
-            <th>Move</th>
-            <th>Bonus</th>
-            <th>Attack</th>
-            <th>Dead</th>
-            <th>BonusSpawn</th>
-            <th>PlayerSpawn</th>
-            <th>DispatchMessage</th>
+            <th>序号</th>
+            <th>创建于</th>
+            <th>暂停用时</th>
+            <th>增加玩家</th>
+            <th>移动&nbsp;&nbsp;&nbsp;&nbsp;</th>
+            <th>奖励&nbsp;&nbsp;&nbsp;&nbsp;</th>
+            <th>攻击&nbsp;&nbsp;&nbsp;&nbsp;</th>
+            <th>死亡&nbsp;&nbsp;&nbsp;&nbsp;</th>
+            <th>生成奖励</th>
+            <th>玩家重生</th>
+            <th>分发消息</th>
+            <th>活动用时</th>
+            <th>FPS</th>
         </tr>
     </thead>
     <tbody>
-        @RenderPerformanceRow("最新", latest)
         @RenderPerformanceRow("平均", average)
+
+        @for (int i = PerformanceManager.PerformanceCounters.Count - 1; i >= 0; i--)
+        {
+            var data = PerformanceManager.PerformanceCounters[i];
+            @RenderPerformanceRow("", data)
+        }
     </tbody>
 </table>

@@ -78,9 +78,11 @@ public class PerformanceCounter(Stopwatch Stopwatch)
         Stopwatch.Restart();
     }
 
-    public PerformanceData ToPerformanceData()
+    public PerformanceData ToPerformanceData(long iterationIndex)
     {
         return new PerformanceData(
+            iterationIndex,
+            DateTime.Now,
             Sleep,
             AddPlayerRequest,
             Move,

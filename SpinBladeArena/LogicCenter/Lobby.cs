@@ -81,7 +81,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
         Stopwatch allTimeStopwatch = Stopwatch.StartNew();
         float oldTime = 0;
         float deltaTime = 0;
-        while (!cancellationToken.IsCancellationRequested)
+        for (long iterationIndex = 0; !cancellationToken.IsCancellationRequested; ++iterationIndex)
         {
             if (DateTime.Now - LastUpdateTime > TimeSpan.FromSeconds(180))
             {
@@ -89,7 +89,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
             }
 
             PerformanceCounter stat = PerformanceCounter.Start();
-            Thread.Sleep(Math.Max(1, (int)(30 - deltaTime)));
+            Thread.Sleep(Math.Max(1, (int)(15 - deltaTime)));
             deltaTime = MathF.Min((float)allTimeStopwatch.Elapsed.TotalSeconds - oldTime, 0.25f);
             oldTime = (float)allTimeStopwatch.Elapsed.TotalSeconds;
             stat.RecordSleep();
@@ -199,7 +199,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
             DispatchMessage();
             stat.RecordDispatchMessage();
 
-            PerformanceManager.Add(stat.ToPerformanceData());
+            PerformanceManager.Add(stat.ToPerformanceData(iterationIndex));
         }
     }
 
