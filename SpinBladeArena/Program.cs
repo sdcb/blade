@@ -34,6 +34,12 @@ namespace SpinBladeArena
             app.MapHub<GameHub>("/gamehub");
             app.MapRazorPages();
 
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                Native.timeBeginPeriod(1);
+                app.Lifetime.ApplicationStopping.Register(() => Native.timeEndPeriod(1));
+            }
+
             app.Run();
         }
 
@@ -52,6 +58,7 @@ namespace SpinBladeArena
             services.AddSingleton<GameManager>();
             services.AddSingleton<UserManager>();
             services.AddSingleton<PerformanceManager>();
+            services.AddKeyedSingleton(typeof(int), "serverFPS", int.Parse(configuration["serverFPS"] ?? "45"));
             TokenValidationParameters tvp = new()
             {
                 ValidateIssuer = true,

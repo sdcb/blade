@@ -13,6 +13,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
     private readonly UserManager UserManager = ServiceProvider.GetRequiredService<UserManager>();
     private readonly PerformanceManager PerformanceManager = ServiceProvider.GetRequiredService<PerformanceManager>();
 
+    public readonly int ServerFPS = ServiceProvider.GetRequiredKeyedService<int>("serverFPS");
     public Vector2 MaxSize = new(2000, 2000);
     public List<Player> Players = [];
     public HashSet<PickableBonus> PickableBonuses = [];
@@ -101,8 +102,6 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
         float bonusSpawnTimer = 0;
 
         Stopwatch allTimeStopwatch = Stopwatch.StartNew();
-        float oldTime = 0;
-        float deltaTime = 0;
         for (long iterationIndex = 0; !cancellationToken.IsCancellationRequested; ++iterationIndex)
         {
             if (DateTime.Now - LastUpdateTime > TimeSpan.FromSeconds(180))
@@ -111,10 +110,9 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
             }
 
             PerformanceCounter stat = PerformanceCounter.Start();
-            Thread.Sleep(Math.Max(1, (int)(15 - deltaTime)));
-            deltaTime = MathF.Min((float)allTimeStopwatch.Elapsed.TotalSeconds - oldTime, 0.25f);
-            oldTime = (float)allTimeStopwatch.Elapsed.TotalSeconds;
+            Thread.Sleep(Math.Max(1, (int)(1000.0 / ServerFPS - PerformanceManager.Latest.AllExceptSleep.TotalMilliseconds)));
             stat.RecordSleep();
+            float dt = MathF.Min((float)stat.Sleep.TotalSeconds, 0.25f);
 
             // handle add player requests
             {
@@ -131,7 +129,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
 
             // handle move
             {
-                foreach (Player player in Players) player.Move(deltaTime);
+                foreach (Player player in Players) player.Move(dt);
                 stat.RecordMove();
             }
 
@@ -193,7 +191,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
             stat.RecordDead();
 
             // handle bonus spawn cooldown
-            bonusSpawnTimer += deltaTime;
+            bonusSpawnTimer += dt;
             while (bonusSpawnTimer > bonusSpawnCooldown)
             {
                 if (PickableBonuses.Count < maxBonusCount)
