@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Drawing;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using SpinBladeArena.Primitives;
 
@@ -22,10 +23,14 @@ public class Player(int userId, string userName, Vector2 position)
 
     public bool Dead => Health <= 0;
 
+    public Vector2 Direction => Vector2.Normalize(Destination - Position);
+
+    public virtual AddPlayerRequest CreateRespawnRequest() => new(UserId, UserName);
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public LineSegment GetBladeLineSegment(Blade blade)
     {
-        float degree = blade.Angle;
+        float degree = blade.RotationDegree;
         float angle = MathF.PI * degree / 180;
         Vector2 bladeStart = Position + new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * Size;
         Vector2 bladeEnd = Position + new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * (Size + blade.Length);
@@ -33,7 +38,7 @@ public class Player(int userId, string userName, Vector2 position)
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Move(float deltaTime)
+    public void Move(float deltaTime, RectangleF bound)
     {
         if (Dead) return;
 
@@ -46,9 +51,12 @@ public class Player(int userId, string userName, Vector2 position)
         }
         else
         {
-            Vector2 Direction = Vector2.Normalize(Destination - Position);
-            Position += Direction * MovementSpeedPerSecond * deltaTime;
+            Position += Direction * maxDistance;
         }
+
+        Position = new(
+            Math.Clamp(Position.X, bound.Left, bound.Right),
+            Math.Clamp(Position.Y, bound.Top, bound.Bottom));
 
         Weapon.RotateBlades(deltaTime);
     }
@@ -139,6 +147,22 @@ public class Player(int userId, string userName, Vector2 position)
         }
     }
 
+    public bool IsDangerousToPlayer(Player player, float reactionTime)
+    {
+        EstimatedPlayerState estimatedPlayerState = EstimateMove(reactionTime);
+        foreach (Blade blade in estimatedPlayerState.Blades)
+        {
+            LineSegment ls = GetBladeLineSegment(blade);
+
+            if (PrimitiveUtils.IsLineIntersectingCircle(ls, player.Position, player.Size))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public PlayerDto ToDto()
     {
         return new PlayerDto
@@ -153,4 +177,25 @@ public class Player(int userId, string userName, Vector2 position)
             Score = Score
         };
     }
+
+    public EstimatedPlayerState EstimateMove(float deltaTime)
+    {
+        float maxDistance = MovementSpeedPerSecond * deltaTime;
+        float distance = Vector2.Distance(Position, Destination);
+
+        Vector2 position;
+        if (distance < maxDistance)
+        {
+            position = Destination;
+        }
+        else
+        {
+            position = Position + Direction * maxDistance;
+        }
+
+        Blade[] blades = Weapon.EstimateRotateBlades(deltaTime);
+        return new EstimatedPlayerState(position, blades);
+    }
 }
+
+public record EstimatedPlayerState(Vector2 Position, Blade[] Blades);

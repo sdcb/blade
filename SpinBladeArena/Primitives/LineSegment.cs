@@ -2,4 +2,4 @@
 
 namespace SpinBladeArena.Primitives;
 
-public record LineSegment(Vector2 Start, Vector2 End);
+public record struct LineSegment(Vector2 Start, Vector2 End);

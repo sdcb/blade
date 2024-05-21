@@ -30,6 +30,7 @@
         AddTd(data.CreatedAt.ToString("HH:mm:ss.ff"));
         AddTd(FormatTime(data.Sleep));
         AddTd(FormatTime(data.AddPlayerRequest));
+        AddTd(FormatTime(data.AIThink));
         AddTd(FormatTime(data.Move));
         AddTd(FormatTime(data.Bonus));
         AddTd(FormatTime(data.Attack));
@@ -52,6 +53,7 @@
             <th>创建于</th>
             <th>暂停用时</th>
             <th>增加玩家</th>
+            <th>AI思考</th>
             <th>移动&nbsp;&nbsp;&nbsp;&nbsp;</th>
             <th>奖励&nbsp;&nbsp;&nbsp;&nbsp;</th>
             <th>攻击&nbsp;&nbsp;&nbsp;&nbsp;</th>

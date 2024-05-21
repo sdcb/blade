@@ -3,6 +3,7 @@ using SpinBladeArena.Hubs;
 using SpinBladeArena.Performance;
 using SpinBladeArena.Users;
 using System.Diagnostics;
+using System.Drawing;
 using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter;
@@ -13,10 +14,10 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
     private readonly UserManager UserManager = ServiceProvider.GetRequiredService<UserManager>();
     private readonly PerformanceManager PerformanceManager = ServiceProvider.GetRequiredService<PerformanceManager>();
 
-    public readonly int ServerFPS = ServiceProvider.GetRequiredKeyedService<int>("serverFPS");
+    public readonly int ServerFPS = ServiceProvider.GetRequiredKeyedService<int>("ServerFPS");
     public Vector2 MaxSize = new(2000, 2000);
     public List<Player> Players = [];
-    public HashSet<PickableBonus> PickableBonuses = [];
+    public HashSet<Bonus> PickableBonuses = [];
     public List<Player> DeadPlayers = [];
     private CancellationTokenSource? _cancellationTokenSource = null;
     // Key: UserId
@@ -120,25 +121,32 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
                 Players.EnsureCapacity(destinationSize);
                 foreach (AddPlayerRequest req in _addPlayerRequests.Values)
                 {
-                    Player newPlayer = new(req.UserId, req.UserName, RandomPosition());
+                    Player newPlayer = req is AddAIPlayerRequest ai ? AIPlayer.CreateRespawn(ai, RandomPosition()) : new Player(req.UserId, req.UserName, RandomPosition());
                     Players.Add(newPlayer);
                 }
                 _addPlayerRequests.Clear();
                 stat.RecordAddPlayerRequests();
             }
 
+            // handle AI Think
+            {
+                foreach (AIPlayer player in Players.OfType<AIPlayer>()) player.Think(dt, this);
+                stat.RecordAIThink();
+            }
+
             // handle move
             {
-                foreach (Player player in Players) player.Move(dt);
+                RectangleF bounds = new(-MaxSize.X / 2, -MaxSize.Y / 2, MaxSize.X, MaxSize.Y);
+                foreach (Player player in Players) player.Move(dt, bounds);
                 stat.RecordMove();
             }
 
             // handle bonus
             {
-                List<PickableBonus> toRemove = new(capacity: PickableBonuses.Count / 2);
+                List<Bonus> toRemove = new(capacity: PickableBonuses.Count / 2);
                 foreach (Player player in Players)
                 {
-                    foreach (PickableBonus bonus in PickableBonuses)
+                    foreach (Bonus bonus in PickableBonuses)
                     {
                         if (Vector2.Distance(player.Position, bonus.Position) < player.Size)
                         {
@@ -150,7 +158,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
                     }
                 }
 
-                foreach (PickableBonus bonus in toRemove)
+                foreach (Bonus bonus in toRemove)
                 {
                     PickableBonuses.Remove(bonus);
                 }
@@ -196,7 +204,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
             {
                 if (PickableBonuses.Count < maxBonusCount)
                 {
-                    PickableBonuses.Add(PickableBonus.CreateRandom(RandomPosition()));
+                    PickableBonuses.Add(Bonus.CreateRandom(RandomPosition()));
                 }
                 bonusSpawnTimer -= bonusSpawnCooldown;
             }
@@ -207,14 +215,14 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
                 {
                     for (int i = 0; i < ki.Player1.Score / 2; ++i)
                     {
-                        PickableBonuses.Add(PickableBonus.CreateRandom(RandomPositionWithin(ki.Player1)));
+                        PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Player1)));
                     }
                 }
                 if (ki.Player2Dead)
                 {
                     for (int i = 0; i < ki.Player2.Score / 2; ++i)
                     {
-                        PickableBonuses.Add(PickableBonus.CreateRandom(RandomPositionWithin(ki.Player2)));
+                        PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Player2)));
                     }
                 }
             }
@@ -226,10 +234,10 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
                 Player player = DeadPlayers[i];
                 if (allTimeStopwatch.Elapsed.TotalSeconds - player.DeadTime > DeadRespawnTimeInSeconds)
                 {
-                    if (UserManager.IsUserOnline(player.UserId))
+                    if (player is AIPlayer || UserManager.IsUserOnline(player.UserId))
                     {
                         // insert into players
-                        _addPlayerRequests[player.UserId] = new(player.UserId, player.UserName);
+                        _addPlayerRequests[player.UserId] = player.CreateRespawnRequest();
                     }
 
                     // remove from dead players
@@ -248,7 +256,15 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
 
     private void EnsureAIPlayers()
     {
+        if (Players.OfType<AIPlayer>().Any()) return;
 
+        int aiPlayerCount = ServiceProvider.GetRequiredKeyedService<int>("AIPlayerCount");
+        HashSet<string> knownNames = [];
+        for (int i = 0; i < aiPlayerCount; ++i)
+        {
+            Player aiPlayer = AIPlayer.CreateRandom(RandomPosition(), knownNames);
+            Players.Add(aiPlayer);
+        }
     }
 
     private void DispatchMessage()
@@ -275,3 +291,5 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
 }
 
 public record AddPlayerRequest(int UserId, string UserName);
+
+public record AddAIPlayerRequest(AIPreference AIPreference, int UserId, string UserName) : AddPlayerRequest(UserId, UserName);

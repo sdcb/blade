@@ -23,10 +23,10 @@ public class PlayerWeapon : List<Blade>
             Add(new());
         }
 
-        float initialAngle = Count == 0 ? 0 : this[0].Angle;
+        float initialAngle = Count == 0 ? 0 : this[0].RotationDegree;
         for (int i = 0; i < Count; ++i)
         {
-            this[i].Angle = initialAngle + 360 / Count * i;
+            this[i].RotationDegree = initialAngle + 360 / Count * i;
         }
     }
 
@@ -55,24 +55,39 @@ public class PlayerWeapon : List<Blade>
     {
         for (int i = 0; i < Count; ++i)
         {
-            this[i].Angle = MathF.IEEERemainder(this[i].Angle + RotationDegreePerSecond * deltaTime, 360) switch
+            this[i].RotationDegree = MathF.IEEERemainder(this[i].RotationDegree + RotationDegreePerSecond * deltaTime, 360) switch
             {
                 var x when x < 0 => x + 360,
                 var x => x,
             };
         }
     }
+
+    public Blade[] EstimateRotateBlades(float deltaTime)
+    {
+        Blade[] result = new Blade[Count];
+        for (int i = 0; i < Count; ++i)
+        {
+            result[i] = new Blade(MathF.IEEERemainder(this[i].RotationDegree + RotationDegreePerSecond * deltaTime, 360) switch
+            {
+                var x when x < 0 => x + 360,
+                var x => x,
+            }, this[i].Damage, this[i].Length);
+        }
+
+        return result;
+    }
 }
 
-public class Blade(float angle = 0, float damage = 1, float length = 40)
+public class Blade(float rotationDegree = 0, float damage = 1, float length = 40)
 {
-    public float Angle = angle;
+    public float RotationDegree = rotationDegree;
     public float Damage = damage;
     public float Length = length;
 
     public BladeDto ToDto() => new()
     {
-        Angle = Angle,
+        Angle = RotationDegree,
         Damage = Damage,
         Length = Length,
     };

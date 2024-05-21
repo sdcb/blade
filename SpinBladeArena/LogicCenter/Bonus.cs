@@ -3,12 +3,12 @@ using System.Runtime.CompilerServices;
 
 namespace SpinBladeArena.LogicCenter;
 
-public class PickableBonus(string name, Vector2 position)
+public class Bonus(string name, Vector2 position)
 {
     public string Name { get; init; } = name;
     public Vector2 Position { get; init; } = position;
 
-    public required PickableBonusApplier Apply { get; init; }
+    public required BonusApplier Apply { get; init; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void NoBladeBonus(Player player)
@@ -19,7 +19,7 @@ public class PickableBonus(string name, Vector2 position)
         }
     }
 
-    public static PickableBonus Health(Vector2 position, float healthAmount = 2) => new("生命", position)
+    public static Bonus Health(Vector2 position, float healthAmount = 2) => new(BonusNames.Health, position)
     {
         Apply = (Player player) =>
         {
@@ -32,12 +32,12 @@ public class PickableBonus(string name, Vector2 position)
         }
     };
 
-    public static PickableBonus Thin(Vector2 position) => new("减肥", position)
+    public static Bonus Thin(Vector2 position) => new(BonusNames.Thin, position)
     {
         Apply = (Player player) => player.Size = Math.Clamp(player.Size / 2, 20, 100)
     };
 
-    public static PickableBonus Speed(Vector2 position, float speedAmount = 5) => new("移速+5", position)
+    public static Bonus Speed(Vector2 position, float speedAmount = 5) => new(BonusNames.Speed, position)
     {
         Apply = (Player player) =>
         {
@@ -50,7 +50,7 @@ public class PickableBonus(string name, Vector2 position)
         }
     };
 
-    public static PickableBonus Speed20(Vector2 position, float speedAmount = 20) => new("移速+20", position)
+    public static Bonus Speed20(Vector2 position, float speedAmount = 20) => new(BonusNames.Speed20, position)
     {
         Apply = (Player player) =>
         {
@@ -70,7 +70,7 @@ public class PickableBonus(string name, Vector2 position)
         return isPositive ? val + addValue : val - addValue;
     }
 
-    public static PickableBonus BladeCount(Vector2 position, int bladeCountAmount = 1) => new("刀数", position)
+    public static Bonus BladeCount(Vector2 position, int bladeCountAmount = 1) => new(BonusNames.BladeCount, position)
     {
         Apply = (Player player) =>
         {
@@ -85,7 +85,7 @@ public class PickableBonus(string name, Vector2 position)
         }
     };
 
-    public static PickableBonus BladeCount3(Vector2 position, int bladeCountAmount = 3) => new("刀数+3", position)
+    public static Bonus BladeCount3(Vector2 position, int bladeCountAmount = 3) => new(BonusNames.BladeCount3, position)
     {
         Apply = (Player player) =>
         {
@@ -100,7 +100,7 @@ public class PickableBonus(string name, Vector2 position)
         }
     };
 
-    public static PickableBonus BladeLength(Vector2 position, float bladeLengthAmount = 5) => new("刀长+5", position)
+    public static Bonus BladeLength(Vector2 position, float bladeLengthAmount = 5) => new(BonusNames.BladeLength, position)
     {
         Apply = (Player player) =>
         {
@@ -109,7 +109,7 @@ public class PickableBonus(string name, Vector2 position)
         }
     };
 
-    public static PickableBonus BladeLength20(Vector2 position, float bladeLengthAmount = 20) => new("刀长+20", position)
+    public static Bonus BladeLength20(Vector2 position, float bladeLengthAmount = 20) => new(BonusNames.BladeLength20, position)
     {
         Apply = (Player player) =>
         {
@@ -124,7 +124,7 @@ public class PickableBonus(string name, Vector2 position)
         }
     };
 
-    public static PickableBonus BladeDamage(Vector2 position, float bladeDamageAmount = 1) => new("刀伤", position)
+    public static Bonus BladeDamage(Vector2 position, float bladeDamageAmount = 1) => new(BonusNames.BladeDamage, position)
     {
         Apply = (Player player) =>
         {
@@ -133,7 +133,7 @@ public class PickableBonus(string name, Vector2 position)
         }
     };
 
-    public static PickableBonus BladeSpeed(Vector2 position, float rotationDegreePerSecond = 5) => new("刀速+5", position)
+    public static Bonus BladeSpeed(Vector2 position, float rotationDegreePerSecond = 5) => new(BonusNames.BladeSpeed, position)
     {
         Apply = (Player player) =>
         {
@@ -147,7 +147,7 @@ public class PickableBonus(string name, Vector2 position)
         }
     };
 
-    public static PickableBonus BladeSpeed20(Vector2 position, float rotationDegreePerSecond = 20) => new("刀速+20", position)
+    public static Bonus BladeSpeed20(Vector2 position, float rotationDegreePerSecond = 20) => new(BonusNames.BladeSpeed20, position)
     {
         Apply = (Player player) =>
         {
@@ -161,12 +161,12 @@ public class PickableBonus(string name, Vector2 position)
         }
     };
 
-    public static PickableBonus Random(Vector2 position) => new("随机", position)
+    public static Bonus Random(Vector2 position) => new(BonusNames.Random, position)
     {
         Apply = (Player player) => All[System.Random.Shared.Next(All.Length)](position).Apply(player)
     };
 
-    internal static Func<Vector2, PickableBonus>[] All =
+    internal static Func<Vector2, Bonus>[] All =
     [
         p => Health(p),
         p => Speed(p),
@@ -182,7 +182,7 @@ public class PickableBonus(string name, Vector2 position)
         Random,
     ];
 
-    public static PickableBonus CreateRandom(Vector2 position) => All[System.Random.Shared.Next(All.Length)](position);
+    public static Bonus CreateRandom(Vector2 position) => All[System.Random.Shared.Next(All.Length)](position);
 
     public PickableBonusDto ToDto()
     {
@@ -194,4 +194,4 @@ public class PickableBonus(string name, Vector2 position)
     }
 }
 
-public delegate void PickableBonusApplier(Player player);
+public delegate void BonusApplier(Player player);

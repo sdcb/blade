@@ -58,7 +58,8 @@ namespace SpinBladeArena
             services.AddSingleton<GameManager>();
             services.AddSingleton<UserManager>();
             services.AddSingleton<PerformanceManager>();
-            services.AddKeyedSingleton(typeof(int), "serverFPS", int.Parse(configuration["serverFPS"] ?? "45"));
+            services.AddKeyedSingleton(typeof(int), "ServerFPS", int.Parse(configuration["ServerFPS"] ?? "45"));
+            services.AddKeyedSingleton(typeof(int), "AIPlayerCount", int.Parse(configuration["AIPlayerCount"] ?? "8"));
             TokenValidationParameters tvp = new()
             {
                 ValidateIssuer = true,

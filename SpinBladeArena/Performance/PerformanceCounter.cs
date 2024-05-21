@@ -10,6 +10,8 @@ public class PerformanceCounter(Stopwatch Stopwatch)
 
     public TimeSpan AddPlayerRequest { get; private set; }
 
+    public TimeSpan AIThink { get; private set; }
+
     public TimeSpan Move { get; private set; }
 
     public TimeSpan Bonus { get; private set; }
@@ -85,6 +87,7 @@ public class PerformanceCounter(Stopwatch Stopwatch)
             DateTime.Now,
             Sleep,
             AddPlayerRequest,
+            AIThink,
             Move,
             Bonus,
             Attack,
@@ -93,5 +96,11 @@ public class PerformanceCounter(Stopwatch Stopwatch)
             PlayerSpawn,
             DispatchMessage
         );
+    }
+
+    internal void RecordAIThink()
+    {
+        AIThink = Stopwatch.Elapsed;
+        Stopwatch.Restart();
     }
 }

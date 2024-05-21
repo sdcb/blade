@@ -5,6 +5,7 @@ public record PerformanceData(
     DateTime CreatedAt,
     TimeSpan Sleep,
     TimeSpan AddPlayerRequest,
+    TimeSpan AIThink,
     TimeSpan Move,
     TimeSpan Bonus,
     TimeSpan Attack,
@@ -30,6 +31,7 @@ public record PerformanceData(
         TimeSpan.Zero,
         TimeSpan.Zero,
         TimeSpan.Zero,
+        TimeSpan.Zero,
         TimeSpan.Zero);
 
     public static PerformanceData operator +(PerformanceData a, PerformanceData b) => new(
@@ -37,6 +39,7 @@ public record PerformanceData(
         DateTime.Now,
         a.Sleep + b.Sleep,
         a.AddPlayerRequest + b.AddPlayerRequest,
+        a.AIThink + b.AIThink,
         a.Move + b.Move,
         a.Bonus + b.Bonus,
         a.Attack + b.Attack,
@@ -50,6 +53,7 @@ public record PerformanceData(
         DateTime.Now,
         TimeSpan.FromTicks(a.Sleep.Ticks / b),
         TimeSpan.FromTicks(a.AddPlayerRequest.Ticks / b),
+        TimeSpan.FromTicks(a.AIThink.Ticks / b),
         TimeSpan.FromTicks(a.Move.Ticks / b),
         TimeSpan.FromTicks(a.Bonus.Ticks / b),
         TimeSpan.FromTicks(a.Attack.Ticks / b),
