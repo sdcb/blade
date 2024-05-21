@@ -162,7 +162,6 @@ function drawUnits(ctx: CanvasRenderingContext2D) {
         ctx.fillText(player.userName, player.position[0], player.position[1]);
 
         // player blades
-        ctx.strokeStyle = 'red';
         for (const blade of player.blades) {
             let angle = blade.angle * Math.PI / 180;
             const sin = Math.sin(angle);
@@ -173,6 +172,11 @@ function drawUnits(ctx: CanvasRenderingContext2D) {
             const len = blade.length + player.size;
             ctx.lineWidth = blade.damage;
             ctx.lineTo(player.position[0] + sin * len, player.position[1] + -cos * len);
+            ctx.strokeStyle = 'red';
+            // 平衡性设计：如果刀比较少，对刀时不减少伤害，此时刀的颜色为金色
+            if (blade.damage > 1 && player.blades.length <= 2) {
+                ctx.strokeStyle = 'gold';
+            }
             ctx.stroke();
         }
     }
