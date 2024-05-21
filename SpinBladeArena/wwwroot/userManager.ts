@@ -3,12 +3,6 @@
         localStorage.password = randomPassword();
     }
 
-    let token = localStorage.token;
-    const tokenValidUntil = localStorage.tokenValidUntil;
-    if (token && tokenValidUntil && new Date(tokenValidUntil) > new Date()) {
-        return token;
-    }
-
     let userName = localStorage.userName;
     while (!userName) {
         userName = prompt("请输入用户名", randomName());
@@ -20,7 +14,6 @@
 
     localStorage.token = tokenObj.token;
     localStorage.userId = tokenObj.userId;
-    localStorage.tokenValidUntil = new Date(new Date().getTime() + 1000 * 60 * 60);
     return localStorage.token;
 }
 

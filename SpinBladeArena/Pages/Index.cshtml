@@ -15,6 +15,11 @@
     <title>旋刃竞技场 - 房间列表</title>
 </head>
 <body>
+    <label>用户名：</label>
+    <input type="text" id="username" />
+    <button type="button" onclick="saveName()">更新用户名</button>
+    <span id="statusText" style="color: green"></span>
+
     <h1>房间列表</h1>
     <table>
         <thead>
@@ -46,6 +51,7 @@
             </tr>
         </tfoot>
     </table>
+
     <script src="~/userManager.js"></script>
     <script>
         async function createRoom() {
@@ -63,6 +69,20 @@
 
         function join(lobbyId) {
             window.location.href = `/lobby/${lobbyId}`;
+        }
+
+        const userNameInput = document.getElementById('username');
+        const statusTextSpan = document.getElementById('statusText');
+        let userName = localStorage.getItem('userName');
+        if (!userName) {
+            userName = randomName();
+            localStorage.setItem('userName', userName);
+        }
+        userNameInput.value = userName;
+
+        function saveName() {
+            localStorage.setItem('userName', userNameInput.value);
+            statusTextSpan.innerText = `用户名已更新为: ${userNameInput.value}`;
         }
     </script>
 </body>

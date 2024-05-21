@@ -10,9 +10,13 @@ public class UserManager
     public UserInfo EnsureUser(string userName, string password)
     {
         if (userName.Length > 10) throw new ArgumentException("User name is too long", nameof(userName));
-        UserInfo? user = _users.Values.FirstOrDefault(user => user.Name == userName);
+        UserInfo? user = _users.Values.FirstOrDefault(user => user.Password == password);
 
-        if (user != null) return user;
+        if (user != null)
+        {
+            user.Name = userName;
+            return user;
+        }
 
         int userId = Interlocked.Increment(ref _nextUserId);
         UserInfo newUser = new(userId, userName, password, isOnline: false, DateTime.Now);
