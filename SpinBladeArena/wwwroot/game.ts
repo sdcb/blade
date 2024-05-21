@@ -57,10 +57,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
         .withHubProtocol(new signalR.protocols.msgpack.MessagePackHubProtocol())
         .build();
-    connection.on('update', (players, pickableBonus, deadPlayers) => {
-        state.players = players;
-        state.pickableBonus = pickableBonus;
-        state.deadPlayers = deadPlayers;
+    connection.on('update', (players: PlayerDtoRaw[], pickableBonus: PickableBonusDtoRaw[], deadPlayers: PlayerDtoRaw[]) => {
+        console.log(players, pickableBonus, deadPlayers);
+        state.players = players.map(x => convertPlayerDto(x));
+        state.pickableBonus = pickableBonus.map(x => convertPickableBonusDto(x));
+        state.deadPlayers = deadPlayers.map(x => convertPlayerDto(x));
         state.onUpdated();
     });
     await connection.start();
