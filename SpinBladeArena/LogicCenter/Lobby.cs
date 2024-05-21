@@ -59,7 +59,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
             float distanceToCenter = Random.Shared.NextSingle() * player.Size * 2f;
             float angle = Random.Shared.NextSingle() * MathF.PI * 2;
             loc = player.Position + new Vector2(MathF.Sin(angle), MathF.Cos(angle)) * distanceToCenter;
-        } while (InBounds(loc) && Players.Where(x => x != player).Any(x => Vector2.Distance(x.Position, loc) < x.Size));
+        } while (!InBounds(loc) || Players.Where(x => x != player).Any(x => Vector2.Distance(x.Position, loc) < x.Size));
         return loc;
     }
 
