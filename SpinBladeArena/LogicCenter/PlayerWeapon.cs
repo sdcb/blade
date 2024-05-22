@@ -8,14 +8,12 @@ public class PlayerWeapon : List<Blade>
 
     public static PlayerWeapon Default => [new()];
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DestroyBladeAt(int bladeIndex)
     {
         if (Count == 0) return;
         RemoveAt(bladeIndex);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void AddBlade(int addBladeCount)
     {
         for (int i = 0; i < addBladeCount; ++i)
@@ -30,7 +28,6 @@ public class PlayerWeapon : List<Blade>
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddLength(float length)
     {
         for (int i = 0; i < Count; ++i)
@@ -39,7 +36,6 @@ public class PlayerWeapon : List<Blade>
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddDamage(float damage)
     {
         for (int i = 0; i < Count; ++i)
@@ -48,16 +44,13 @@ public class PlayerWeapon : List<Blade>
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsGoldBlade(Blade blade)
     {
         return blade.Damage >= 2 && Count <= 2;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public BladeDto[] ToDto() => this.Select(x => x.ToDto()).ToArray();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RotateBlades(float deltaTime)
     {
         for (int i = 0; i < Count; ++i)
@@ -83,6 +76,22 @@ public class PlayerWeapon : List<Blade>
         }
 
         return result;
+    }
+
+    public float LongestBladeLength
+    {
+        get
+        {
+            float longest = 0;
+            for (int i = 0; i < Count; ++i)
+            {
+                if (this[i].Length > longest)
+                {
+                    longest = this[i].Length;
+                }
+            }
+            return longest;
+        }
     }
 }
 

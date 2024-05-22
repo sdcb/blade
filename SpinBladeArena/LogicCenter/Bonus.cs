@@ -10,7 +10,7 @@ public class Bonus(string name, Vector2 position)
 
     public required BonusApplier Apply { get; init; }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
     public static void NoBladeBonus(Player player)
     {
         if (player.Weapon.Count == 0)
@@ -63,7 +63,7 @@ public class Bonus(string name, Vector2 position)
         }
     };
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
     static float AbsAdd(float val, float addValue)
     {
         bool isPositive = val > 0;

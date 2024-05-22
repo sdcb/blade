@@ -5,7 +5,7 @@ namespace SpinBladeArena.Primitives;
 
 public static class PrimitiveUtils
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
     public static bool IsLineIntersectingCircle(LineSegment lineSegment, Vector2 circleCenter, float circleRadius)
     {
         Vector2 d = lineSegment.End - lineSegment.Start;
@@ -38,7 +38,7 @@ public static class PrimitiveUtils
         return false;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
     public static bool IsLineSegmentIntersection(LineSegment lineSegment1, LineSegment lineSegment2)
     {
         Vector2 a = lineSegment1.End - lineSegment1.Start;

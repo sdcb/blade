@@ -23,13 +23,12 @@ public class Player(int userId, string userName, Vector2 position)
 
     public bool Dead => Health <= 0;
 
-    public float SafeDistance => Size + Weapon.Max(x => x.Length);
+    public float SafeDistance => Size + Weapon.LongestBladeLength;
 
     public Vector2 Direction => Vector2.Normalize(Destination - Position);
 
     public virtual AddPlayerRequest CreateRespawnRequest() => new(UserId, UserName);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public LineSegment GetBladeLineSegment(Blade blade)
     {
         float degree = blade.RotationDegree;
@@ -39,7 +38,6 @@ public class Player(int userId, string userName, Vector2 position)
         return new(bladeStart, bladeEnd);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Move(float deltaTime, RectangleF bound)
     {
         if (Dead) return;
@@ -63,10 +61,10 @@ public class Player(int userId, string userName, Vector2 position)
         Weapon.RotateBlades(deltaTime);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static KillingInfo AttackEachOther(Player p1, Player p2)
     {
         if (p1.Dead || p2.Dead) return new KillingInfo(p1, p2, false, false);
+        if (Vector2.Distance(p1.Position, p2.Position) > p1.SafeDistance + p2.SafeDistance) return new KillingInfo(p1, p2, false, false);
 
         bool player2Dead = P1AttackP2(p1, p2);
         bool player1Dead = P1AttackP2(p2, p1);
@@ -74,7 +72,6 @@ public class Player(int userId, string userName, Vector2 position)
 
         return new(p1, p2, player1Dead, player2Dead);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool P1AttackP2(Player p1, Player p2)
         {
             for (int i = 0; i < p1.Weapon.Count; i++)
@@ -92,7 +89,6 @@ public class Player(int userId, string userName, Vector2 position)
             return false;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void BladeAttack(Player p1, Player p2)
         {
             for (int p1i = 0; p1i < p1.Weapon.Count; p1i++)

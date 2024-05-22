@@ -65,7 +65,7 @@ public abstract class AIPlayer(int userId, string userName, Vector2 position) : 
 
         // common: if no weapon, goes for random bonus
         CloseastThings things = GetCloseastThings(lobby);
-        if (Weapon.Count == 0 && things.Bonuses.Any())
+        if (Weapon.Count == 0 && things.Bonuses.Length != 0)
         {
             Position = things.Bonuses.First().Bonus.Position;
             return;
@@ -76,11 +76,11 @@ public abstract class AIPlayer(int userId, string userName, Vector2 position) : 
 
     protected abstract void Think(Lobby lobby, CloseastThings things);
 
-    protected CloseastThings GetCloseastThings(Lobby lobby, int maxCount = 3)
+    protected CloseastThings GetCloseastThings(Lobby lobby, int maxCount = 4)
     {
         PlayerDistance[] closestPlayers = lobby.Players
             .Where(p => p.UserId != UserId)
-            .Select(p => new PlayerDistance(p, Vector2.Distance(Position, p.Position) - Size - p.Size))
+            .Select(p => new PlayerDistance(p, Vector2.Distance(Position, p.Position) - Size - p.SafeDistance))
             .OrderBy(p => p.Distance)
             .Take(maxCount)
             .ToArray();
