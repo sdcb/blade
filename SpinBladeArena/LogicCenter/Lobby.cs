@@ -48,7 +48,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
         do
         {
             loc = new(Random.Shared.NextSingle() * MaxSize.X - MaxSize.Y / 2, Random.Shared.NextSingle() * MaxSize.Y - MaxSize.Y / 2);
-        } while (Players.Any(x => Vector2.Distance(x.Position, loc) < x.Size));
+        } while (Players.Any(player => Vector2.Distance(player.Position, loc) < player.SafeDistance));
         return loc;
     }
 
@@ -99,7 +99,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
         EnsureAIPlayers();
 
         const int DeadRespawnTimeInSeconds = 3;
-        float bonusSpawnCooldown = 1;
+        float bonusSpawnCooldown = 0.5f;
         float maxBonusCount = 25;
         float bonusSpawnTimer = 0;
 
@@ -214,14 +214,22 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
             {
                 if (ki.Player1Dead)
                 {
-                    for (int i = 0; i < ki.Player1.Score / 2; ++i)
+                    if (ki.Player1.Score < 3 && Random.Shared.NextDouble() < (1.0 / ki.Player1.Score))
+                    {
+                        PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Player1)));
+                    }
+                    for (int i = 0; i < ki.Player1.Score / 3; ++i)
                     {
                         PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Player1)));
                     }
                 }
                 if (ki.Player2Dead)
                 {
-                    for (int i = 0; i < ki.Player2.Score / 2; ++i)
+                    if (ki.Player2.Score < 3 && Random.Shared.NextDouble() < (1.0 / ki.Player2.Score))
+                    {
+                        PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Player2)));
+                    }
+                    for (int i = 0; i < ki.Player2.Score / 3; ++i)
                     {
                         PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Player2)));
                     }

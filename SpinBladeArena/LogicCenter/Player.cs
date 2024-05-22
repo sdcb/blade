@@ -142,7 +142,7 @@ public class Player(int userId, string userName, Vector2 position)
 
                         // 刀相撞后，反向旋转
                         p1.Weapon.RotationDegreePerSecond = -p1.Weapon.RotationDegreePerSecond;
-                        p1.Weapon.RotationDegreePerSecond = -p1.Weapon.RotationDegreePerSecond;
+                        p2.Weapon.RotationDegreePerSecond = -p2.Weapon.RotationDegreePerSecond;
                         return;
                     }
                 }

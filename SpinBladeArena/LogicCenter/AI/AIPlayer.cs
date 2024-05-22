@@ -49,6 +49,7 @@ public abstract class AIPlayer(int userId, string userName, Vector2 position) : 
             name = nameBatch[Random.Shared.Next(nameBatch.Length)];
         } while (knownNames.Contains(name));
 
+        knownNames.Add(name);
         return name;
     }
 
