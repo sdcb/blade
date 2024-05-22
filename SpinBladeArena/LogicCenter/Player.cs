@@ -19,9 +19,11 @@ public class Player(int userId, string userName, Vector2 position)
     public int Score = 1;
     public bool IsLarge => Size > 75;
 
-    public bool IsStrong => Weapon.Count > 8;
+    public bool IsStrong => Weapon.Count > 7;
 
     public bool Dead => Health <= 0;
+
+    public float SafeDistance => Size + Weapon.Max(x => x.Length);
 
     public Vector2 Direction => Vector2.Normalize(Destination - Position);
 
@@ -105,15 +107,20 @@ public class Player(int userId, string userName, Vector2 position)
 
                     if (PrimitiveUtils.IsLineSegmentIntersection(bladeLine1, bladeLine2))
                     {
-                        // 平衡性设计：伤害高的刀削伤害低的刀，伤害高的刀只减少1点伤害，伤害低的刀直接销毁
-                        if (p1b.Damage > p2b.Damage)
+                        // 平衡性设计：如果对方没有金刀，自己有金刀，对方的刀直接销毁，自己的金刀不消耗
+                        if (p1.Weapon.IsGoldBlade(p1b) && !p2.Weapon.IsGoldBlade(p2b))
                         {
-                            p2.Weapon.DestroyBladeAt(p2i);
-                            // 平衡性设计：如果刀比较少，对刀时不减少伤害
-                            if (p1.Weapon.Count > 2)
-                            {
-                                p1b.Damage -= 1;
-                            }
+                            p2.Weapon.DestroyBladeAt(p2i--);
+                        }
+                        else if (!p1.Weapon.IsGoldBlade(p1b) && p2.Weapon.IsGoldBlade(p2b))
+                        {
+                            p1.Weapon.DestroyBladeAt(p1i--);
+                        }
+                        // 其它情况，伤害高的刀消耗低的刀，伤害高的刀只减少1伤害
+                        else if (p1b.Damage > p2b.Damage)
+                        {
+                            p2.Weapon.DestroyBladeAt(p2i--);
+                            p1b.Damage -= 1;
                             if (p1b.Damage == 0)
                             {
                                 p1.Weapon.DestroyBladeAt(p1i--);
@@ -121,23 +128,21 @@ public class Player(int userId, string userName, Vector2 position)
                         }
                         else if (p1b.Damage < p2b.Damage)
                         {
-                            p1.Weapon.DestroyBladeAt(p1i);
-                            // 平衡性设计：如果刀比较少，对刀时不减少伤害
-                            if (p2.Weapon.Count > 2)
-                            {
-                                p2b.Damage -= 1;
-                            }
+                            p1.Weapon.DestroyBladeAt(p1i--);
+                            p2b.Damage -= 1;
                             if (p2b.Damage == 0)
                             {
                                 p2.Weapon.DestroyBladeAt(p2i--);
                             }
                         }
+                        // 伤害相等，双方刀都销毁
                         else
                         {
                             p1.Weapon.DestroyBladeAt(p1i--);
                             p2.Weapon.DestroyBladeAt(p2i--);
                         }
-                        // Reverse rotation direction
+
+                        // 刀相撞后，反向旋转
                         p1.Weapon.RotationDegreePerSecond = -p1.Weapon.RotationDegreePerSecond;
                         p1.Weapon.RotationDegreePerSecond = -p1.Weapon.RotationDegreePerSecond;
                         return;

@@ -39,12 +39,19 @@ public class PlayerWeapon : List<Blade>
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddDamage(float damage)
     {
         for (int i = 0; i < Count; ++i)
         {
             this[i].Damage += damage;
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsGoldBlade(Blade blade)
+    {
+        return blade.Damage >= 2 && Count <= 2;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

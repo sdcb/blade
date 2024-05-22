@@ -26,7 +26,7 @@ public class Bonus(string name, Vector2 position)
             player.Health += healthAmount;
             if (player.IsLarge)
             {
-                player.Size = Math.Clamp(player.Size - 5, 20, 100);
+                player.Size -= 5;
             }
             NoBladeBonus(player);
         }
@@ -34,7 +34,7 @@ public class Bonus(string name, Vector2 position)
 
     public static Bonus Thin(Vector2 position) => new(BonusNames.Thin, position)
     {
-        Apply = (Player player) => player.Size = Math.Clamp(player.Size / 2, 20, 100)
+        Apply = (Player player) => player.Size = Math.Clamp(MathF.Round(player.Size / 2), 20, 200)
     };
 
     public static Bonus Speed(Vector2 position, float speedAmount = 5) => new(BonusNames.Speed, position)

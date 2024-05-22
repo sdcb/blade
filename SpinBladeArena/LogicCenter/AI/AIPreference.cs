@@ -1,4 +1,4 @@
-﻿namespace SpinBladeArena.LogicCenter;
+﻿namespace SpinBladeArena.LogicCenter.AI;
 
 public enum AIPreference
 {
