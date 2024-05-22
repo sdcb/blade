@@ -11,29 +11,11 @@ public class DefensiveAIPlayer(int userId, string userName, Vector2 position) : 
     protected override void Think(Lobby lobby, CloseastThings things)
     {
         // if been attacked, run away
-        PlayerDistance? danger = FindCloseastDanger(things);
-        if (danger != null)
+        PlayerDistance[] dangers = FindCloseastDangers(things);
+        if (dangers.Length > 0)
         {
-            RunAwayFromDanger(danger.Player);
+            RunAwayFromDangers(dangers);
             return;
-        }
-
-        // if I can get someone in 2 seconds
-        PlayerDistance? target = things.Players.FirstOrDefault(p => p.Distance < MovementSpeedPerSecond * 2);
-        if (target != null)
-        {
-            if (Score > target.Player.Score)
-            {
-                // if I am strong, attack
-                Destination = target.Player.Position;
-                return;
-            }
-            else
-            {
-                // if I am weak, run away
-                RunAwayFromDanger(target.Player);
-                return;
-            }
         }
 
         // if I only have < 2 blade, get the closest blade bonus
@@ -42,6 +24,23 @@ public class DefensiveAIPlayer(int userId, string userName, Vector2 position) : 
         {
             Destination = bladeBonus.Position;
             return;
+        }
+
+        PlayerDistance? target = things.Players.FirstOrDefault(p => p.Distance < MovementSpeedPerSecond * 2);
+        if (target != null)
+        {
+            if (Score > target.Player.Score)
+            {
+                // if I can get someone in 2 seconds and I am strong, attack
+                Destination = target.Player.Position;
+                return;
+            }
+            else if (target.Distance < MovementSpeedPerSecond)
+            {
+                // if I am weak, and the target is close, run away
+                RunAwayFromDangers([target]);
+                return;
+            }
         }
 
         // if I have exact 2 blade, get the closest blade bonus except BladeCount/BladeCount3/Random

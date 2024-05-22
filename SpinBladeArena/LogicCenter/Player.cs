@@ -28,6 +28,7 @@ public class Player(int userId, string userName, Vector2 position)
     public Vector2 Direction => Vector2.Normalize(Destination - Position);
 
     public Circle ToCircle() => new(Position, Size);
+    public Circle ToSafeDistanceCircle() => new(Position, SafeDistance);
 
     public virtual AddPlayerRequest CreateRespawnRequest() => new(UserId, UserName);
 

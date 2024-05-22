@@ -19,6 +19,8 @@ public abstract class AIPlayer(int userId, string userName, Vector2 position) : 
     public static AIPlayer CreateRandom(Vector2 position, HashSet<string> knownNames)
     {
         AIPreference preference = (AIPreference)Random.Shared.Next(_names.Count);
+        // for testing
+        // AIPreference preference = AIPreference.Peaceful;
         string userName = RandomName(preference, knownNames);
         int userId = _nextAIUserId--;
         return Create(position, preference, userName, userId);
@@ -79,18 +81,18 @@ public abstract class AIPlayer(int userId, string userName, Vector2 position) : 
 
     protected abstract void Think(Lobby lobby, CloseastThings things);
 
-    protected CloseastThings GetCloseastThings(Lobby lobby, int maxCount = 4)
+    protected CloseastThings GetCloseastThings(Lobby lobby)
     {
         PlayerDistance[] closestPlayers = lobby.Players
             .Where(p => p.UserId != UserId)
             .Select(p => new PlayerDistance(p, Vector2.Distance(Position, p.Position) - Size - p.SafeDistance))
             .OrderBy(p => p.Distance)
-            .Take(maxCount)
+            .Take(4)
             .ToArray();
         IEnumerable<BonusDistance> closestBonuses = lobby.PickableBonuses
             .Select(b => new BonusDistance(b, Vector2.Distance(Position, b.Position) - Size))
             .OrderBy(b => b.Distance)
-            .Take(maxCount);
+            .Take(8);
         Func<Bonus, bool> checker = CreateBonusSafeChecker(closestPlayers.Select(x => x.Player));
         BonusDistance[] safeBonuses = closestBonuses
             .Where(x => checker(x.Bonus))
@@ -98,19 +100,28 @@ public abstract class AIPlayer(int userId, string userName, Vector2 position) : 
         return new CloseastThings(closestPlayers, safeBonuses);
     }
 
-    protected void RunAwayFromDanger(Player danger)
+    protected void RunAwayFromDangers(PlayerDistance[] dangers)
     {
-        Destination = Position + Vector2.Normalize(Position - danger.Position) * MovementSpeedPerSecond * ReactionTimeMS * 2;
+        Vector2[] directions = dangers.Select(danger => Vector2.Normalize(Position - danger.Player.Position)).ToArray();
+        Vector2 averageDirection = directions.Aggregate((a, b) => a + b) / dangers.Length;
+        Destination = Position + averageDirection * MovementSpeedPerSecond * ReactionTimeMS * 2;
     }
 
-    protected PlayerDistance? FindCloseastDanger(CloseastThings closestThings)
+    protected PlayerDistance[] FindCloseastDangers(CloseastThings closestThings)
     {
-        return closestThings.Players.FirstOrDefault(p => p.Player.IsDangerousToPlayer(this, ReactionTimeMS));
+        return closestThings.Players.Where(p => p.Player.IsDangerousToPlayer(this, ReactionTimeMS)).ToArray();
     }
 
-    protected PlayerDistance? FindApprochingDanger(CloseastThings closestThings)
+    protected PlayerDistance[] FindCloseastDangers2(CloseastThings closestThings)
     {
-        return closestThings.Players.FirstOrDefault(p => p.Distance < MovementSpeedPerSecond);
+        var blades = closestThings.Players
+            .SelectMany(x => x.Player.Weapon.Select(w => x.Player.GetBladeLineSegment(w)));
+        throw new NotImplementedException();
+    }
+
+    protected PlayerDistance[] FindApprochingDangers(CloseastThings closestThings)
+    {
+        return closestThings.Players.Where(p => p.Distance < ReactionTimeMS).ToArray();
     }
 
     public static Func<Bonus, bool> CreateBonusSafeChecker(IEnumerable<Player> players)

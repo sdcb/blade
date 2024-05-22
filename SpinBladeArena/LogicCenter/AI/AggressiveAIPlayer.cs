@@ -11,10 +11,10 @@ public class AggressiveAIPlayer(int userId, string userName, Vector2 position) :
     protected override void Think(Lobby lobby, CloseastThings things)
     {
         // if been attacked, run away
-        PlayerDistance? danger = FindCloseastDanger(things);
-        if (danger != null)
+        PlayerDistance[] danger = FindCloseastDangers(things);
+        if (danger.Length > 0)
         {
-            RunAwayFromDanger(danger.Player);
+            RunAwayFromDangers(danger);
             return;
         }
 

@@ -80,8 +80,9 @@
         }
         userNameInput.value = userName;
 
-        function saveName() {
+        async function saveName() {
             localStorage.setItem('userName', userNameInput.value);
+            await ensureToken();
             statusTextSpan.innerText = `用户名已更新为: ${userNameInput.value}`;
         }
     </script>

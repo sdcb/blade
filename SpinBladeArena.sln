@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决�
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpinBladeArena.Tests", "SpinBladeArena.Tests\SpinBladeArena.Tests.csproj", "{F5A83E5D-1FEF-4583-9CD9-B72DAC9D9F5E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{77FDD02F-7CBC-44D0-A888-B9D185198DC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77FDD02F-7CBC-44D0-A888-B9D185198DC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77FDD02F-7CBC-44D0-A888-B9D185198DC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5A83E5D-1FEF-4583-9CD9-B72DAC9D9F5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5A83E5D-1FEF-4583-9CD9-B72DAC9D9F5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5A83E5D-1FEF-4583-9CD9-B72DAC9D9F5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5A83E5D-1FEF-4583-9CD9-B72DAC9D9F5E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

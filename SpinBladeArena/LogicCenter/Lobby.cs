@@ -122,7 +122,24 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
                 Players.EnsureCapacity(destinationSize);
                 foreach (AddPlayerRequest req in _addPlayerRequests.Values)
                 {
-                    Player newPlayer = req is AddAIPlayerRequest ai ? AIPlayer.CreateRespawn(ai, RandomPosition()) : new Player(req.UserId, req.UserName, RandomPosition());
+                    string userName = UserManager.GetUser(req.UserId)?.Name ?? req.UserName;
+                    Player newPlayer = req is AddAIPlayerRequest ai ? AIPlayer.CreateRespawn(ai, RandomPosition()) : new Player(req.UserId, userName, RandomPosition())
+                    {
+                        // for testing
+                        //Weapon =
+                        //[
+                        //    new Blade(rotationDegree: 0, damage: 5, length: 180), 
+                        //    new Blade(rotationDegree: 20, damage: 5, length: 180),
+                        //    new Blade(rotationDegree: 40, damage: 5, length: 180),
+                        //    new Blade(rotationDegree: 60, damage: 5, length: 180),
+                        //    new Blade(rotationDegree: 80, damage: 5, length: 180),
+                        //    new Blade(rotationDegree: 100, damage: 5, length: 180),
+                        //    new Blade(rotationDegree: 120, damage: 5, length: 180),
+                        //    new Blade(rotationDegree: 140, damage: 5, length: 180),
+                        //    new Blade(rotationDegree: 160, damage: 5, length: 180),
+                        //    new Blade(rotationDegree: 180, damage: 5, length: 180),
+                        //]
+                    };
                     Players.Add(newPlayer);
                 }
                 _addPlayerRequests.Clear();

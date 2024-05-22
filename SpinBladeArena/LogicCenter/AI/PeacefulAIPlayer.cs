@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using SpinBladeArena.Primitives;
+using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter.AI;
 
@@ -11,15 +12,21 @@ public class PeacefulAIPlayer(int userId, string userName, Vector2 position) : A
     protected override void Think(Lobby lobby, CloseastThings things)
     {
         // if some one approach, run away
-        PlayerDistance? danger = FindApprochingDanger(things);
-        if (danger != null)
+        PlayerDistance[] dangers = FindApprochingDangers(things);
+        if (dangers.Length > 0)
         {
-            RunAwayFromDanger(danger.Player);
+            RunAwayFromDangers(dangers);
             return;
         }
 
+        Circle[] dangerAreas = things.Players
+            .Select(p => p.Player.ToSafeDistanceCircle())
+            .ToArray();
+
         // get the closest bonus
-        Bonus? closestBonus = things.Bonuses.FirstOrDefault()?.Bonus;
+        Bonus? closestBonus = things.Bonuses
+            .Where(bonus => !dangerAreas.Any(danger => Vector2.Distance(danger.Center, bonus.Bonus.Position) < danger.Radius + Bonus.FrontendRadius))
+            .FirstOrDefault()?.Bonus;
         if (closestBonus != null)
         {
             Destination = closestBonus.Position;

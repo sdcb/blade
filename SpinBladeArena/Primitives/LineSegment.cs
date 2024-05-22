@@ -36,6 +36,21 @@ public readonly record struct LineSegment(in Vector2 Start, in Vector2 End)
         return false;
     }
 
+    public float DistanceTo(in Circle circle)
+    {
+        Vector2 d = End - Start;
+        Vector2 f = Start - circle.Center;
+
+        float a = Vector2.Dot(d, d);
+        float b = 2 * Vector2.Dot(f, d);
+        float t = Math.Clamp(-b / (2 * a), 0, 1);  // Lowest quadratic solution
+
+        Vector2 nearestPoint = Start + t * d;
+        Vector2 nearestVector = circle.Center - nearestPoint;
+
+        float distance = nearestVector.Length() - circle.Radius;
+        return Math.Max(0, distance);  // ensure non-negative distance
+    }
 
     public static bool IsIntersection(in LineSegment lineSegment1, in LineSegment lineSegment2)
     {
