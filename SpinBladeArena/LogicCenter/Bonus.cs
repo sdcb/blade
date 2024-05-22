@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using SpinBladeArena.Primitives;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace SpinBladeArena.LogicCenter;
@@ -8,7 +9,11 @@ public class Bonus(string name, Vector2 position)
     public string Name { get; init; } = name;
     public Vector2 Position { get; init; } = position;
 
+    public const int FrontendRadius = 20;
+
     public required BonusApplier Apply { get; init; }
+
+    public Circle ToFrontendCircle() => new(Position, FrontendRadius);
 
     
     public static void NoBladeBonus(Player player)

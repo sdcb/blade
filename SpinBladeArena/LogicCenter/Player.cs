@@ -27,6 +27,8 @@ public class Player(int userId, string userName, Vector2 position)
 
     public Vector2 Direction => Vector2.Normalize(Destination - Position);
 
+    public Circle ToCircle() => new(Position, Size);
+
     public virtual AddPlayerRequest CreateRespawnRequest() => new(UserId, UserName);
 
     public LineSegment GetBladeLineSegment(Blade blade)
@@ -77,9 +79,9 @@ public class Player(int userId, string userName, Vector2 position)
             for (int i = 0; i < p1.Weapon.Count; i++)
             {
                 Blade blade = p1.Weapon[i];
-                LineSegment ls = p1.GetBladeLineSegment(blade);
+                LineSegment bladeLine = p1.GetBladeLineSegment(blade);
 
-                if (PrimitiveUtils.IsLineIntersectingCircle(ls, p2.Position, p2.Size))
+                if (bladeLine.IsIntersectingCircle(p2.ToCircle()))
                 {
                     p2.Health -= blade.Damage;
                     return p2.Health <= 0;
@@ -101,7 +103,7 @@ public class Player(int userId, string userName, Vector2 position)
                     Blade p2b = p2.Weapon[p2i];
                     LineSegment bladeLine2 = p2.GetBladeLineSegment(p2b);
 
-                    if (PrimitiveUtils.IsLineSegmentIntersection(bladeLine1, bladeLine2))
+                    if (LineSegment.IsIntersection(bladeLine1, bladeLine2))
                     {
                         // 平衡性设计：如果对方没有金刀，自己有金刀，对方的刀直接销毁，自己的金刀不消耗
                         if (p1.Weapon.IsGoldBlade(p1b) && !p2.Weapon.IsGoldBlade(p2b))
@@ -151,11 +153,12 @@ public class Player(int userId, string userName, Vector2 position)
     public bool IsDangerousToPlayer(Player player, float reactionTime)
     {
         EstimatedPlayerState estimatedPlayerState = EstimateMove(reactionTime);
+        Circle playerCircle = player.ToCircle();
         foreach (Blade blade in estimatedPlayerState.Blades)
         {
             LineSegment ls = GetBladeLineSegment(blade);
 
-            if (PrimitiveUtils.IsLineIntersectingCircle(ls, player.Position, player.Size))
+            if (ls.IsIntersectingCircle(playerCircle))
             {
                 return true;
             }

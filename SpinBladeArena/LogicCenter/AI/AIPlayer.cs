@@ -1,4 +1,6 @@
-﻿using System.Numerics;
+﻿using SpinBladeArena.Primitives;
+using System.Linq;
+using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter.AI;
 
@@ -84,12 +86,15 @@ public abstract class AIPlayer(int userId, string userName, Vector2 position) : 
             .OrderBy(p => p.Distance)
             .Take(maxCount)
             .ToArray();
-        BonusDistance[] closestBonuses = lobby.PickableBonuses
+        IEnumerable<BonusDistance> closestBonuses = lobby.PickableBonuses
             .Select(b => new BonusDistance(b, Vector2.Distance(Position, b.Position) - Size))
             .OrderBy(b => b.Distance)
-            .Take(maxCount)
+            .Take(maxCount);
+        Func<Bonus, bool> checker = CreateBonusSafeChecker(closestPlayers.Select(x => x.Player));
+        BonusDistance[] safeBonuses = closestBonuses
+            .Where(x => checker(x.Bonus))
             .ToArray();
-        return new CloseastThings(closestPlayers, closestBonuses);
+        return new CloseastThings(closestPlayers, safeBonuses);
     }
 
     protected void RunAwayFromDanger(Player danger)
@@ -105,5 +110,17 @@ public abstract class AIPlayer(int userId, string userName, Vector2 position) : 
     protected PlayerDistance? FindApprochingDanger(CloseastThings closestThings)
     {
         return closestThings.Players.FirstOrDefault(p => p.Distance < MovementSpeedPerSecond);
+    }
+
+    public static Func<Bonus, bool> CreateBonusSafeChecker(IEnumerable<Player> players)
+    {
+        LineSegment[] lines = players
+            .SelectMany(p => p.Weapon.Select(w => p.GetBladeLineSegment(w)))
+            .ToArray();
+        return b =>
+        {
+            Circle bonusCircle = b.ToFrontendCircle();
+            return !lines.Any(l => l.IsIntersectingCircle(bonusCircle));
+        };
     }
 }
