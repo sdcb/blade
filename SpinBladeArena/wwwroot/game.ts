@@ -93,27 +93,32 @@ function render(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
     ctx.fillStyle = 'black';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
-    ctx.font = '40px Arial';
+    ctx.font = '30px Monospace';
     ctx.fillStyle = 'white';
     let y = 10;
-    ctx.fillText(`积分榜（${state.players.length} 人）`, 10, y);
-    y += 40;
-    ctx.font = '20px Arial';
+    ctx.fillText(`积分榜（${state.players.length + state.deadPlayers.length} 人）`, 10, y);
+    y += 30;
+    ctx.font = '15px Monospace';
     for (const p of state.players.concat().sort((a, b) => b.score - a.score)) {
-        const isYou = p.userId === getUserId();
-        ctx.fillStyle = isYou ? 'yellow' : 'white';
-        ctx.fillText(`${p.userName}: ${p.score}`, 10, y);
-        y += 20;
+        drawPlayer(p, /* isDead */ false);
+    }
+    for (const p of state.deadPlayers) {
+        drawPlayer(p, /* isDead */ true);
     }
     ctx.restore();
 
 
     requestAnimationFrame(() => render(ctx, canvas));
+
+    function drawPlayer(p: PlayerDto, isDead: boolean) {
+        const isYou = p.userId === getUserId();
+        ctx.fillStyle = isDead ? 'darkgray' : isYou ? 'yellow' : 'white';
+        ctx.fillText(`${p.userName}: ${p.score}`, 10, y);
+        y += 15;
+    }
 }
 
 function drawUnits(ctx: CanvasRenderingContext2D) {
-    const userId = getUserId();
-
     for (const bonus of state.pickableBonus) {
         ctx.beginPath();
         ctx.arc(bonus.position[0], bonus.position[1], 20, 0, Math.PI * 2);
@@ -143,25 +148,49 @@ function drawUnits(ctx: CanvasRenderingContext2D) {
         ctx.stroke();
     }
 
+    for (const player of state.deadPlayers) {
+        drawPlayer(ctx, player, /* isDead: */ true);
+    }
+
     for (const player of state.players) {
-        ctx.beginPath();
-        ctx.arc(player.position[0], player.position[1], player.size, 0, Math.PI * 2);
-        ctx.fillStyle = player.userId === userId ? 'dodgerblue' : 'crimson';
-        ctx.fill();
+        drawPlayer(ctx, player, /* isDead: */ false);
+    }
 
-        // player health
-        ctx.beginPath();
-        ctx.arc(player.position[0], player.position[1], player.size + 1, 0, Math.PI * 2);
-        ctx.strokeStyle = 'white';
-        ctx.setLineDash([1, 0]);
-        ctx.lineWidth = player.health;
-        ctx.stroke();
+    if (state.me?.health <= 0) {
+        // draw dead player
+        ctx.font = '100px Arial';
+        ctx.fillText('你挂了', state.center.x, state.center.y);
+    }
+}
 
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'black';
-        ctx.fillText(player.userName, player.position[0], player.position[1]);
+function drawPlayer(ctx: CanvasRenderingContext2D, player: PlayerDto, isDead: boolean) {
+    const currentUserId = getUserId();
 
+    ctx.beginPath();
+    ctx.arc(player.position[0], player.position[1], player.size, 0, Math.PI * 2);
+    if (isDead) {
+        ctx.fillStyle = 'gray';
+    } else if (player.userId === currentUserId) {
+        ctx.fillStyle = 'dodgerblue';
+    } else {
+        ctx.fillStyle = 'crimson';
+    }
+    ctx.fill();
+
+    // player health
+    ctx.beginPath();
+    ctx.arc(player.position[0], player.position[1], player.size + 1, 0, Math.PI * 2);
+    ctx.strokeStyle = 'white';
+    ctx.setLineDash([1, 0]);
+    ctx.lineWidth = player.health;
+    ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'black';
+    ctx.fillText(player.userName, player.position[0], player.position[1]);
+
+    if (!isDead) {
         // player blades
         for (const blade of player.blades) {
             let angle = blade.angle * Math.PI / 180;
@@ -180,12 +209,6 @@ function drawUnits(ctx: CanvasRenderingContext2D) {
             }
             ctx.stroke();
         }
-    }
-
-    if (state.me?.health <= 0) {
-        // draw dead player
-        ctx.font = '100px Arial';
-        ctx.fillText('你挂了', state.center.x, state.center.y);
     }
 }
 
