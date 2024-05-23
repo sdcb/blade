@@ -15,6 +15,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Build wwwroot typescript
+        run: |
+          cd SpinBladeArena/wwwroot
+          tsc
+
       - name: Build container
         run: docker build -f "SpinBladeArena/Dockerfile" . -t blade
 
