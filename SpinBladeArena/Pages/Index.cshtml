@@ -8,51 +8,115 @@
 @{
 }
 
+<!DOCTYPE html>
 <html lang="zh-hans">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <link href="~/libs/gh-fork-ribbon.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>旋刃竞技场 - 房间列表</title>
-</head>
-<body>
-    <label>用户名：</label>
-    <input type="text" id="username" />
-    <button type="button" onclick="saveName()">更新用户名</button>
-    <span id="statusText" style="color: green"></span>
-
-    <h1>房间列表</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>房间号</th>
-                <th>人数</th>
-                <th>创建者</th>
-                <th>创建时间</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody id="room-list">
-            @foreach (var room in GameManager.Lobbies.Values.OrderByDescending(x => x.Id))
-            {
-                <tr>
-                    <td>@room.Id</td>
-                    <td>@room.Players.Count</td>
-                    <td>@UserManager.GetUser(room.CreateUserId)?.Name</td>
-                    <td>@room.CreateTime</td>
-                    <td><button type="button" onclick="join(@room.Id)">加入</button></td>
-                </tr>
+    <style>
+        @@keyframes textGradient {
+            0%, 100% {
+                background-position: left bottom;
             }
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="3">
-                    <button onclick="createRoom()">创建新房间</button>
-                </td>
-            </tr>
-        </tfoot>
-    </table>
+
+            50% {
+                background-position: right top;
+            }
+        }
+
+        .title-gradient {
+            background: linear-gradient(to right, red, gold, red);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 100%;
+            animation: textGradient 10s ease infinite;
+            text-align: center;
+            padding: 20px;
+            font-weight: bold;
+        }
+
+            .title-gradient h1 {
+                font-size: 4em;
+            }
+
+            .title-gradient h2 {
+                font-size: 2em;
+            }
+    </style>
+</head>
+<body class="bg-light">
+    <a class="github-fork-ribbon right-bottom fixed"
+       href="https://github.com/sdcb/blade"
+       data-ribbon="Fork me on GitHub"
+       title="Fork me on GitHub">Fork me on GitHub</a>
+    <div class="container py-2">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="title-gradient">
+                    <h1>旋刃竞技场</h1>
+                    <h2>Spin Blade Arena</h2>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col">
+                <label for="username" class="form-label">用户名：</label>
+                <input type="text" id="username" class="form-control" />
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary mt-4" onclick="saveName()">更新用户名</button>
+            </div>
+            <div class="col-12">
+                <span id="statusText" class="text-success mt-2"></span>
+            </div>
+        </div>
+        <hr />
+        <div class="row mb-3 align-items-center">
+            <div class="col-sm-6">
+                <h1 class="mb-0">房间列表</h1>
+            </div>
+            <div class="col-sm-6 text-end">
+                <button class="btn btn-primary" onclick="createRoom()">创建新房间</button>
+            </div>
+        </div>
+        <table class="table table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>房间号</th>
+                    <th>人数</th>
+                    <th>创建者</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="room-list">
+                @if (GameManager.Lobbies.Count == 0)
+                {
+                    <tr>
+                        <td colspan="5" style="text-align: center">暂无房间</td>
+                    </tr>
+                }
+                @foreach (var room in GameManager.Lobbies.Values.OrderByDescending(x => x.Id))
+                {
+                    <tr>
+                        <td>@room.Id</td>
+                        <td>@room.Players.Count</td>
+                        <td>@UserManager.GetUser(room.CreateUserId)?.Name</td>
+                        <td>@room.CreateTime</td>
+                        <td><button type="button" class="btn btn-success" onclick="join(@room.Id)">加入</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 
     <script src="~/userManager.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         async function createRoom() {
             const createLobbyResp = await fetch('/lobby', {
