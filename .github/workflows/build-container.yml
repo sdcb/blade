@@ -20,9 +20,9 @@ jobs:
 
       - name: Tag container with 'latest' & date
         run: |
-          docker tag chats ${{ secrets.DOCKER_USERNAME }}/blade:latest
+          docker tag blade ${{ secrets.DOCKER_USERNAME }}/blade:latest
           DATE=$(date +'%Y%m%d')
-          docker tag chats ${{ secrets.DOCKER_USERNAME }}/blade:$DATE
+          docker tag blade ${{ secrets.DOCKER_USERNAME }}/blade:$DATE
 
       # Push both 'latest' and 'date' tags
       - name: Push container
