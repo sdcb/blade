@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SpinBladeArena.Hubs;
 using SpinBladeArena.LogicCenter;
 using SpinBladeArena.Performance;
 using SpinBladeArena.Users;
+using System.Security.Cryptography;
 
 namespace SpinBladeArena
 {
@@ -45,7 +45,12 @@ namespace SpinBladeArena
 
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            string? authKey = configuration["Key"] ?? throw new Exception("Please provide a key in the configuration");
+            string? authKey = configuration["Key"];
+            if (string.IsNullOrEmpty(authKey))
+            {
+                authKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+                Console.WriteLine($"Auth key not found in configuration, use generated: {authKey}");
+            }
 
             // Add services to the container.
             services.AddHttpContextAccessor();

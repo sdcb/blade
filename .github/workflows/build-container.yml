@@ -1,0 +1,32 @@
+name: Build Container
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-container:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login container
+        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build container
+        run: docker build -t -f "SpinBladeArena/Dockerfile" . blade
+
+      - name: Tag container with 'latest' & date
+        run: |
+          docker tag chats ${{ secrets.DOCKER_USERNAME }}/blade:latest
+          DATE=$(date +'%Y%m%d')
+          docker tag chats ${{ secrets.DOCKER_USERNAME }}/blade:$DATE
+
+      # Push both 'latest' and 'date' tags
+      - name: Push container
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/blade:latest
+          DATE=$(date +'%Y%m%d')
+          docker push ${{ secrets.DOCKER_USERNAME }}/blade:$DATE
