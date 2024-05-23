@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build container
-        run: docker build -t -f "SpinBladeArena/Dockerfile" . blade
+        run: docker build -f "SpinBladeArena/Dockerfile" . -t blade
 
       - name: Tag container with 'latest' & date
         run: |
