@@ -1,8 +1,8 @@
-﻿# 旋刃竟技场 [![main](https://github.com/sdcb/blade/actions/workflows/build-container.yml/badge.svg)](https://github.com/sdcb/blade/actions/workflows/build-container.yml) [![QQ](https://img.shields.io/badge/QQ_Group-495782587-52B6EF?style=social&logo=tencent-qq&logoColor=000&logoWidth=20)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=mma4msRKd372Z6dWpmBp4JZ9RL4Jrf8X&authKey=gccTx0h0RaH5b8B8jtuPJocU7MgFRUznqbV%2FLgsKdsK8RqZE%2BOhnETQ7nYVTp1W0&noverify=0&group_code=495782587)
+﻿# 旋刃竞技场 [![main](https://github.com/sdcb/blade/actions/workflows/build-container.yml/badge.svg)](https://github.com/sdcb/blade/actions/workflows/build-container.yml) [![QQ](https://img.shields.io/badge/QQ_Group-495782587-52B6EF?style=social&logo=tencent-qq&logoColor=000&logoWidth=20)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=mma4msRKd372Z6dWpmBp4JZ9RL4Jrf8X&authKey=gccTx0h0RaH5b8B8jtuPJocU7MgFRUznqbV%2FLgsKdsK8RqZE%2BOhnETQ7nYVTp1W0&noverify=0&group_code=495782587)
 
-**旋刃竟技场**是一个多人在线对战游戏，玩家可以在游戏中选择不同的成长路线，与其他玩家（或者机器人）进行对战，体验地址：[https://blade.starworks.cc:88](https://blade.starworks.cc:88)。
+**旋刃竞技场**是一个多人在线对战游戏，玩家可以在游戏中选择不同的成长路线，与其他玩家（或者机器人）进行对战，体验地址：[https://blade.starworks.cc:88](https://blade.starworks.cc:88)。
 
-旋刃竟技场是一个基于`ASP.NET Core`和`SignalR`实现了多人在线对战的游戏，游戏的画面使用`HTML Canvas`实现。
+旋刃竞技场是一个基于`ASP.NET Core`和`SignalR`实现了多人在线对战的游戏，游戏的画面使用`HTML Canvas`实现。
 
 游戏的前端使用`TypeScript`编写，后端使用`C#`编写，游戏的逻辑全部在后端实现，前端只负责显示游戏画面和接收用户输入。
 
@@ -35,10 +35,10 @@ tsc
 
 ## 游戏玩法
 
-**旋刃竟技场**是一款动作策略大型多人在线游戏，玩家的目标是通过巧妙的移动和战略部署，利用旋刃击败对手并生存下来。
+**旋刃竞技场**是一款动作策略大型多人在线游戏，玩家的目标是通过巧妙的移动和战略部署，利用旋刃击败对手并生存下来。
 
 ### 开始游戏
-游戏开始前，玩家需要输入一个昵称，这将是其他玩家识别你的唯一标识。输入昵称后，玩家将被随机放置在一个多人在线的竟技场地图中。
+游戏开始前，玩家需要输入一个昵称，这将是其他玩家识别你的唯一标识。输入昵称后，玩家将被随机放置在一个多人在线的竞技场地图中。
 
 ### 控制方式
 玩家通过鼠标或触屏操作控制角色的移动。点击或触摸屏幕的任何位置，游戏中的角色将会向这个点移动。玩家需要灵活控制角色的移动来追逐或逃避对手，或是触碰散落在地图上的奖励。
@@ -55,9 +55,9 @@ tsc
 每个玩家需要结合实时的战场情况调整自己的策略，利用地图环境和奖励机制，智取对手，最终成为场上的赢家。
 
 #### 快速反应与精确操作
-旋刃竟技场的胜负往往在一瞬之间，敏捷的操作和对战场的准确判断是成为优胜者不可或缺的能力。每一次操作都可能成为转折点，选择在何时战斗、何时撤退，会直接影响游戏的最终结果。
+旋刃竞技场的胜负往往在一瞬之间，敏捷的操作和对战场的准确判断是成为优胜者不可或缺的能力。每一次操作都可能成为转折点，选择在何时战斗、何时撤退，会直接影响游戏的最终结果。
 
-现在，让我们开始游戏，见证谁能在旋刃竟技场中笑到最后！
+现在，让我们开始游戏，见证谁能在旋刃竞技场中笑到最后！
 
 ## 游戏规则
 
