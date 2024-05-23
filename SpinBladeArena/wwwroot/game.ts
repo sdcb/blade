@@ -119,6 +119,11 @@ function render(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
 }
 
 function drawUnits(ctx: CanvasRenderingContext2D) {
+    // 渲染顺序（从下到上）：尸体、奖励、玩家
+    for (const player of state.deadPlayers) {
+        drawPlayer(ctx, player, /* isDead: */ true);
+    }
+
     for (const bonus of state.pickableBonus) {
         ctx.beginPath();
         ctx.arc(bonus.position[0], bonus.position[1], 20, 0, Math.PI * 2);
@@ -146,10 +151,6 @@ function drawUnits(ctx: CanvasRenderingContext2D) {
         ctx.strokeStyle = 'blue';
         ctx.setLineDash([5, 5]);
         ctx.stroke();
-    }
-
-    for (const player of state.deadPlayers) {
-        drawPlayer(ctx, player, /* isDead: */ true);
     }
 
     for (const player of state.players) {
