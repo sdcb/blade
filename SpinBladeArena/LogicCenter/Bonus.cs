@@ -110,9 +110,7 @@ public class Bonus(string name, Vector2 position)
         Apply = (Player player) =>
         {
             NoBladeBonus(player);
-            float maxBladeLength = player.Size * 3;
-            // 平衡性调整：刀片长度不超过玩家大小的3倍
-            player.Weapon.AddLength(Math.Clamp(bladeLengthAmount, 0, maxBladeLength));
+            player.Weapon.AddLength(bladeLengthAmount, player.Size);
         }
     };
 
@@ -121,9 +119,7 @@ public class Bonus(string name, Vector2 position)
         Apply = (Player player) =>
         {
             NoBladeBonus(player);
-            float maxBladeLength = player.Size * 3;
-            // 平衡性调整：刀片长度不超过玩家大小的3倍
-            player.Weapon.AddLength(Math.Clamp(bladeLengthAmount, 0, maxBladeLength));
+            player.Weapon.AddLength(bladeLengthAmount, player.Size);
             if (player.IsStrong)
             {
                 player.Size = Math.Clamp(player.Size + 30, 20, 200);

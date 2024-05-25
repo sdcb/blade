@@ -28,11 +28,13 @@ public class PlayerWeapon : List<Blade>
         }
     }
 
-    public void AddLength(float length)
+    public void AddLength(float length, float size)
     {
+        // 平衡性调整：刀片长度不超过玩家大小的5倍
+        float maxLength = size * 5;
         for (int i = 0; i < Count; ++i)
         {
-            this[i].Length += length;
+            this[i].Length = Math.Min(this[i].Length + length, maxLength);
         }
     }
 
