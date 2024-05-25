@@ -13,7 +13,7 @@ public record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvi
 {
     private readonly IHubContext<GameHub, IGameHubClient> Hub = ServiceProvider.GetRequiredService<IHubContext<GameHub, IGameHubClient>>();
     private readonly UserManager UserManager = ServiceProvider.GetRequiredService<UserManager>();
-    private readonly PerformanceManager PerformanceManager = ServiceProvider.GetRequiredService<PerformanceManager>();
+    public readonly PerformanceManager PerformanceManager = new();
 
     public readonly int ServerFPS = ServiceProvider.GetRequiredKeyedService<int>("ServerFPS");
     public Vector2 MaxSize = new(2000, 2000);

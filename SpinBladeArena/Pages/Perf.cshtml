@@ -1,16 +1,14 @@
-﻿@page
+﻿@page "/lobby/{lobbyId:int}/perf"
 @using Microsoft.AspNetCore.Html
 @using SpinBladeArena.Performance
-@inject PerformanceManager PerformanceManager
-@model SpinBladeArena.Pages.PerfModel
+@model PerfModel
 @{
     ViewData["Title"] = "性能";
-    PerformanceData latest = PerformanceManager.Latest;
-    PerformanceData average = PerformanceManager.Average;
+    PerformanceData latest = Model.Perf.Latest;
+    PerformanceData average = Model.Perf.Average;
 
     static string FormatTime(TimeSpan time)
     {
-
         return time.TotalMilliseconds.ToString("0.00");
     }
 
@@ -68,10 +66,17 @@
     <tbody>
         @RenderPerformanceRow("平均", average)
 
-        @for (int i = PerformanceManager.PerformanceCounters.Count - 1; i >= 0; i--)
+        @for (int i = Model.Perf.Datas.Count - 1; i >= 0; i--)
         {
-            var data = PerformanceManager.PerformanceCounters[i];
+            var data = Model.Perf.Datas[i];
             @RenderPerformanceRow("", data)
         }
     </tbody>
+
+    <script>
+        // 每秒刷新页面一次
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    </script>
 </table>
