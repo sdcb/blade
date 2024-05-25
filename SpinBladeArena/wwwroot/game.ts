@@ -1,4 +1,5 @@
 ﻿const lobbyId = parseInt(location.href.split('/').pop());
+const mapSize = 2000;
 
 class State {
     players = Array<PlayerDto>();
@@ -89,8 +90,32 @@ function render(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
     ctx.restore();
 
     drawLeaderBoard(ctx);
+    drawMiniMap(ctx, canvas);
 
     requestAnimationFrame(() => render(ctx, canvas));
+}
+
+function isSmallScreenDevice(canvas: HTMLCanvasElement) {
+    return canvas.width < 800;
+}
+
+function drawMiniMap(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+    const scale = isSmallScreenDevice(canvas) ? canvas.width / 2.5 / mapSize : 0.15;
+    const size = mapSize * scale;
+    const margin = 5;
+    // 画到鼠标左下角
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(margin, canvas.height - size - margin, size, size);
+    ctx.strokeStyle = 'yellow';
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(size / 2 + margin, canvas.height - size / 2 - margin);
+    ctx.scale(scale, scale);
+    drawUnits(ctx, /* isMiniMap: */ true);
+    ctx.restore();
 }
 
 function drawLeaderBoard(ctx: CanvasRenderingContext2D) {
@@ -121,10 +146,10 @@ function drawLeaderBoard(ctx: CanvasRenderingContext2D) {
     }
 }
 
-function drawUnits(ctx: CanvasRenderingContext2D) {
+function drawUnits(ctx: CanvasRenderingContext2D, isMiniMap: boolean = false) {
     // 渲染顺序（从下到上）：尸体、奖励、玩家
     for (const player of state.deadPlayers) {
-        drawPlayer(ctx, player, /* isDead: */ true);
+        drawPlayer(ctx, player, /* isDead: */ true, isMiniMap);
     }
 
     for (const bonus of state.pickableBonus) {
@@ -142,12 +167,13 @@ function drawUnits(ctx: CanvasRenderingContext2D) {
     }
 
     const me = state.me;
-    if (me && me.destination[0] !== me.position[0] && me.destination[1] !== me.position[1]) {
+    if (me && me.destination[0] !== me.position[0] && me.destination[1] !== me.position[1] && !isMiniMap) {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = 'blue';
         ctx.fillText('X', me.destination[0], me.destination[1]);
 
+        // 不在小地图上画路径
         ctx.beginPath();
         ctx.moveTo(me.position[0], me.position[1]);
         ctx.lineTo(me.destination[0], me.destination[1]);
@@ -157,42 +183,59 @@ function drawUnits(ctx: CanvasRenderingContext2D) {
     }
 
     for (const player of state.players) {
-        drawPlayer(ctx, player, /* isDead: */ false);
+        drawPlayer(ctx, player, /* isDead: */ false, isMiniMap);
     }
 
-    if (state.me?.health <= 0) {
+    if (state.me?.health <= 0 && !isMiniMap) {
         // draw dead player
         ctx.font = '100px Arial';
         ctx.fillText('你挂了', state.center.x, state.center.y);
     }
 }
 
-function drawPlayer(ctx: CanvasRenderingContext2D, player: PlayerDto, isDead: boolean) {
+function drawPlayer(ctx: CanvasRenderingContext2D, player: PlayerDto, isDead: boolean, isMiniMap: boolean) {
     const currentUserId = getUserId();
+    const miniMapRed = 'rgba(255, 0, 0, 0.6)';
+    const red = 'red';
+    const miniMapWhite = 'rgba(255, 255, 255, 0.6)';
+    const white = 'white';
 
     ctx.beginPath();
     ctx.arc(player.position[0], player.position[1], player.size, 0, Math.PI * 2);
     if (isDead) {
         ctx.fillStyle = 'gray';
     } else if (player.userId === currentUserId) {
-        ctx.fillStyle = 'dodgerblue';
+        if (isMiniMap) {
+            // 小地图显示更显眼的亮蓝色
+            ctx.fillStyle = 'yellow';
+        } else {
+            ctx.fillStyle = 'dodgerblue';
+        }
     } else {
-        ctx.fillStyle = 'crimson';
+        if (isMiniMap) {
+            // 小地图显示更显眼的红色，但要有点透明度
+            ctx.fillStyle = miniMapRed;
+        } else {
+            ctx.fillStyle = 'crimson';
+        }
     }
     ctx.fill();
 
     // player health
     ctx.beginPath();
     ctx.arc(player.position[0], player.position[1], player.size + 1, 0, Math.PI * 2);
-    ctx.strokeStyle = 'white';
+    ctx.strokeStyle = isMiniMap ? miniMapWhite : white;
     ctx.setLineDash([1, 0]);
     ctx.lineWidth = player.health;
     ctx.stroke();
 
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'black';
-    ctx.fillText(player.userName, player.position[0], player.position[1]);
+    if (!isMiniMap) {
+        // 小地图上不显示名字
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'black';
+        ctx.fillText(player.userName, player.position[0], player.position[1]);
+    }
 
     if (!isDead) {
         // player blades
@@ -206,7 +249,7 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: PlayerDto, isDead: bo
             const len = blade.length + player.size;
             ctx.lineWidth = blade.damage;
             ctx.lineTo(player.position[0] + sin * len, player.position[1] + -cos * len);
-            ctx.strokeStyle = 'red';
+            ctx.strokeStyle = isMiniMap ? miniMapRed : red;
             // 平衡性设计：如果刀比较少，对刀时不减少伤害，此时刀的颜色为金色
             if (blade.damage > 1 && player.blades.length <= 2) {
                 ctx.strokeStyle = 'gold';
@@ -217,30 +260,29 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: PlayerDto, isDead: bo
 }
 
 function drawGrid(ctx: CanvasRenderingContext2D) {
-    const size = 2000;
     // clear
     ctx.beginPath();
-    ctx.rect(-size / 2, -size / 2, size, size);
+    ctx.rect(-mapSize / 2, -mapSize / 2, mapSize, mapSize);
     ctx.fillStyle = 'gray';
     ctx.fill();
 
     // draw horizontal lines
-    for (let y = -size / 2; y <= size / 2; y += 20) {
+    for (let y = -mapSize / 2; y <= mapSize / 2; y += 20) {
         ctx.lineDashOffset = 0;
         ctx.lineWidth = y % 100 === 0 ? 1 : 0.1;
         ctx.beginPath();
-        ctx.moveTo(-size / 2, y);
-        ctx.lineTo(size / 2, y);
+        ctx.moveTo(-mapSize / 2, y);
+        ctx.lineTo(mapSize / 2, y);
         ctx.stroke();
     }
 
     // draw vertical lines
-    for (let x = -size / 2; x <= size / 2; x += 20) {
+    for (let x = -mapSize / 2; x <= mapSize / 2; x += 20) {
         ctx.lineDashOffset = 0;
         ctx.lineWidth = x % 100 === 0 ? 1 : 0.1;
         ctx.beginPath();
-        ctx.moveTo(x, -size / 2);
-        ctx.lineTo(x, size / 2);
+        ctx.moveTo(x, -mapSize / 2);
+        ctx.lineTo(x, mapSize / 2);
         ctx.stroke();
     }
 }
