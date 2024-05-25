@@ -1,11 +1,42 @@
 ﻿@page
 @using SpinBladeArena.Controllers
 @using SpinBladeArena.LogicCenter
+@using SpinBladeArena.LogicCenter.AI
 @using SpinBladeArena.Users
 @inject GameManager GameManager
 @inject UserManager UserManager
 @model SpinBladeArena.Pages.IndexModel
 @{
+    static string FormatTime(DateTime time)
+    {
+        DateTime now = DateTime.Now;
+        TimeSpan timeDifference = now - time;
+
+        if (timeDifference.TotalSeconds <= 2)
+        {
+            return "刚刚";
+        }
+        else if (timeDifference.TotalSeconds <= 100)
+        {
+            return $"{timeDifference.Seconds}秒前";
+        }
+        else if (time.Date == now.Date)
+        {
+            return time.ToString("HH:mm:ss");
+        }
+        else if (time.Date == now.AddDays(-1).Date)
+        {
+            return "昨天 " + time.ToString("HH:mm:ss");
+        }
+        else if (time.Date == now.AddDays(-2).Date)
+        {
+            return "前天 " + time.ToString("HH:mm:ss");
+        }
+        else
+        {
+            return time.ToString("yyyy-MM-dd HH:mm");
+        }
+    }
 }
 
 <!DOCTYPE html>
@@ -47,6 +78,12 @@
             .title-gradient h2 {
                 font-size: 2em;
             }
+
+        @@media (max-width: 768px) {
+            .title-gradient h1 {
+                font-size: 3em;
+            }
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -91,6 +128,7 @@
                     <th>人数</th>
                     <th>创建者</th>
                     <th>创建时间</th>
+                    <th>活动时间</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -103,11 +141,13 @@
                 }
                 @foreach (var room in GameManager.Lobbies.Values.OrderByDescending(x => x.Id))
                 {
+                    int aiPlayerCount = room.Players.OfType<AIPlayer>().Count() + room.DeadPlayers.OfType<AIPlayer>().Count();
                     <tr>
                         <td>@room.Id</td>
-                        <td>@room.Players.Count</td>
+                        <td>@room.Players.Count+@room.DeadPlayers.Count (@aiPlayerCount)</td>
                         <td>@UserManager.GetUser(room.CreateUserId)?.Name</td>
-                        <td>@room.CreateTime</td>
+                        <td>@FormatTime(room.CreateTime)</td>
+                        <td>@FormatTime(room.LastUpdateTime)</td>
                         <td><button type="button" class="btn btn-success" onclick="join(@room.Id)">加入</button></td>
                     </tr>
                 }
