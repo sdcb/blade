@@ -58,7 +58,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         .withHubProtocol(new signalR.protocols.msgpack.MessagePackHubProtocol())
         .build();
     connection.on('update', (players: PlayerDtoRaw[], pickableBonus: PickableBonusDtoRaw[], deadPlayers: PlayerDtoRaw[]) => {
-        console.log(players, pickableBonus, deadPlayers);
         state.players = players.map(x => convertPlayerDto(x));
         state.pickableBonus = pickableBonus.map(x => convertPickableBonusDto(x));
         state.deadPlayers = deadPlayers.map(x => convertPlayerDto(x));
@@ -89,6 +88,12 @@ function render(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
     drawUnits(ctx);
     ctx.restore();
 
+    drawLeaderBoard(ctx);
+
+    requestAnimationFrame(() => render(ctx, canvas));
+}
+
+function drawLeaderBoard(ctx: CanvasRenderingContext2D) {
     ctx.save();
     ctx.fillStyle = 'black';
     ctx.textAlign = 'left';
@@ -96,7 +101,7 @@ function render(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
     ctx.font = '30px Monospace';
     ctx.fillStyle = 'white';
     let y = 10;
-    ctx.fillText(`积分榜（${state.players.length + state.deadPlayers.length} 人）`, 10, y);
+    ctx.fillText(`积分榜(${state.players.length + state.deadPlayers.length}人)`, 10, y);
     y += 30;
     ctx.font = '15px Monospace';
     for (const p of state.players.concat().sort((a, b) => b.score - a.score)) {
@@ -106,9 +111,7 @@ function render(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
         drawPlayer(p, /* isDead */ true);
     }
     ctx.restore();
-
-
-    requestAnimationFrame(() => render(ctx, canvas));
+    return y;
 
     function drawPlayer(p: PlayerDto, isDead: boolean) {
         const isYou = p.userId === getUserId();

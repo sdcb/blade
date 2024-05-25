@@ -20,10 +20,38 @@
             height: 100%;
             display: block;
         }
+
+        #ad {
+            position: absolute;
+            right: 5px;
+            bottom: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 5px;
+            font-size: 11px;
+            color: black;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+            #ad a {
+                text-decoration: none;
+                color: #007bff;
+                font-family: monospace
+            }
+
+                #ad a:hover {
+                    text-decoration: underline;
+                }
     </style>
 </head>
 <body>
     <canvas id="canvas">您的浏览器不支持Canvas元素</canvas>
+    <div id="ad">
+        <strong>旋刃竞技场</strong>
+        Github: <a href="https://github.com/sdcb/blade" target="_blank">sdcb/blade</a>
+        QQ群: <a href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=mma4msRKd372Z6dWpmBp4JZ9RL4Jrf8X&authKey=gccTx0h0RaH5b8B8jtuPJocU7MgFRUznqbV%2FLgsKdsK8RqZE%2BOhnETQ7nYVTp1W0&noverify=0&group_code=495782587">495782587</a>
+    </div>
     <script src="~/libs/signalr.js"></script>
     <script src="~/libs/signalr-protocol-msgpack.js"></script>
     <script src="~/defs.js" asp-append-version="true"></script>
