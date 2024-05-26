@@ -1,4 +1,6 @@
 ﻿@page "/lobby/{lobbyId:int}"
+@using System.Text.Json
+@using System.Text.Encodings.Web
 @model LobbyModel
 <html lang="zh-hans">
 <head>
@@ -46,6 +48,9 @@
     </style>
 </head>
 <body>
+    <script>
+        const initState = @Html.Raw(JsonSerializer.Serialize(Model.Lobby.ToPushState(), new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
+    </script>
     <canvas id="canvas">您的浏览器不支持Canvas元素</canvas>
     <div id="ad">
         <strong>旋刃竞技场</strong>

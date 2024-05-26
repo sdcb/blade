@@ -19,8 +19,19 @@ class State {
 
         if (this.me) {
             this.center = { x: this.me.position[0], y: this.me.position[1] };
+            this.scale = getScale(this.me.size, window.innerWidth, window.innerHeight);
         }
-        this.scale = getScale(this.me.size, window.innerWidth, window.innerHeight);
+    }
+
+    onPush(dto: PushStateDto) {
+        this.players = dto.p.map(x => convertPlayerDto(x));
+        this.pickableBonus = dto.b.map(x => convertPickableBonusDto(x));
+        this.deadPlayers = dto.d.map(x => convertPlayerDto(x));
+        this.onUpdated();
+    }
+
+    constructor() {
+        this.onPush(initState);
     }
 
     me: PlayerDto = null;
@@ -58,13 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
         .withHubProtocol(new signalR.protocols.msgpack.MessagePackHubProtocol())
         .build();
-    connection.on('update', (resp: PushStateDto) => {
-        console.log(resp);
-        state.players = resp.p.map(x => convertPlayerDto(x));
-        state.pickableBonus = resp.b.map(x => convertPickableBonusDto(x));
-        state.deadPlayers = resp.d.map(x => convertPlayerDto(x));
-        state.onUpdated();
-    });
+    connection.on('update', (resp: PushStateDto) => state.onPush(resp));
     await connection.start();
 
     document.addEventListener('click', e => {

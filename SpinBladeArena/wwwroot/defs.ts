@@ -46,6 +46,7 @@ type BladeDtoRaw = {
 };
 
 type PushStateDto = {
+    i: number; // frame index
     p: PlayerDtoRaw[]; // Array of player data
     b: PickableBonusDtoRaw[]; // Array of pickable bonus data
     d: PlayerDtoRaw[]; // Array of dead player data
@@ -93,3 +94,5 @@ function convertPickableBonusDto(rawBonus: PickableBonusDtoRaw): PickableBonusDt
         position: rawBonus.p,
     };
 }
+
+declare var initState: PushStateDto;
