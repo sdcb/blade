@@ -83,6 +83,10 @@
             .title-gradient h1 {
                 font-size: 3em;
             }
+
+            .hide-sm {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -127,7 +131,7 @@
                     <th>#</th>
                     <th>人数</th>
                     <th>创建者</th>
-                    <th>创建时间</th>
+                    <th class="hide-sm">创建时间</th>
                     <th>活动时间</th>
                     <th>操作</th>
                 </tr>
@@ -136,7 +140,7 @@
                 @if (GameManager.Lobbies.Count == 0)
                 {
                     <tr>
-                        <td colspan="5" style="text-align: center">暂无房间</td>
+                        <td colspan="6" style="text-align: center">暂无房间</td>
                     </tr>
                 }
                 @foreach (var room in GameManager.Lobbies.Values.OrderByDescending(x => x.Id))
@@ -146,7 +150,7 @@
                         <td>@room.Id</td>
                         <td>@room.Players.Count+@room.DeadPlayers.Count (@aiPlayerCount)</td>
                         <td>@UserManager.GetUser(room.CreateUserId)?.Name</td>
-                        <td>@FormatTime(room.CreateTime)</td>
+                        <td class="hide-sm">@FormatTime(room.CreateTime)</td>
                         <td>@FormatTime(room.LastUpdateTime)</td>
                         <td><button type="button" class="btn btn-success" onclick="join(@room.Id)">加入</button></td>
                     </tr>
