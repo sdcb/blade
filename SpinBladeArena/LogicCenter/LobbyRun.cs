@@ -1,4 +1,6 @@
-﻿using SpinBladeArena.LogicCenter.AI;
+﻿using Microsoft.AspNetCore.SignalR;
+using SpinBladeArena.Hubs;
+using SpinBladeArena.LogicCenter.AI;
 using SpinBladeArena.Performance;
 using System.Diagnostics;
 using System.Drawing;
@@ -8,6 +10,8 @@ namespace SpinBladeArena.LogicCenter;
 
 public partial record Lobby
 {
+    private readonly PushManager pushManager = new(Id, ServiceProvider.GetRequiredService<IHubContext<GameHub, IGameHubClient>>(), ServiceProvider.GetRequiredKeyedService<int>("ServerFPS"));
+
     public void Run(CancellationToken cancellationToken)
     {
         EnsureAIPlayers();
@@ -191,10 +195,18 @@ public partial record Lobby
             }
             stat.RecordPlayerSpawn();
 
-            DispatchMessage();
+            pushManager.Push(ToPushState());
             stat.RecordDispatchMessage();
 
             PerformanceManager.Add(stat.ToPerformanceData(iterationIndex));
         }
+    }
+
+    private PushState ToPushState()
+    {
+        PlayerDto[] playerDtos = Players.Select(x => x.ToDto()).ToArray();
+        PickableBonusDto[] pickableBonusDtos = PickableBonuses.Select(x => x.ToDto()).ToArray();
+        PlayerDto[] deadPlayerDtos = DeadPlayers.Select(x => x.ToDto()).ToArray();
+        return new PushState(playerDtos, pickableBonusDtos, deadPlayerDtos);
     }
 }

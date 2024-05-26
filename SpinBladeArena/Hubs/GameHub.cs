@@ -38,5 +38,5 @@ public class GameHub(GameManager gameManager, CurrentUser user, UserManager user
 
 public interface IGameHubClient
 {
-    Task Update(PlayerDto[] players, PickableBonusDto[] pickableBonuses, PlayerDto[] deadPlayers);
+    Task Update(PushState pushState);
 }

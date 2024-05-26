@@ -3,6 +3,21 @@ using System.Runtime.Serialization;
 
 namespace SpinBladeArena.LogicCenter;
 
+using System.Runtime.Serialization;
+
+[DataContract]
+public record PushState(PlayerDto[] Players, PickableBonusDto[] Bonuses, PlayerDto[] DeadPlayers)
+{
+    [DataMember(Name = "p")]
+    public PlayerDto[] Players { get; set; } = Players;
+
+    [DataMember(Name = "b")]
+    public PickableBonusDto[] Bonuses { get; set; } = Bonuses;
+
+    [DataMember(Name = "d")]
+    public PlayerDto[] DeadPlayers { get; set; } = DeadPlayers;
+}
+
 [DataContract]
 public class PlayerDto
 {

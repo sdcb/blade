@@ -45,6 +45,12 @@ type BladeDtoRaw = {
     d: number;  // Damage potential of the blade
 };
 
+type PushStateDto = {
+    p: PlayerDtoRaw[]; // Array of player data
+    b: PickableBonusDtoRaw[]; // Array of pickable bonus data
+    d: PlayerDtoRaw[]; // Array of dead player data
+};
+
 /**
 * Converts the raw player data (PlayerDtoRaw) into a more readable format (PlayerDto)
 * @param rawPlayer The raw player data

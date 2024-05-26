@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using SpinBladeArena.Primitives;
 
 namespace SpinBladeArena.LogicCenter;
@@ -16,6 +15,7 @@ public class Player(int userId, string userName, Vector2 position)
     public float MovementSpeedPerSecond = 75;
     public PlayerWeapon Weapon = PlayerWeapon.Default;
     public double DeadTime = 0;
+    public List<string> Connections { get; } = [];
     public int Score = 1;
     public bool IsLarge => Size > 75;
 

@@ -1,17 +1,12 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using SpinBladeArena.Hubs;
-using SpinBladeArena.LogicCenter.AI;
+﻿using SpinBladeArena.LogicCenter.AI;
 using SpinBladeArena.Performance;
 using SpinBladeArena.Users;
-using System.Diagnostics;
-using System.Drawing;
 using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter;
 
 public partial record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvider ServiceProvider)
 {
-    private readonly IHubContext<GameHub, IGameHubClient> Hub = ServiceProvider.GetRequiredService<IHubContext<GameHub, IGameHubClient>>();
     private readonly UserManager UserManager = ServiceProvider.GetRequiredService<UserManager>();
     public readonly PerformanceManager PerformanceManager = new();
 
@@ -105,14 +100,6 @@ public partial record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServ
             Player aiPlayer = AIPlayer.CreateRandom(RandomPosition(), knownNames);
             Players.Add(aiPlayer);
         }
-    }
-
-    private void DispatchMessage()
-    {
-        PlayerDto[] playerDtos = Players.Select(x => x.ToDto()).ToArray();
-        PickableBonusDto[] pickableBonusDtos = PickableBonuses.Select(x => x.ToDto()).ToArray();
-        PlayerDto[] deadPlayerDtos = DeadPlayers.Select(x => x.ToDto()).ToArray();
-        Hub.Clients.Group(Id.ToString()).Update(playerDtos, pickableBonusDtos, deadPlayerDtos);
     }
 
     internal void SetPlayerDestination(int userId, float x, float y)
