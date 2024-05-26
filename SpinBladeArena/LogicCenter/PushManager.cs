@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using SpinBladeArena.Hubs;
 using SpinBladeArena.Performance;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 
 namespace SpinBladeArena.LogicCenter;
 
@@ -14,5 +16,17 @@ public class PushManager(int lobbyId, IHubContext<GameHub, IGameHubClient> hub, 
     {
         _states.Add(state);
         hub.Clients.Group(lobbyId.ToString()).Update(state);
+
+        // Uncomment the following line to write debug info to the file system
+        // WriteDebugInfo(state);
     }
+
+    private void WriteDebugInfo(PushState state)
+    {
+        Directory.CreateDirectory($"pushes/{lobbyId}");
+        string jsonData = JsonSerializer.Serialize(state, _jso);
+        File.WriteAllText($"pushes/{lobbyId}/{state.FrameId}.json", jsonData);
+    }
+
+    static JsonSerializerOptions _jso = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 }
