@@ -14,10 +14,7 @@ public class LobbyController(CurrentUser user, GameManager gameManager) : Contro
         return gameManager.CreateLobby(user.Id);
     }
 
-#if DEBUG
-    [AllowAnonymous]
-#endif
-    [HttpGet, Route("lobby/{lobbyId}/state")]
+    [AllowAnonymous, HttpGet, Route("lobby/{lobbyId}/state")]
     public ActionResult<PushState> GetLobbyState(int lobbyId)
     {
         if (gameManager.Lobbies.TryGetValue(lobbyId, out Lobby? lobby))
