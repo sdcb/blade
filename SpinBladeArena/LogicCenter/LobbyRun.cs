@@ -10,7 +10,8 @@ namespace SpinBladeArena.LogicCenter;
 
 public partial record Lobby
 {
-    private readonly PushManager pushManager = new(Id, ServiceProvider.GetRequiredService<IHubContext<GameHub, IGameHubClient>>(), ServiceProvider.GetRequiredKeyedService<int>("ServerFPS"));
+    private readonly PushManager PushManager = new(Id, ServiceProvider.GetRequiredService<IHubContext<GameHub, IGameHubClient>>(), ServiceProvider.GetRequiredKeyedService<int>("ServerFPS"));
+    private long FrameId = 0;
 
     public void Run(CancellationToken cancellationToken)
     {
@@ -22,7 +23,7 @@ public partial record Lobby
         float bonusSpawnTimer = 0;
 
         Stopwatch allTimeStopwatch = Stopwatch.StartNew();
-        for (long iterationIndex = 0; !cancellationToken.IsCancellationRequested; ++iterationIndex)
+        for (FrameId = 0; !cancellationToken.IsCancellationRequested; ++FrameId)
         {
             if (DateTime.Now - LastUpdateTime > TimeSpan.FromSeconds(180))
             {
@@ -195,18 +196,18 @@ public partial record Lobby
             }
             stat.RecordPlayerSpawn();
 
-            pushManager.Push(ToPushState());
+            PushManager.Push(ToPushState());
             stat.RecordDispatchMessage();
 
-            PerformanceManager.Add(stat.ToPerformanceData(iterationIndex));
+            PerformanceManager.Add(stat.ToPerformanceData(FrameId));
         }
     }
 
-    private PushState ToPushState()
+    public PushState ToPushState()
     {
         PlayerDto[] playerDtos = Players.Select(x => x.ToDto()).ToArray();
         PickableBonusDto[] pickableBonusDtos = PickableBonuses.Select(x => x.ToDto()).ToArray();
         PlayerDto[] deadPlayerDtos = DeadPlayers.Select(x => x.ToDto()).ToArray();
-        return new PushState(playerDtos, pickableBonusDtos, deadPlayerDtos);
+        return new PushState(FrameId, playerDtos, pickableBonusDtos, deadPlayerDtos);
     }
 }
