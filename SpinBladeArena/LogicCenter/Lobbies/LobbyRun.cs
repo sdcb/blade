@@ -61,7 +61,11 @@ public partial class Lobby
             // handle move
             {
                 RectangleF bounds = new(-MaxSize.X / 2, -MaxSize.Y / 2, MaxSize.X, MaxSize.Y);
-                foreach (Player player in Players) player.Move(dt, bounds);
+                foreach (Player player in Players)
+                {
+                    player.Move(dt, bounds);
+                    player.BalanceCheck();
+                }
                 // 如果玩家之间的距离小于玩家圆的直径，则以双方的Size为权重，将双方推开
                 for (int i = 0; i < Players.Count - 1; ++i)
                 {

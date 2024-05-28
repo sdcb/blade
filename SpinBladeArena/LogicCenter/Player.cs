@@ -10,17 +10,31 @@ public class Player(int userId, string userName, Vector2 position)
     public int UserId { get; } = userId;
     public string UserName { get; } = userName;
     public Vector2 Position = position;
-    public float Health = 1;
-    public float Size = 30;
+    public float Health = 10;
+    public float Size => MinSize + Health;
+    public const float DefaultSize = 30;
+    public const float MinSize = 20;
     public Vector2 Destination = position;
-    public float MovementSpeedPerSecond = 75;
+
+    public const float DefaultMovementSpeedPerSecond = 60;
+    private float _movementSpeedPerSecond = 60;
+    // 平衡性设计：如果没有刀，移动速度增加50%
+    public float MovementSpeedPerSecond
+    {
+        get => Weapon.Count == 0 ? _movementSpeedPerSecond * 1.5f : _movementSpeedPerSecond;
+        private set => _movementSpeedPerSecond = value;
+    }
+
+    public void AddMovementSpeed(float amount)
+    {
+        _movementSpeedPerSecond = MathUtils.AbsAdd(_movementSpeedPerSecond, amount);
+    }
+
     public PlayerWeapon Weapon = PlayerWeapon.Default;
     public double DeadTime = 0;
     public List<string> Connections { get; } = [];
+    
     public int Score = 1;
-    public bool IsLarge => Size > 75;
-
-    public bool IsStrong => Weapon.Count > 7;
 
     public bool Dead => Health <= 0;
 
@@ -63,6 +77,38 @@ public class Player(int userId, string userName, Vector2 position)
             Math.Clamp(Position.Y, bound.Top, bound.Bottom));
 
         Weapon.RotateBlades(deltaTime);
+    }
+
+    public void BalanceCheck()
+    {
+        // 刀长不能超过玩家半径的3倍
+        // 默认刀长30，玩家半径30，最大刀长90
+        for (int i = 0; i < Weapon.Count; i++)
+        {
+            if (Weapon[i].Length > Size * 3)
+            {
+                Weapon[i].Length = Size * 3;
+            }
+        }
+
+        // 刀速不能超过玩家半径的1.5倍
+        // 起始10度每秒，半径30，最大45度每秒
+        if (Weapon.RotationDegreePerSecond > Size * 1.5f)
+        {
+            Weapon.LimitRotationDegreePerSecond(Size * 1.5f);
+        }
+
+        // 移动速度不能超过150
+        if (MovementSpeedPerSecond > 150)
+        {
+            MovementSpeedPerSecond = 150;
+        }
+
+        // 刀数量不能超过半径除以6，默认半径30，最多5把刀
+        while (Weapon.Count > Size / 6)
+        {
+            Weapon.RemoveAt(Weapon.Count - 1);
+        }
     }
 
     public static KillingInfo AttackEachOther(Player p1, Player p2)
@@ -143,8 +189,8 @@ public class Player(int userId, string userName, Vector2 position)
                         }
 
                         // 刀相撞后，反向旋转
-                        p1.Weapon.RotationDegreePerSecond = -p1.Weapon.RotationDegreePerSecond;
-                        p2.Weapon.RotationDegreePerSecond = -p2.Weapon.RotationDegreePerSecond;
+                        p1.Weapon.ReverseRotationDirection();
+                        p2.Weapon.ReverseRotationDirection();
                         return;
                     }
                 }
@@ -178,7 +224,6 @@ public class Player(int userId, string userName, Vector2 position)
             Position = [Position.X, Position.Y],
             Destination = [Destination.X, Destination.Y],
             Health = Health,
-            Size = Size,
             Blades = Weapon.ToDto(),
             Score = Score
         };

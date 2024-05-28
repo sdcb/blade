@@ -24,9 +24,6 @@ public class PlayerDto
     [DataMember(Name = "h"), JsonPropertyName("h")]
     public required float Health { get; init; }
 
-    [DataMember(Name = "i"), JsonPropertyName("i")]
-    public required float Size { get; init; }
-
     [DataMember(Name = "b"), JsonPropertyName("b")]
     public required BladeDto[] Blades { get; init; }
 }

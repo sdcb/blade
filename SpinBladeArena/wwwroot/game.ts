@@ -2,11 +2,11 @@
 const mapSize = 2000;
 
 class State {
-    players = Array<PlayerDto>();
+    players = Array<Player>();
 
-    pickableBonus = Array<PickableBonusDto>();
+    pickableBonus = Array<Bonus>();
 
-    deadPlayers = Array<PlayerDto>();
+    deadPlayers = Array<Player>();
 
     center = { x: 0, y: 0 };
     scale = 1;
@@ -19,14 +19,14 @@ class State {
 
         if (this.me) {
             this.center = { x: this.me.position[0], y: this.me.position[1] };
-            this.scale = getScale(this.me.size, window.innerWidth, window.innerHeight);
+            this.scale = getScale(this.me.getSize(), window.innerWidth, window.innerHeight);
         }
     }
 
     onPush(dto: PushStateDto) {
-        this.players = dto.p.map(x => convertPlayerDto(x));
-        this.pickableBonus = dto.b.map(x => convertPickableBonusDto(x));
-        this.deadPlayers = dto.d.map(x => convertPlayerDto(x));
+        this.players = dto.p.map(x => new Player(x));
+        this.pickableBonus = dto.b.map(x => new Bonus(x));
+        this.deadPlayers = dto.d.map(x => new Player(x));
         this.onUpdated();
     }
 
@@ -34,7 +34,7 @@ class State {
         this.onPush(initState);
     }
 
-    me: PlayerDto = null;
+    me: Player = null;
 }
 const state = new State();
 
@@ -144,7 +144,7 @@ function drawLeaderBoard(ctx: CanvasRenderingContext2D) {
     ctx.restore();
     return y;
 
-    function drawPlayer(p: PlayerDto, isDead: boolean) {
+    function drawPlayer(p: Player, isDead: boolean) {
         const isYou = p.userId === getUserId();
         ctx.fillStyle = isDead ? 'darkgray' : isYou ? 'yellow' : 'white';
         ctx.fillText(`${p.userName}: ${p.score}`, 10, y);
@@ -199,7 +199,7 @@ function drawUnits(ctx: CanvasRenderingContext2D, isMiniMap: boolean = false) {
     }
 }
 
-function drawPlayer(ctx: CanvasRenderingContext2D, player: PlayerDto, isDead: boolean, isMiniMap: boolean) {
+function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, isDead: boolean, isMiniMap: boolean) {
     const currentUserId = getUserId();
     const miniMapRed = 'rgba(255, 0, 0, 0.6)';
     const red = 'red';
@@ -207,7 +207,7 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: PlayerDto, isDead: bo
     const white = 'white';
 
     ctx.beginPath();
-    ctx.arc(player.position[0], player.position[1], player.size, 0, Math.PI * 2);
+    ctx.arc(player.position[0], player.position[1], player.getSize(), 0, Math.PI * 2);
     if (isDead) {
         ctx.fillStyle = 'gray';
     } else if (player.userId === currentUserId) {
@@ -226,13 +226,9 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: PlayerDto, isDead: bo
         }
     }
     ctx.fill();
-
-    // player health
-    ctx.beginPath();
-    ctx.arc(player.position[0], player.position[1], player.size + 1, 0, Math.PI * 2);
     ctx.strokeStyle = isMiniMap ? miniMapWhite : white;
-    ctx.setLineDash([1, 0]);
-    ctx.lineWidth = player.health;
+    ctx.lineWidth = player.getSize() / Player.minSize;
+    ctx.setLineDash([]);
     ctx.stroke();
 
     if (!isMiniMap) {
@@ -251,8 +247,8 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: PlayerDto, isDead: bo
             const cos = Math.cos(angle);
 
             ctx.beginPath();
-            ctx.moveTo(player.position[0] + sin * player.size, player.position[1] + -cos * player.size);
-            const len = blade.length + player.size;
+            ctx.moveTo(player.position[0] + sin * player.getSize(), player.position[1] + -cos * player.getSize());
+            const len = blade.length + player.getSize();
             ctx.lineWidth = blade.damage;
             ctx.lineTo(player.position[0] + sin * len, player.position[1] + -cos * len);
             ctx.strokeStyle = isMiniMap ? miniMapRed : red;

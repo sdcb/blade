@@ -1,13 +1,35 @@
-﻿using System.Runtime.CompilerServices;
-using SpinBladeArena.LogicCenter.Push;
+﻿using SpinBladeArena.LogicCenter.Push;
+using SpinBladeArena.Primitives;
 
 namespace SpinBladeArena.LogicCenter;
 
 public class PlayerWeapon : List<Blade>
 {
-    public float RotationDegreePerSecond = 10;
+    public const float DefaultRotationDegreePerSecond = 10;
 
-    public static PlayerWeapon Default => [new()];
+    public float RotationDegreePerSecond { get; set; } = DefaultRotationDegreePerSecond;
+
+    public void AddRotationDegreePerSecond(float amountInDegree)
+    {
+        RotationDegreePerSecond = MathUtils.AbsAdd(RotationDegreePerSecond, amountInDegree);
+    }
+
+    public void ReverseRotationDirection()
+    {
+        RotationDegreePerSecond = -RotationDegreePerSecond;
+    }
+
+    public void LimitRotationDegreePerSecond(float val)
+    {
+        if (Math.Abs(RotationDegreePerSecond) > val)
+        {
+            RotationDegreePerSecond = Math.Sign(RotationDegreePerSecond) * val;
+        }
+    }
+
+    public float WeaponScore => this.Sum(x => x.Score) * RotationDegreePerSecond / DefaultRotationDegreePerSecond;
+
+    public static PlayerWeapon Default => [new(Random.Shared.NextSingle() * 360)];
 
     public void DestroyBladeAt(int bladeIndex)
     {
@@ -29,13 +51,11 @@ public class PlayerWeapon : List<Blade>
         }
     }
 
-    public void AddLength(float length, float size)
+    public void AddLength(float length)
     {
-        // 平衡性调整：刀片长度不超过玩家大小的5倍
-        float maxLength = size * 5;
         for (int i = 0; i < Count; ++i)
         {
-            this[i].Length = Math.Min(this[i].Length + length, maxLength);
+            this[i].Length = this[i].Length + length;
         }
     }
 
@@ -98,11 +118,15 @@ public class PlayerWeapon : List<Blade>
     }
 }
 
-public class Blade(float rotationDegree = 0, float damage = 1, float length = 40)
+public class Blade(float rotationDegree = 0, float damage = 1, float length = Blade.DefaultLength)
 {
+    public const float DefaultLength = 30;
+
     public float RotationDegree = rotationDegree;
     public float Damage = damage;
     public float Length = length;
+
+    public float Score => Damage / 2f + Length / 80f;
 
     public BladeDto ToDto() => new()
     {

@@ -1,7 +1,6 @@
 ﻿using SpinBladeArena.LogicCenter.Push;
 using SpinBladeArena.Primitives;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 
 namespace SpinBladeArena.LogicCenter;
 
@@ -16,43 +15,33 @@ public class Bonus(string name, Vector2 position)
 
     public Circle ToFrontendCircle() => new(Position, FrontendRadius);
 
-    
-    public static void NoBladeBonus(Player player)
-    {
-        if (player.Weapon.Count == 0)
-        {
-            player.Weapon.AddBlade(1);
-        }
-    }
-
-    public static Bonus Health(Vector2 position, float healthAmount = 2) => new(BonusNames.Health, position)
+    public static Bonus Health(Vector2 position, float healthAmount = 8) => new(BonusNames.Fat, position)
     {
         Apply = (Player player) =>
         {
             player.Health += healthAmount;
-            if (player.IsLarge)
-            {
-                player.Size -= 5;
-            }
-            NoBladeBonus(player);
         }
     };
 
     public static Bonus Thin(Vector2 position) => new(BonusNames.Thin, position)
     {
-        Apply = (Player player) => player.Size = Math.Clamp(MathF.Round(player.Size / 2), 20, 200)
+        Apply = (Player player) =>
+        {
+            float oldHealth = player.Health;
+            player.Health = Math.Clamp(MathF.Round(player.Health / 2), 1, 200);
+            // 设计：减少血量的同时，增加减少血量一半的速度
+            float diff = oldHealth - player.Health;
+            player.AddMovementSpeed(diff / 2);
+        }
     };
 
     public static Bonus Speed(Vector2 position, float speedAmount = 5) => new(BonusNames.Speed, position)
     {
         Apply = (Player player) =>
         {
-            player.MovementSpeedPerSecond = AbsAdd(player.MovementSpeedPerSecond, speedAmount);
-            if (player.IsStrong)
-            {
-                player.Size = Math.Clamp(player.Size + 5, 20, 200);
-            }
-            NoBladeBonus(player);
+            player.AddMovementSpeed(speedAmount);
+            player.Health = Math.Clamp(player.Health - 1, 1, 200);
+            player.Weapon.AddRotationDegreePerSecond(-2);
         }
     };
 
@@ -60,34 +49,20 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.MovementSpeedPerSecond = AbsAdd(player.MovementSpeedPerSecond, speedAmount);
-            if (player.IsStrong)
-            {
-                player.Size = Math.Clamp(player.Size + 20, 20, 200);
-            }
-            NoBladeBonus(player);
+            player.AddMovementSpeed(speedAmount);
+            player.Health = Math.Clamp(player.Health - 2, 1, 200);
+            player.Weapon.AddRotationDegreePerSecond(-5);
         }
     };
-
-    
-    static float AbsAdd(float val, float addValue)
-    {
-        bool isPositive = val > 0;
-        return isPositive ? val + addValue : val - addValue;
-    }
 
     public static Bonus BladeCount(Vector2 position, int bladeCountAmount = 1) => new(BonusNames.BladeCount, position)
     {
         Apply = (Player player) =>
         {
-            NoBladeBonus(player);
             player.Weapon.AddBlade(bladeCountAmount);
-            if (player.IsStrong)
-            {
-                player.Size = Math.Clamp(player.Size + 10, 20, 200);
-                player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 10, 10, 100);
-                player.Weapon.RotationDegreePerSecond = Math.Clamp(player.Weapon.RotationDegreePerSecond - 2, 1, 10);
-            }
+            player.Health += 1;
+            player.Weapon.AddRotationDegreePerSecond(-1);
+            player.AddMovementSpeed(-1);
         }
     };
 
@@ -95,14 +70,10 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            NoBladeBonus(player);
             player.Weapon.AddBlade(bladeCountAmount);
-            if (player.IsStrong)
-            {
-                player.Size = Math.Clamp(player.Size + 30, 20, 200);
-                player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
-                player.Weapon.RotationDegreePerSecond = Math.Clamp(player.Weapon.RotationDegreePerSecond - 5, 1, 10);
-            }
+            player.Health += 3;
+            player.Weapon.AddRotationDegreePerSecond(-4);
+            player.AddMovementSpeed(-4);
         }
     };
 
@@ -110,8 +81,10 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            NoBladeBonus(player);
-            player.Weapon.AddLength(bladeLengthAmount, player.Size);
+            player.Weapon.AddLength(bladeLengthAmount);
+            player.Health += 1;
+            player.Weapon.AddRotationDegreePerSecond(-1);
+            player.AddMovementSpeed(-1);
         }
     };
 
@@ -119,14 +92,10 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            NoBladeBonus(player);
-            player.Weapon.AddLength(bladeLengthAmount, player.Size);
-            if (player.IsStrong)
-            {
-                player.Size = Math.Clamp(player.Size + 30, 20, 200);
-                player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
-                player.Weapon.RotationDegreePerSecond = Math.Clamp(player.Weapon.RotationDegreePerSecond - 5, 1, 10);
-            }
+            player.Weapon.AddLength(bladeLengthAmount);
+            player.Health += 3;
+            player.Weapon.AddRotationDegreePerSecond(-4);
+            player.AddMovementSpeed(-4);
         }
     };
 
@@ -134,8 +103,10 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            NoBladeBonus(player);
             player.Weapon.AddDamage(bladeDamageAmount);
+            player.Health += 1;
+            player.Weapon.AddRotationDegreePerSecond(-1);
+            player.AddMovementSpeed(-1);
         }
     };
 
@@ -143,13 +114,9 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Weapon.RotationDegreePerSecond += rotationDegreePerSecond;
-            if (player.IsStrong)
-            {
-                player.Size = Math.Clamp(player.Size + 10, 20, 200);
-                player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 10, 10, 100);
-            }
-            NoBladeBonus(player);
+            player.Weapon.AddRotationDegreePerSecond(rotationDegreePerSecond);
+            player.Health += 1;
+            player.AddMovementSpeed(-1);
         }
     };
 
@@ -157,13 +124,9 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Weapon.RotationDegreePerSecond += rotationDegreePerSecond;
-            if (player.IsStrong)
-            {
-                player.Size = Math.Clamp(player.Size + 30, 20, 200);
-                player.MovementSpeedPerSecond = Math.Clamp(player.MovementSpeedPerSecond - 20, 10, 100);
-            }
-            NoBladeBonus(player);
+            player.Weapon.AddRotationDegreePerSecond(rotationDegreePerSecond);
+            player.Health += 3;
+            player.AddMovementSpeed(-5);
         }
     };
 
@@ -185,7 +148,7 @@ public class Bonus(string name, Vector2 position)
         p => BladeSpeed20(p),
         p => Thin(p),
         p => BladeCount3(p),
-        Random,
+        //Random,
     ];
 
     public static Bonus CreateRandom(Vector2 position) => All[System.Random.Shared.Next(All.Length)](position);
