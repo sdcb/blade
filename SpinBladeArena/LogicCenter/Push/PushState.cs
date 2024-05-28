@@ -1,4 +1,4 @@
-﻿namespace SpinBladeArena.LogicCenter;
+﻿namespace SpinBladeArena.LogicCenter.Push;
 
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;

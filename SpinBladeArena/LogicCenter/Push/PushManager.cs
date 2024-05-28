@@ -4,7 +4,7 @@ using SpinBladeArena.Performance;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 
-namespace SpinBladeArena.LogicCenter;
+namespace SpinBladeArena.LogicCenter.Push;
 
 public class PushManager(int lobbyId, IHubContext<GameHub, IGameHubClient> hub, int serverFps)
 {
