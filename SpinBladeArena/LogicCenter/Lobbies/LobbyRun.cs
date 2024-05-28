@@ -8,9 +8,9 @@ using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter;
 
-public partial record Lobby
+public partial class Lobby
 {
-    private readonly PushManager PushManager = new(Id, ServiceProvider.GetRequiredService<IHubContext<GameHub, IGameHubClient>>(), ServiceProvider.GetRequiredKeyedService<int>("ServerFPS"));
+    public readonly PushManager PushManager = new(id, ServiceProvider.GetRequiredService<IHubContext<GameHub, IGameHubClient>>(), ServiceProvider.GetRequiredKeyedService<int>("ServerFPS"));
     private long FrameId = 0;
 
     public void Run(CancellationToken cancellationToken)
@@ -203,7 +203,7 @@ public partial record Lobby
         }
     }
 
-    public PushState ToPushState()
+    private PushState ToPushState()
     {
         PlayerDto[] playerDtos = Players.Select(x => x.ToDto()).ToArray();
         PickableBonusDto[] pickableBonusDtos = PickableBonuses.Select(x => x.ToDto()).ToArray();

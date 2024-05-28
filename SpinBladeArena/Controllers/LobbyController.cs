@@ -11,7 +11,7 @@ public class LobbyController(CurrentUser user, GameManager gameManager) : Contro
     [HttpPost, Route("lobby")]
     public int CreateLobby()
     {
-        return gameManager.CreateLobby(user.Id);
+        return gameManager.CreateFFALobby(user.Id);
     }
 
     [AllowAnonymous, HttpGet, Route("lobby/{lobbyId}/state")]
@@ -19,7 +19,7 @@ public class LobbyController(CurrentUser user, GameManager gameManager) : Contro
     {
         if (gameManager.Lobbies.TryGetValue(lobbyId, out Lobby? lobby))
         {
-            return lobby.ToPushState();
+            return lobby.PushManager.Latest;
         }
         else
         {

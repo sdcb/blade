@@ -12,6 +12,8 @@ public class PushManager(int lobbyId, IHubContext<GameHub, IGameHubClient> hub, 
 
     private readonly CircularList<PushState> _states = new((int)Math.Ceiling(serverFps * AllowedDelaySeconds));
 
+    public PushState Latest => _states.LastOrDefault() ?? new PushState(0, [], [], []);
+
     public void Push(PushState state)
     {
         _states.Add(state);
@@ -28,5 +30,5 @@ public class PushManager(int lobbyId, IHubContext<GameHub, IGameHubClient> hub, 
         File.WriteAllText($"pushes/{lobbyId}/{state.FrameId}.json", jsonData);
     }
 
-    static JsonSerializerOptions _jso = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+    readonly static JsonSerializerOptions _jso = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 }

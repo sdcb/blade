@@ -49,7 +49,7 @@
 </head>
 <body>
     <script>
-        const initState = @Html.Raw(JsonSerializer.Serialize(Model.Lobby.ToPushState(), new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
+        const initState = @Html.Raw(JsonSerializer.Serialize(Model.Lobby.PushManager.Latest, new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
     </script>
     <canvas id="canvas">您的浏览器不支持Canvas元素</canvas>
     <div id="ad">

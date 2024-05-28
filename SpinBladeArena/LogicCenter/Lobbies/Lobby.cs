@@ -5,8 +5,12 @@ using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter;
 
-public partial record Lobby(int Id, int CreateUserId, DateTime CreateTime, IServiceProvider ServiceProvider)
+public abstract partial class Lobby(int id, int createUserId, DateTime createTime, IServiceProvider ServiceProvider)
 {
+    public int Id = id;
+    public int CreateUserId = createUserId;
+    public DateTime CreateTime = createTime;
+
     private readonly UserManager UserManager = ServiceProvider.GetRequiredService<UserManager>();
     public readonly PerformanceManager PerformanceManager = new();
 
