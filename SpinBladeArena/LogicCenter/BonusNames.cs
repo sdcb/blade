@@ -2,7 +2,7 @@
 
 public static class BonusNames
 {
-    public const string Fat = "增重";
+    public const string Health = "生命";
     public const string Thin = "减肥";
     public const string Speed = "移速+5";
     public const string Speed20 = "移速+20";

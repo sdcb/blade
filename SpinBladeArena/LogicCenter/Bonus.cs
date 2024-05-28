@@ -15,7 +15,7 @@ public class Bonus(string name, Vector2 position)
 
     public Circle ToFrontendCircle() => new(Position, FrontendRadius);
 
-    public static Bonus Health(Vector2 position, float healthAmount = 8) => new(BonusNames.Fat, position)
+    public static Bonus Health(Vector2 position, float healthAmount = 8) => new(BonusNames.Health, position)
     {
         Apply = (Player player) =>
         {
