@@ -81,7 +81,7 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Weapon.AddLength(bladeLengthAmount);
+            player.Weapon.AddLength(bladeLengthAmount, player.Size);
             player.Health += 1;
             player.Weapon.AddRotationDegreePerSecond(-1);
             player.AddMovementSpeed(-1);
@@ -92,7 +92,7 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Weapon.AddLength(bladeLengthAmount);
+            player.Weapon.AddLength(bladeLengthAmount, player.Size);
             player.Health += 3;
             player.Weapon.AddRotationDegreePerSecond(-4);
             player.AddMovementSpeed(-4);

@@ -81,33 +81,25 @@ public class Player(int userId, string userName, Vector2 position)
 
     public void BalanceCheck()
     {
-        // 刀长不能超过玩家半径的3倍
-        // 默认刀长30，玩家半径30，最大刀长90
-        for (int i = 0; i < Weapon.Count; i++)
-        {
-            if (Weapon[i].Length > Size * 3)
-            {
-                Weapon[i].Length = Size * 3;
-            }
-        }
-
-        // 刀速不能超过玩家半径的1.5倍
-        // 起始10度每秒，半径30，最大45度每秒
-        if (Weapon.RotationDegreePerSecond > Size * 1.5f)
-        {
-            Weapon.LimitRotationDegreePerSecond(Size * 1.5f);
-        }
-
         // 移动速度不能超过150
         if (MovementSpeedPerSecond > 150)
         {
             MovementSpeedPerSecond = 150;
         }
 
-        // 刀数量不能超过半径除以6，默认半径30，最多5把刀
+        // 刀数量不能超过半径除以6，默认半径30，最多5把刀，减肥时会掉刀
         while (Weapon.Count > Size / 6)
         {
             Weapon.RemoveAt(Weapon.Count - 1);
+        }
+
+        // 刀伤不能超过半径除以15，默认半径30，最多2伤，减肥时会掉刀伤
+        for (int i = 0; i < Weapon.Count; i++)
+        {
+            if (Weapon[i].Damage > Size / 15)
+            { 
+                Weapon[i].Damage = Size / 15;
+            }
         }
     }
 

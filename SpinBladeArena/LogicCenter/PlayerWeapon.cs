@@ -11,7 +11,13 @@ public class PlayerWeapon : List<Blade>
 
     public void AddRotationDegreePerSecond(float amountInDegree)
     {
-        RotationDegreePerSecond = MathUtils.AbsAdd(RotationDegreePerSecond, amountInDegree);
+        // 刀速不能超过玩家半径的1.5倍（但不掉速度）
+        // 起始10度每秒，半径30，最大45度每秒
+        float max = 1.5f * 30 / 10 * DefaultRotationDegreePerSecond;
+        if (Math.Abs(RotationDegreePerSecond) <= max)
+        {
+            RotationDegreePerSecond = MathUtils.AbsAdd(RotationDegreePerSecond, amountInDegree);
+        }
     }
 
     public void ReverseRotationDirection()
@@ -44,18 +50,30 @@ public class PlayerWeapon : List<Blade>
             Add(new());
         }
 
+        RearrangeBlades();
+    }
+
+    private void RearrangeBlades()
+    {
         float initialAngle = Count == 0 ? 0 : this[0].RotationDegree;
         for (int i = 0; i < Count; ++i)
         {
-            this[i].RotationDegree = initialAngle + 360 / Count * i;
+            this[i].RotationDegree = initialAngle + 360.0f / Count * i;
         }
     }
 
-    public void AddLength(float length)
+    public void AddLength(float length, float playerSize)
     {
+        // 平衡性：刀长不能超过玩家半径的3倍（但不掉长度）
+        // 例如：默认刀长30，玩家半径30，最大刀长90
+        float maxLength = playerSize * 3;
         for (int i = 0; i < Count; ++i)
         {
-            this[i].Length = this[i].Length + length;
+            float result = this[i].Length + length;
+            if (result < maxLength)
+            {
+                this[i].Length = result;
+            }
         }
     }
 
