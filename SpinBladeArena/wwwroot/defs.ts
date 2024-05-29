@@ -24,7 +24,7 @@ class Bonus {
 
         if (this.name === BonusNames.BladeCount || this.name === BonusNames.BladeCount3) {
             // 刀数量不能超过半径除以8（向上取值），默认半径30，最多3.75->4把刀，减肥时不掉刀
-            const maxBladeCount = Math.ceil(Player.defaultSize / 8);
+            const maxBladeCount = Math.ceil(player.getSize() / 8);
             return player.blades.length < maxBladeCount;
         }
 
@@ -36,7 +36,7 @@ class Bonus {
 
         if (this.name === BonusNames.BladeDamage) {
             // 刀伤不能超过半径除以15，默认半径30，最多2伤，减肥时会掉刀伤
-            const maxBladeDamage = Math.ceil(Player.defaultSize / 15);
+            const maxBladeDamage = Math.ceil(player.getSize() / 15);
             return player.blades.some(blade => blade.damage < maxBladeDamage);
         }
 
@@ -83,6 +83,11 @@ class Player {
     getSize() {
         const suggestedSize = Player.minSize + this.health;
         return suggestedSize < 0 ? 0 : suggestedSize;
+    }
+
+    // 平衡性设计：如果刀比较少，对刀时不减少伤害，此时刀的颜色为金色
+    isGoldBlade(blade: Blade) {
+        return this.blades.length <= 2 && blade.damage >= 2;
     }
 }
 // Define the structure for player data

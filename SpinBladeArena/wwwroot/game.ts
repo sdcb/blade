@@ -267,8 +267,8 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, isDead: boole
             ctx.lineWidth = blade.damage;
             ctx.lineTo(player.position[0] + sin * len, player.position[1] + -cos * len);
             ctx.strokeStyle = isMiniMap ? miniMapRed : red;
-            // 平衡性设计：如果刀比较少，对刀时不减少伤害，此时刀的颜色为金色
-            if (blade.damage > 1 && player.blades.length <= 2) {
+            
+            if (player.isGoldBlade(blade)) {
                 ctx.strokeStyle = 'gold';
             }
             ctx.stroke();

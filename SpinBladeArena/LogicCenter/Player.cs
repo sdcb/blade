@@ -32,13 +32,13 @@ public class Player(int userId, string userName, Vector2 position)
     {
         if (size < 50)
         {
-            // 20~50 -> 100~60
-            return 100 - (size - 20) * (40.0f / 30);
+            // 20~50 -> 120~70
+            return 120 - (size - 20) * (50.0f / 30);
         }
         if (size < 120)
         {
-            // 50~120 -> 60~30
-            return 60 - (size - 50) * (30.0f / 70);
+            // 50~120 -> 70~30
+            return 70 - (size - 50) * (40.0f / 70);
         }
         else
         {
@@ -108,16 +108,17 @@ public class Player(int userId, string userName, Vector2 position)
                 Weapon[i].Damage = Size / 15;
             }
         }
-    }
 
-    public void BeenAttackedBalanceCheck(float damage)
-    {
-        // 刀数量不能超过半径除以8（向上取整），默认半径30，最多3.75->4把刀，减肥时不掉刀
+        // 刀数量不能超过半径除以8（向上取整），默认半径30，最多3.75->4把刀，减肥时掉刀
         int maxBladeCount = MaxBladeCount;
         while (Weapon.Count > maxBladeCount)
         {
             Weapon.DestroyBladeAt(Weapon.Count - 1);
         }
+    }
+
+    public void BeenAttackedBalanceCheck(float damage)
+    {
     }
 
     internal bool AddBlade(int addBladeCount)
