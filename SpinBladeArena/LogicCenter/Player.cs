@@ -21,7 +21,7 @@ public class Player(int userId, string userName, Vector2 position)
     // 平衡性设计：如果没有刀，移动速度增加50%
     public float MovementSpeedPerSecond
     {
-        get => Weapon.Count == 0 ? _movementSpeedPerSecond * 1.5f : _movementSpeedPerSecond;
+        get => Weapon.Count == 0 ? _movementSpeedPerSecond * 2f : _movementSpeedPerSecond;
         private set => _movementSpeedPerSecond = value;
     }
 
@@ -33,7 +33,7 @@ public class Player(int userId, string userName, Vector2 position)
     public PlayerWeapon Weapon = PlayerWeapon.Default;
     public double DeadTime = 0;
     public List<string> Connections { get; } = [];
-    
+
     public int Score = 1;
 
     public bool Dead => Health <= 0;
@@ -87,34 +87,32 @@ public class Player(int userId, string userName, Vector2 position)
             MovementSpeedPerSecond = 150;
         }
 
-        // 刀数量不能超过半径除以6，默认半径30，最多5把刀，减肥时会掉刀
-        while (Weapon.Count > Size / 6)
-        {
-            Weapon.RemoveAt(Weapon.Count - 1);
-        }
-
         // 刀伤不能超过半径除以15，默认半径30，最多2伤，减肥时会掉刀伤
         for (int i = 0; i < Weapon.Count; i++)
         {
             if (Weapon[i].Damage > Size / 15)
-            { 
+            {
                 Weapon[i].Damage = Size / 15;
             }
         }
     }
 
-    public static KillingInfo AttackEachOther(Player p1, Player p2)
+    public void BeenAttackedBalanceCheck()
     {
-        if (p1.Dead || p2.Dead) return new KillingInfo(p1, p2, false, false);
-        if (Vector2.Distance(p1.Position, p2.Position) > p1.SafeDistance + p2.SafeDistance) return new KillingInfo(p1, p2, false, false);
+    }
 
-        bool player2Dead = P1AttackP2(p1, p2);
-        bool player1Dead = P1AttackP2(p2, p1);
+    public static PlayerHitInfo[] AttackEachOther(Player p1, Player p2)
+    {
+        if (p1.Dead || p2.Dead) return [];
+        if (Vector2.Distance(p1.Position, p2.Position) > p1.SafeDistance + p2.SafeDistance) return [];
+
+        PlayerHitInfo p1a2 = P1AttackP2(p1, p2);
+        PlayerHitInfo p2a1 = P1AttackP2(p2, p1);
         BladeAttack(p1, p2);
 
-        return new(p1, p2, player1Dead, player2Dead);
+        return [p1a2,  p2a1];
 
-        static bool P1AttackP2(Player p1, Player p2)
+        static PlayerHitInfo P1AttackP2(Player p1, Player p2)
         {
             for (int i = 0; i < p1.Weapon.Count; i++)
             {
@@ -124,11 +122,11 @@ public class Player(int userId, string userName, Vector2 position)
                 if (bladeLine.IsIntersectingCircle(p2.ToCircle()))
                 {
                     p2.Health -= blade.Damage;
-                    return p2.Health <= 0;
+                    return new PlayerHitInfo(p1, p2, blade.Damage);
                 }
             }
 
-            return false;
+            return new PlayerHitInfo(p1, p2, 0);
         }
 
         static void BladeAttack(Player p1, Player p2)

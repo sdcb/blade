@@ -76,7 +76,7 @@ public partial class Lobby
                         Vector2 direction = Vector2.Normalize(p2.Position - p1.Position);
                         float distance = Vector2.Distance(p1.Position, p2.Position);
                         float overlap = p1.Size + p2.Size - distance;
-                        
+
                         if (overlap > 0)
                         {
                             p1.Position -= direction * overlap * p2.Size / (p1.Size + p2.Size);
@@ -112,18 +112,14 @@ public partial class Lobby
             }
 
             // handle attack
-            List<KillingInfo> killingInfoConfirmedDeads = [];
+            List<PlayerHitInfo> attackingInfos = [];
             for (int i = 0; i < Players.Count - 1; ++i)
             {
                 Player p1 = Players[i];
                 for (int j = i + 1; j < Players.Count; ++j)
                 {
                     Player p2 = Players[j];
-                    KillingInfo killingInfo = Player.AttackEachOther(p1, p2);
-                    if (killingInfo.AnyDead)
-                    {
-                        killingInfoConfirmedDeads.Add(killingInfo);
-                    }
+                    attackingInfos.AddRange(Player.AttackEachOther(p1, p2));
                 }
             }
             stat.RecordAttack();
@@ -155,29 +151,22 @@ public partial class Lobby
                 bonusSpawnTimer -= bonusSpawnCooldown;
             }
             // handle bonus spawn from dead players
-            foreach (KillingInfo ki in killingInfoConfirmedDeads)
+            foreach (PlayerHitInfo ki in attackingInfos)
             {
-                if (ki.Player1Dead)
+                if (ki.Damage > 0)
                 {
-                    if (ki.Player1.Score < 3 && Random.Shared.NextDouble() < (1.0 / ki.Player1.Score))
+                    if (ki.DefenderDead)
                     {
-                        PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Player1)));
+                        if (ki.Defender.Score < 3 && Random.Shared.NextDouble() < (1.0 / ki.Defender.Score))
+                        {
+                            PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Defender)));
+                        }
+                        for (int i = 0; i < ki.Defender.Score / 3; ++i)
+                        {
+                            PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Defender)));
+                        }
                     }
-                    for (int i = 0; i < ki.Player1.Score / 3; ++i)
-                    {
-                        PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Player1)));
-                    }
-                }
-                if (ki.Player2Dead)
-                {
-                    if (ki.Player2.Score < 3 && Random.Shared.NextDouble() < (1.0 / ki.Player2.Score))
-                    {
-                        PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Player2)));
-                    }
-                    for (int i = 0; i < ki.Player2.Score / 3; ++i)
-                    {
-                        PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Player2)));
-                    }
+                    ki.Defender.BeenAttackedBalanceCheck();
                 }
             }
             stat.RecordBonusSpawn();

@@ -1,5 +1,6 @@
 ﻿using SpinBladeArena.LogicCenter.Push;
 using SpinBladeArena.Primitives;
+using System.Drawing;
 
 namespace SpinBladeArena.LogicCenter;
 
@@ -43,9 +44,13 @@ public class PlayerWeapon : List<Blade>
         RemoveAt(bladeIndex);
     }
 
-    internal void AddBlade(int addBladeCount)
+    internal void AddBlade(int addBladeCount, float playerSize)
     {
-        for (int i = 0; i < addBladeCount; ++i)
+        // 刀数量不能超过半径除以7，默认半径30，最多4把刀，减肥时不掉刀
+        int maxBladeCount = Math.Clamp((int)playerSize / 7, 1, 100);
+        int toAdd = Math.Clamp(addBladeCount, 0, maxBladeCount - Count);
+
+        for (int i = 0; i < toAdd; ++i)
         {
             Add(new());
         }
