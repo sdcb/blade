@@ -10,9 +10,14 @@ namespace SpinBladeArena.Controllers;
 public class LobbyController(CurrentUser user, GameManager gameManager) : Controller
 {
     [HttpPost, Route("lobby")]
-    public int CreateLobby()
+    public ActionResult<int> CreateLobby([FromBody] LobbyCreateDto dto)
     {
-        return gameManager.CreateFFALobby(user.Id);
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        return gameManager.CreateFFALobby(dto.ToFFA(user.Id));
     }
 
     [AllowAnonymous, HttpGet, Route("lobby/{lobbyId}/state")]

@@ -161,16 +161,86 @@
         </table>
     </div>
 
+    <!-- 创建新房间对话框 -->
+    <div class="modal fade" id="createRoomModal" tabindex="-1" aria-labelledby="createRoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createRoomModalLabel">创建新房间</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="createRoomForm" novalidate>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="robotCount" class="form-label">机器人数量</label>
+                            <input type="number" class="form-control" id="robotCount" min="0" max="12" value="10" required>
+                            <div class="invalid-feedback">
+                                请输入0到12之间的数字。
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="rewardCount" class="form-label">奖励物品数量</label>
+                            <input type="number" class="form-control" id="rewardCount" min="0" max="20" placeholder="不填代表自动按玩家数量乘以2">
+                            <div class="invalid-feedback">
+                                请输入0到20之间的数字。
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-primary">确定</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="~/userManager.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        async function createRoom() {
+        function createRoom() {
+            var myModal = new bootstrap.Modal(document.getElementById('createRoomModal'), {
+                keyboard: false
+            });
+            myModal.show();
+        }
+
+        // 表单验证
+        (() => {
+            'use strict'
+
+            const form = document.getElementById('createRoomForm');
+
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    event.preventDefault();
+                    confirmCreateRoom();
+                }
+
+                form.classList.add('was-validated');
+            }, false)
+        })();
+
+        async function confirmCreateRoom() {
+            const robotCount = parseInt(document.getElementById('robotCount').value);
+            const rewardCount = parseInt(document.getElementById('rewardCount').value || 0);
+
+            // 这里可以根据需要将 robotCount 和 rewardCount 包含在请求中
             const createLobbyResp = await fetch('/lobby', {
                 method: 'POST',
                 headers: {
                     Authorization: `bearer ${await ensureToken()}`,
+                    'Content-Type': 'application/json'
                 },
+                body: JSON.stringify({
+                    robotCount: robotCount,
+                    rewardCount: rewardCount
+                }),
             });
+
             if (createLobbyResp.ok) {
                 const lobbyId = await createLobbyResp.text();
                 window.location.href = `/lobby/${lobbyId}`;

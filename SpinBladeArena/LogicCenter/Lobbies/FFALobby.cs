@@ -1,5 +1,15 @@
 ﻿namespace SpinBladeArena.LogicCenter.Lobbies;
 
-public sealed class FFALobby(int id, int createUserId, DateTime createTime, IServiceProvider ServiceProvider) : Lobby(id, createUserId, createTime, ServiceProvider)
+public sealed class FFALobby(int id, FFALobbyCreateOptions CreateOptions, IServiceProvider ServiceProvider) : Lobby(id, CreateOptions, ServiceProvider)
 {
+}
+
+public sealed record FFALobbyCreateOptions : LobbyCreateOptions;
+
+public abstract record LobbyCreateOptions
+{
+    public int RobotCount { get; init; }
+    public int RewardCount { get; init; }
+    public int CreateUserId { get; init; }
+    public DateTime CreateTime { get; init; }
 }

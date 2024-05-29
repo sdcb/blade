@@ -6,13 +6,13 @@ public class GameManager(IServiceProvider ServiceProvider)
 {
     public Dictionary<int, Lobby> Lobbies { get; } = [];
 
-    public int CreateFFALobby(int userId)
+    public int CreateFFALobby(FFALobbyCreateOptions options)
     {
         int nextLobbyId;
         lock (Lobbies)
         {
             nextLobbyId = Lobbies.Count + 1;
-            Lobbies[nextLobbyId] = new FFALobby(nextLobbyId, userId, DateTime.Now, ServiceProvider);
+            Lobbies[nextLobbyId] = new FFALobby(nextLobbyId, options, ServiceProvider);
         }
         return nextLobbyId;
     }

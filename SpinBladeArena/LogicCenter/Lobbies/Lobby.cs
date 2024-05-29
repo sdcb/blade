@@ -1,15 +1,16 @@
 ﻿using SpinBladeArena.LogicCenter.AI;
+using SpinBladeArena.LogicCenter.Lobbies;
 using SpinBladeArena.Performance;
 using SpinBladeArena.Users;
 using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter;
 
-public abstract partial class Lobby(int id, int createUserId, DateTime createTime, IServiceProvider ServiceProvider)
+public abstract partial class Lobby(int id, LobbyCreateOptions CreateOptions, IServiceProvider ServiceProvider)
 {
-    public int Id = id;
-    public int CreateUserId = createUserId;
-    public DateTime CreateTime = createTime;
+    public int Id => id;
+    public int CreateUserId => CreateOptions.CreateUserId;
+    public DateTime CreateTime => CreateOptions.CreateTime;
 
     private readonly UserManager UserManager = ServiceProvider.GetRequiredService<UserManager>();
     public readonly PerformanceManager PerformanceManager = new();

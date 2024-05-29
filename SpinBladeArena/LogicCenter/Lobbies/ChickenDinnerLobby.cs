@@ -1,9 +1,9 @@
 ﻿namespace SpinBladeArena.LogicCenter.Lobbies;
 
-public class ChickenDinnerLobby(int id, int createUserId, DateTime createTime, IServiceProvider ServiceProvider) : Lobby(id, createUserId, createTime, ServiceProvider)
+public class ChickenDinnerLobby(int id, LobbyCreateOptions options, IServiceProvider ServiceProvider) : Lobby(id, options, ServiceProvider)
 {
 }
 
-public record ChickenDinnerLobbyOptions
+public record ChickenDinnerLobbyOptions : LobbyCreateOptions
 {
 }
