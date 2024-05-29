@@ -159,17 +159,31 @@ function drawUnits(ctx: CanvasRenderingContext2D, isMiniMap: boolean = false) {
     }
 
     for (const bonus of state.pickableBonus) {
+        const isUseable = bonus.isUseable(state.me);
+
         ctx.beginPath();
         ctx.arc(bonus.position[0], bonus.position[1], 20, 0, Math.PI * 2);
-        ctx.fillStyle = 'green';
+        ctx.fillStyle = bonusFillColor(isUseable);
         ctx.fill();
-        ctx.strokeStyle = 'white';
+        ctx.strokeStyle = bonusStrokeColor(isUseable);
         ctx.stroke();
 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = bonusTextColor(isUseable);
         ctx.fillText(bonus.name, bonus.position[0], bonus.position[1]);
+
+        function bonusFillColor(isUseable: boolean) {
+            return isUseable ? 'green' : 'rgba(0, 128, 0, 0.5)';
+        }
+
+        function bonusStrokeColor(isUseable: boolean) {
+            return isUseable ? 'white' : 'rgba(255, 255, 255, 0.5)';
+        }
+
+        function bonusTextColor(isUseable: boolean) {
+            return isUseable ? 'black' : 'rgba(0, 0, 0, 0.5)';
+        }
     }
 
     const me = state.me;

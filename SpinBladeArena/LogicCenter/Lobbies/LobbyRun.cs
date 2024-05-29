@@ -19,8 +19,7 @@ public partial class Lobby
         EnsureAIPlayers();
 
         const int DeadRespawnTimeInSeconds = 3;
-        float bonusSpawnCooldown = 0.5f;
-        float maxBonusCount = 25;
+        float bonusSpawnCooldown = 1.2f;
         float bonusSpawnTimer = 0;
 
         Stopwatch allTimeStopwatch = Stopwatch.StartNew();
@@ -35,6 +34,7 @@ public partial class Lobby
             Thread.Sleep(Math.Max(1, (int)(1000.0 / ServerFPS - PerformanceManager.Latest.AllExceptSleep.TotalMilliseconds)));
             stat.RecordSleep();
             float dt = MathF.Min((float)stat.Sleep.TotalSeconds, 0.25f);
+            int maxBonusCount = (int)Math.Ceiling((Players.Count + DeadPlayers.Count) * 1.2);
 
             // handle add player requests
             {
@@ -166,7 +166,7 @@ public partial class Lobby
                             PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Defender)));
                         }
                     }
-                    ki.Defender.BeenAttackedBalanceCheck();
+                    ki.Defender.BeenAttackedBalanceCheck(ki.Damage);
                 }
             }
             stat.RecordBonusSpawn();

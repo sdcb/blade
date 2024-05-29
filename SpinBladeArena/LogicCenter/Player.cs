@@ -97,8 +97,10 @@ public class Player(int userId, string userName, Vector2 position)
         }
     }
 
-    public void BeenAttackedBalanceCheck()
+    public void BeenAttackedBalanceCheck(float damage)
     {
+        // 如果受到伤害，移动速度增加伤害值
+        AddMovementSpeed(damage);
     }
 
     public static PlayerHitInfo[] AttackEachOther(Player p1, Player p2)

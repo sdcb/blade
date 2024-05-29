@@ -1,6 +1,5 @@
 ﻿using SpinBladeArena.LogicCenter.Push;
 using SpinBladeArena.Primitives;
-using System.Drawing;
 
 namespace SpinBladeArena.LogicCenter;
 
@@ -10,15 +9,15 @@ public class PlayerWeapon : List<Blade>
 
     public float RotationDegreePerSecond { get; set; } = DefaultRotationDegreePerSecond;
 
-    public void AddRotationDegreePerSecond(float amountInDegree)
+    public float AbsRotationDegreePerSecond => Math.Abs(RotationDegreePerSecond);
+
+    public bool AddRotationDegreePerSecond(float amountInDegree, float playerSize)
     {
         // 刀速不能超过玩家半径的1.5倍（但不掉速度）
         // 起始10度每秒，半径30，最大45度每秒
-        float max = 1.5f * 30 / 10 * DefaultRotationDegreePerSecond;
-        if (Math.Abs(RotationDegreePerSecond) <= max)
-        {
-            RotationDegreePerSecond = MathUtils.AbsAdd(RotationDegreePerSecond, amountInDegree);
-        }
+        float maxSpeed = 1.5f * playerSize;
+        RotationDegreePerSecond = MathUtils.AbsAdd(RotationDegreePerSecond, amountInDegree);
+        return LimitRotationDegreePerSecond(maxSpeed);
     }
 
     public void ReverseRotationDirection()
@@ -26,12 +25,14 @@ public class PlayerWeapon : List<Blade>
         RotationDegreePerSecond = -RotationDegreePerSecond;
     }
 
-    public void LimitRotationDegreePerSecond(float val)
+    private bool LimitRotationDegreePerSecond(float absSpeed)
     {
-        if (Math.Abs(RotationDegreePerSecond) > val)
+        if (AbsRotationDegreePerSecond > absSpeed)
         {
-            RotationDegreePerSecond = Math.Sign(RotationDegreePerSecond) * val;
+            RotationDegreePerSecond = Math.Sign(RotationDegreePerSecond) * absSpeed;
+            return true;
         }
+        return false;
     }
 
     public float WeaponScore => this.Sum(x => x.Score) * RotationDegreePerSecond / DefaultRotationDegreePerSecond;
@@ -44,11 +45,11 @@ public class PlayerWeapon : List<Blade>
         RemoveAt(bladeIndex);
     }
 
-    internal void AddBlade(int addBladeCount, float playerSize)
+    internal bool AddBlade(int addBladeCount, float playerSize)
     {
-        // 刀数量不能超过半径除以7，默认半径30，最多4把刀，减肥时不掉刀
-        int maxBladeCount = Math.Clamp((int)playerSize / 7, 1, 100);
-        int toAdd = Math.Clamp(addBladeCount, 0, maxBladeCount - Count);
+        // 刀数量不能超过半径除以8（向上取值），默认半径30，最多3.75->4把刀，减肥时不掉刀
+        int maxBladeCount = (int)Math.Ceiling(playerSize / 7);
+        int toAdd = addBladeCount + Count > maxBladeCount ? maxBladeCount - Count : addBladeCount;
 
         for (int i = 0; i < toAdd; ++i)
         {
@@ -56,6 +57,8 @@ public class PlayerWeapon : List<Blade>
         }
 
         RearrangeBlades();
+
+        return toAdd > 0;
     }
 
     private void RearrangeBlades()
@@ -67,27 +70,48 @@ public class PlayerWeapon : List<Blade>
         }
     }
 
-    public void AddLength(float length, float playerSize)
+    public bool AddLength(float length, float playerSize)
     {
-        // 平衡性：刀长不能超过玩家半径的3倍（但不掉长度）
-        // 例如：默认刀长30，玩家半径30，最大刀长90
+        // 刀长不能超过玩家半径的3倍（但不掉长度），例如：默认刀长30，玩家半径30，最大刀长90
         float maxLength = playerSize * 3;
+        bool everApplied = false;
         for (int i = 0; i < Count; ++i)
         {
-            float result = this[i].Length + length;
-            if (result < maxLength)
+            float bladeLengthTarget = this[i].Length + length;
+            if (bladeLengthTarget < maxLength)
             {
-                this[i].Length = result;
+                everApplied = true;
+                this[i].Length = bladeLengthTarget;
+            }
+            else if (this[i].Length < maxLength)
+            {
+                everApplied = true;
+                this[i].Length = maxLength;
             }
         }
+        return everApplied;
     }
 
-    public void AddDamage(float damage)
+    public bool AddDamage(float damage, float playerSize)
     {
+        // 刀伤不能超过半径除以15，默认半径30，最多2伤，减肥时会掉刀伤
+        float maxDamage = playerSize / 15;
+        bool everApplied = false;
         for (int i = 0; i < Count; ++i)
         {
-            this[i].Damage += damage;
+            float destDamage = this[i].Damage + damage;
+            if (destDamage < maxDamage)
+            {
+                everApplied = true;
+                this[i].Damage = destDamage;
+            }
+            else if (this[i].Damage < maxDamage)
+            {
+                everApplied = true;
+                this[i].Damage = maxDamage;
+            }
         }
+        return everApplied;
     }
 
     public bool IsGoldBlade(Blade blade)

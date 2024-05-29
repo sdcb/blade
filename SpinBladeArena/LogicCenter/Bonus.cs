@@ -29,9 +29,8 @@ public class Bonus(string name, Vector2 position)
         {
             float oldHealth = player.Health;
             player.Health = Math.Clamp(MathF.Round(player.Health / 2), 1, 200);
-            // 设计：减少血量的同时，增加减少血量一半的速度
-            float diff = oldHealth - player.Health;
-            player.AddMovementSpeed(diff / 2);
+            // 设计：减少血量的同时，增加减少血量数额值的速度
+            player.AddMovementSpeed(oldHealth - player.Health);
         }
     };
 
@@ -41,7 +40,7 @@ public class Bonus(string name, Vector2 position)
         {
             player.AddMovementSpeed(speedAmount);
             player.Health = Math.Clamp(player.Health - 1, 1, 200);
-            player.Weapon.AddRotationDegreePerSecond(-2);
+            player.Weapon.AddRotationDegreePerSecond(-2, player.Size);
         }
     };
 
@@ -50,8 +49,8 @@ public class Bonus(string name, Vector2 position)
         Apply = (Player player) =>
         {
             player.AddMovementSpeed(speedAmount);
-            player.Health = Math.Clamp(player.Health - 2, 1, 200);
-            player.Weapon.AddRotationDegreePerSecond(-5);
+            player.Health = Math.Clamp(player.Health - 5, 1, 200);
+            player.Weapon.AddRotationDegreePerSecond(-5, player.Size);
         }
     };
 
@@ -59,10 +58,13 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Weapon.AddBlade(bladeCountAmount, player.Size);
-            player.Health += 1;
-            player.Weapon.AddRotationDegreePerSecond(-1);
-            player.AddMovementSpeed(-1);
+            if (player.Weapon.AddBlade(bladeCountAmount, player.Size))
+            {
+                // 只有增加了刀才应用负面效果
+                player.Health += 1;
+                player.Weapon.AddRotationDegreePerSecond(-1, player.Size);
+                player.AddMovementSpeed(-1);
+            }
         }
     };
 
@@ -70,10 +72,13 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Weapon.AddBlade(bladeCountAmount, player.Size);
-            player.Health += 3;
-            player.Weapon.AddRotationDegreePerSecond(-4);
-            player.AddMovementSpeed(-4);
+            if (player.Weapon.AddBlade(bladeCountAmount, player.Size))
+            {
+                // 只有增加了刀才应用负面效果
+                player.Health += 3;
+                player.Weapon.AddRotationDegreePerSecond(-4, player.Size);
+                player.AddMovementSpeed(-4);
+            }
         }
     };
 
@@ -81,10 +86,13 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Weapon.AddLength(bladeLengthAmount, player.Size);
-            player.Health += 1;
-            player.Weapon.AddRotationDegreePerSecond(-1);
-            player.AddMovementSpeed(-1);
+            if (player.Weapon.AddLength(bladeLengthAmount, player.Size))
+            {
+                // 只有增加了刀长才应用负面效果
+                player.Health += 1;
+                player.Weapon.AddRotationDegreePerSecond(-1, player.Size);
+                player.AddMovementSpeed(-1);
+            }
         }
     };
 
@@ -92,10 +100,13 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Weapon.AddLength(bladeLengthAmount, player.Size);
-            player.Health += 3;
-            player.Weapon.AddRotationDegreePerSecond(-4);
-            player.AddMovementSpeed(-4);
+            if (player.Weapon.AddLength(bladeLengthAmount, player.Size))
+            {
+                // 只有增加了刀长才应用负面效果
+                player.Health += 3;
+                player.Weapon.AddRotationDegreePerSecond(-4, player.Size);
+                player.AddMovementSpeed(-4);
+            }
         }
     };
 
@@ -103,10 +114,13 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Weapon.AddDamage(bladeDamageAmount);
-            player.Health += 1;
-            player.Weapon.AddRotationDegreePerSecond(-1);
-            player.AddMovementSpeed(-1);
+            if (player.Weapon.AddDamage(bladeDamageAmount, player.Size))
+            {
+                // 只有增加了刀伤才应用负面效果
+                player.Health += 1;
+                player.Weapon.AddRotationDegreePerSecond(-1, player.Size);
+                player.AddMovementSpeed(-1);
+            }
         }
     };
 
@@ -114,7 +128,7 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Weapon.AddRotationDegreePerSecond(rotationDegreePerSecond);
+            player.Weapon.AddRotationDegreePerSecond(rotationDegreePerSecond, player.Size);
             player.Health += 1;
             player.AddMovementSpeed(-1);
         }
@@ -124,7 +138,7 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            player.Weapon.AddRotationDegreePerSecond(rotationDegreePerSecond);
+            player.Weapon.AddRotationDegreePerSecond(rotationDegreePerSecond, player.Size);
             player.Health += 3;
             player.AddMovementSpeed(-5);
         }

@@ -18,6 +18,45 @@ class Bonus {
         this.name = raw.n;
         this.position = raw.p;
     }
+
+    isUseable(player: Player | null) {
+        if (!player) return true;
+
+        if (this.name === BonusNames.BladeCount || this.name === BonusNames.BladeCount3) {
+            // 刀数量不能超过半径除以8（向上取值），默认半径30，最多3.75->4把刀，减肥时不掉刀
+            const maxBladeCount = Math.ceil(Player.defaultSize / 8);
+            return player.blades.length < maxBladeCount;
+        }
+
+        if (this.name === BonusNames.BladeLength || this.name === BonusNames.BladeLength20) {
+            // 刀长不能超过玩家半径的3倍（但不掉长度），例如：默认刀长30，玩家半径30，最大刀长90
+            const maxBladeLength = player.getSize() * 3;
+            return player.blades.some(blade => blade.length < maxBladeLength);
+        }
+
+        if (this.name === BonusNames.BladeDamage) {
+            // 刀伤不能超过半径除以15，默认半径30，最多2伤，减肥时会掉刀伤
+            const maxBladeDamage = Math.ceil(Player.defaultSize / 15);
+            return player.blades.some(blade => blade.damage < maxBladeDamage);
+        }
+
+        return true;
+    }
+}
+
+class BonusNames {
+    public static readonly Health: string = "生命";
+    public static readonly Thin: string = "减肥";
+    public static readonly Speed: string = "移速+5";
+    public static readonly Speed20: string = "移速+20";
+    public static readonly BladeCount: string = "刀数";
+    public static readonly BladeCount3: string = "刀数+3";
+    public static readonly BladeLength: string = "刀长+5";
+    public static readonly BladeLength20: string = "刀长+20";
+    public static readonly BladeDamage: string = "刀伤";
+    public static readonly BladeSpeed: string = "刀速+5";
+    public static readonly BladeSpeed20: string = "刀速+20";
+    public static readonly Random: string = "随机";
 }
 
 class Player {
@@ -42,7 +81,8 @@ class Player {
     }
 
     getSize() {
-        return Player.minSize + this.health;
+        const suggestedSize = Player.minSize + this.health;
+        return suggestedSize < 0 ? 0 : suggestedSize;
     }
 }
 // Define the structure for player data
