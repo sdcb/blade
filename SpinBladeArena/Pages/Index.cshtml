@@ -145,10 +145,12 @@
                 }
                 @foreach (var room in GameManager.Lobbies.Values.OrderByDescending(x => x.Id))
                 {
+                    int playerCount = room.Players.Count + room.DeadPlayers.Count;
                     int aiPlayerCount = room.Players.OfType<AIPlayer>().Count() + room.DeadPlayers.OfType<AIPlayer>().Count();
+                    int humanPlayerCount = playerCount - aiPlayerCount;
                     <tr>
                         <td>@room.Id</td>
-                        <td>@room.Players.Count+@room.DeadPlayers.Count (@aiPlayerCount)</td>
+                        <td>@room.Players.Count+@room.DeadPlayers.Count (@humanPlayerCount)</td>
                         <td>@UserManager.GetUser(room.CreateUserId)?.Name</td>
                         <td class="hide-sm">@FormatTime(room.CreateTime)</td>
                         <td>@FormatTime(room.LastUpdateTime)</td>
