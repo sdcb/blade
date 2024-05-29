@@ -189,12 +189,12 @@ public class Player(int userId, string userName, Vector2 position)
                         {
                             p1.Weapon.DestroyBladeAt(p1i--);
                         }
-                        // 其它情况，伤害高的刀消耗低的刀，伤害高的刀只减少1伤害
+                        // 其它情况，伤害高的刀消耗低的刀，伤害高的刀只减少一半伤害
                         else if (p1b.Damage > p2b.Damage)
                         {
                             p2.Weapon.DestroyBladeAt(p2i--);
-                            p1b.Damage -= 1;
-                            if (p1b.Damage == 0)
+                            p1b.Damage -= p2b.Damage / 2;
+                            if (p1b.Damage < 0)
                             {
                                 p1.Weapon.DestroyBladeAt(p1i--);
                             }
@@ -202,8 +202,8 @@ public class Player(int userId, string userName, Vector2 position)
                         else if (p1b.Damage < p2b.Damage)
                         {
                             p1.Weapon.DestroyBladeAt(p1i--);
-                            p2b.Damage -= 1;
-                            if (p2b.Damage == 0)
+                            p2b.Damage -= p1b.Damage / 2;
+                            if (p2b.Damage < 0)
                             {
                                 p2.Weapon.DestroyBladeAt(p2i--);
                             }

@@ -124,15 +124,15 @@ public class Bonus(string name, Vector2 position)
     {
         BonusChanceDef[] All =
         [
-            new (p => Health(p)),
-            new (p => BladeLength(p)),
-            new (p => BladeLength20(p)),
-            new (p => BladeDamage(p), 0.1f),
-            new (p => BladeSpeed(p)),
-            new (p => BladeSpeed20(p)),
-            new (p => Thin(p)),
-            new (p => BladeCount(p), 0.2f),
-            new (p => BladeCount3(p)),
+            new (BonusNames.Health, p => Health(p)),
+            new (BonusNames.BladeLength, p => BladeLength(p), 0.1f),
+            new (BonusNames.BladeLength20, p => BladeLength20(p)),
+            new (BonusNames.BladeDamage, p => BladeDamage(p), 0.1f),
+            new (BonusNames.BladeSpeed, p => BladeSpeed(p), 0.1f),
+            new (BonusNames.BladeSpeed20, p => BladeSpeed20(p)),
+            new (BonusNames.Thin, p => Thin(p)),
+            new (BonusNames.BladeCount, p => BladeCount(p), 0.25f),
+            new (BonusNames.BladeCount3, p => BladeCount3(p)),
             //Random,
         ];
         BonusChanceDef[] haveChances = All.Where(x => x.Chance.HasValue).ToArray();
@@ -141,16 +141,16 @@ public class Bonus(string name, Vector2 position)
         float noChanceTotal = 1 - haveChanceTotal;
         float fromRandom = 0;
         
-        List<BonusChance> bonusChances = new();
+        List<BonusChance> bonusChances = [];
         foreach (BonusChanceDef def in haveChances)
         {
-            BonusChance bc = new(def.Factory, fromRandom, def.Chance!.Value);
+            BonusChance bc = new(def.Name, def.Factory, fromRandom, def.Chance!.Value);
             bonusChances.Add(bc);
             fromRandom = bc.ToRandom;
         }
         foreach (BonusChanceDef def in noChances)
         {
-            BonusChance bc = new(def.Factory, fromRandom, noChanceTotal / noChances.Length);
+            BonusChance bc = new(def.Name, def.Factory, fromRandom, noChanceTotal / noChances.Length);
             bonusChances.Add(bc);
             fromRandom = bc.ToRandom;
         }
@@ -174,8 +174,8 @@ public class Bonus(string name, Vector2 position)
         };
     }
 
-    private record BonusChanceDef(BonusFactory Factory, float? Chance = null);
-    private record BonusChance(BonusFactory Factory, float FromRandom, float Chance)
+    private record BonusChanceDef(string Name, BonusFactory Factory, float? Chance = null);
+    private record BonusChance(string Name, BonusFactory Factory, float FromRandom, float Chance)
     {
         public float ToRandom => FromRandom + Chance;
     }

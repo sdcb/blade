@@ -72,7 +72,9 @@ public abstract class AIPlayer(int userId, string userName, Vector2 position) : 
         CloseastThings things = GetCloseastThings(lobby);
         if (Weapon.Count == 0 && things.Bonuses.Length != 0)
         {
-            Destination = things.Bonuses.First().Bonus.Position;
+            Bonus target = things.GetPerferedBonus(BonusNames.BladeCount3, BonusNames.BladeCount, BonusNames.Health, BonusNames.BladeSpeed, BonusNames.BladeSpeed20)
+                ?? things.Bonuses.First().Bonus;
+            Destination = target.Position;
             return;
         }
 

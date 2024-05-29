@@ -19,7 +19,7 @@ public class DefensiveAIPlayer(int userId, string userName, Vector2 position) : 
         }
 
         // if I only have < 2 blade, get the closest blade bonus
-        Bonus? bladeBonus = things.Bonuses.FirstOrDefault(b => b.Bonus.Name == BonusNames.BladeCount3 || b.Bonus.Name == BonusNames.BladeCount)?.Bonus;
+        Bonus? bladeBonus = things.GetPerferedBonus(BonusNames.BladeCount3, BonusNames.BladeCount);
         if (Weapon.Count < 2 && bladeBonus != null)
         {
             Destination = bladeBonus.Position;
@@ -29,7 +29,7 @@ public class DefensiveAIPlayer(int userId, string userName, Vector2 position) : 
         PlayerDistance? target = things.Players.FirstOrDefault(p => p.Distance < MovementSpeedPerSecond * 2);
         if (target != null)
         {
-            if (Score > target.Player.Score)
+            if (Weapon.WeaponScore > target.Player.Weapon.WeaponScore)
             {
                 // if I can get someone in 2 seconds and I am strong, attack
                 Destination = target.Player.Position;
@@ -43,12 +43,15 @@ public class DefensiveAIPlayer(int userId, string userName, Vector2 position) : 
             }
         }
 
-        // if I have exact 2 blade, get the closest blade bonus except BladeCount/BladeCount3/Random
-        Bonus? nonBladeBonus = things.Bonuses.FirstOrDefault(b => b.Bonus.Name != BonusNames.BladeCount3 && b.Bonus.Name != BonusNames.BladeCount && b.Bonus.Name != BonusNames.Random)?.Bonus;
-        if (Weapon.Count == 2 && nonBladeBonus != null)
+        // if I have gold blade, get the closest blade bonus except BladeCount/BladeCount3/Random/Thin
+        if (Weapon.Any(Weapon.IsGoldBlade))
         {
-            Destination = nonBladeBonus.Position;
-            return;
+            Bonus? b = things.GetPerferedBonus(BonusNames.Speed20, BonusNames.Speed, BonusNames.BladeLength20, BonusNames.BladeLength, BonusNames.Health);
+            if (b != null)
+            {
+                Destination = b.Position;
+                return;
+            }
         }
 
         // if I have more than 2 blade, get the closest bonus
@@ -59,4 +62,20 @@ public class DefensiveAIPlayer(int userId, string userName, Vector2 position) : 
             return;
         }
     }
+
+    static HashSet<string> perferForGoldBlade =
+    [
+        BonusNames.BladeSpeed, 
+        BonusNames.BladeSpeed20,
+        BonusNames.BladeLength,
+        BonusNames.BladeLength20,
+    ];
+
+    static HashSet<string> exceptNamesForGoldBlade =
+    [
+        BonusNames.BladeCount,
+        BonusNames.BladeCount3,
+        BonusNames.Random,
+        BonusNames.Thin,
+    ];
 }

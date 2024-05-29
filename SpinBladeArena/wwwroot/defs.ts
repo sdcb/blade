@@ -36,8 +36,13 @@ class Bonus {
 
         if (this.name === BonusNames.BladeDamage) {
             // 刀伤不能超过半径除以15，默认半径30，最多2伤，减肥时会掉刀伤
-            const maxBladeDamage = Math.ceil(player.getSize() / 15);
+            const maxBladeDamage = player.getSize() / 15;
             return player.blades.some(blade => blade.damage < maxBladeDamage);
+        }
+
+        if (this.name === BonusNames.BladeSpeed || this.name === BonusNames.BladeSpeed20) {
+            // 刀速不能超过玩家半径的1.5倍（但不掉速度），起始10度每秒，半径30，最大45度每秒
+            // 前端没有刀速的显示，所以这个判断是暂时做不到的
         }
 
         return true;
