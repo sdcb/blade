@@ -16,18 +16,34 @@ public class Player(int userId, string userName, Vector2 position)
     public const float MinSize = 20;
     public Vector2 Destination = position;
 
-    public const float DefaultMovementSpeedPerSecond = 60;
-    private float _movementSpeedPerSecond = 60;
-    // 平衡性设计：如果没有刀，移动速度增加50%
+    public const float DefaultMovementSpeedPerSecond = 90;
+    public const float MaxMovementSpeedPerSecond = 120;
+
     public float MovementSpeedPerSecond
     {
-        get => Weapon.Count == 0 ? _movementSpeedPerSecond * 2f : _movementSpeedPerSecond;
-        private set => _movementSpeedPerSecond = value;
+        get
+        {
+            float multiplier = Weapon.Count == 0 ? 2 : 1;
+            return GetSuggestedMovementSpeedByPlayerSize(Size) * multiplier;
+        }
     }
 
-    public void AddMovementSpeed(float amount)
+    private static float GetSuggestedMovementSpeedByPlayerSize(float size)
     {
-        _movementSpeedPerSecond = MathUtils.AbsAdd(_movementSpeedPerSecond, amount);
+        if (size < 50)
+        {
+            // 20~50 -> 100~60
+            return 100 - (size - 20) * (40.0f / 30);
+        }
+        if (size < 120)
+        {
+            // 50~120 -> 60~30
+            return 60 - (size - 50) * (30.0f / 70);
+        }
+        else
+        {
+            return 25;
+        }
     }
 
     public PlayerWeapon Weapon = PlayerWeapon.Default;
@@ -41,6 +57,9 @@ public class Player(int userId, string userName, Vector2 position)
     public float SafeDistance => Size + Weapon.LongestBladeLength;
 
     public Vector2 Direction => Vector2.Normalize(Destination - Position);
+
+    // 刀数量不能超过半径除以8（向上取整）
+    public int MaxBladeCount => (int)Math.Ceiling(Size / 8);
 
     public Circle ToCircle() => new(Position, Size);
     public Circle ToSafeDistanceCircle() => new(Position, SafeDistance);
@@ -81,12 +100,6 @@ public class Player(int userId, string userName, Vector2 position)
 
     public void BalanceCheck()
     {
-        // 移动速度不能超过150
-        if (MovementSpeedPerSecond > 150)
-        {
-            MovementSpeedPerSecond = 150;
-        }
-
         // 刀伤不能超过半径除以15，默认半径30，最多2伤，减肥时会掉刀伤
         for (int i = 0; i < Weapon.Count; i++)
         {
@@ -99,8 +112,28 @@ public class Player(int userId, string userName, Vector2 position)
 
     public void BeenAttackedBalanceCheck(float damage)
     {
-        // 如果受到伤害，移动速度增加伤害值
-        AddMovementSpeed(damage);
+        // 刀数量不能超过半径除以8（向上取整），默认半径30，最多3.75->4把刀，减肥时不掉刀
+        int maxBladeCount = MaxBladeCount;
+        while (Weapon.Count > maxBladeCount)
+        {
+            Weapon.DestroyBladeAt(Weapon.Count - 1);
+        }
+    }
+
+    internal bool AddBlade(int addBladeCount)
+    {
+        // 刀数量不能超过半径除以8（向上取值），默认半径30，最多3.75->4把刀，减肥时不掉刀
+        int maxBladeCount = MaxBladeCount;
+        int toAdd = addBladeCount + Weapon.Count > maxBladeCount ? maxBladeCount - Weapon.Count : addBladeCount;
+
+        for (int i = 0; i < toAdd; ++i)
+        {
+            Weapon.Add(new());
+        }
+
+        Weapon.RearrangeBlades();
+
+        return toAdd > 0;
     }
 
     public static PlayerHitInfo[] AttackEachOther(Player p1, Player p2)
@@ -124,6 +157,7 @@ public class Player(int userId, string userName, Vector2 position)
                 if (bladeLine.IsIntersectingCircle(p2.ToCircle()))
                 {
                     p2.Health -= blade.Damage;
+                    p1.Weapon.ReverseRotationDirection();
                     return new PlayerHitInfo(p1, p2, blade.Damage);
                 }
             }

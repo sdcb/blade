@@ -29,28 +29,6 @@ public class Bonus(string name, Vector2 position)
         {
             float oldHealth = player.Health;
             player.Health = Math.Clamp(MathF.Round(player.Health / 2), 1, 200);
-            // 设计：减少血量的同时，增加减少血量数额值的速度
-            player.AddMovementSpeed(oldHealth - player.Health);
-        }
-    };
-
-    public static Bonus Speed(Vector2 position, float speedAmount = 5) => new(BonusNames.Speed, position)
-    {
-        Apply = (Player player) =>
-        {
-            player.AddMovementSpeed(speedAmount);
-            player.Health = Math.Clamp(player.Health - 1, 1, 200);
-            player.Weapon.AddRotationDegreePerSecond(-2, player.Size);
-        }
-    };
-
-    public static Bonus Speed20(Vector2 position, float speedAmount = 20) => new(BonusNames.Speed20, position)
-    {
-        Apply = (Player player) =>
-        {
-            player.AddMovementSpeed(speedAmount);
-            player.Health = Math.Clamp(player.Health - 5, 1, 200);
-            player.Weapon.AddRotationDegreePerSecond(-5, player.Size);
         }
     };
 
@@ -58,12 +36,11 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            if (player.Weapon.AddBlade(bladeCountAmount, player.Size))
+            if (player.AddBlade(bladeCountAmount))
             {
                 // 只有增加了刀才应用负面效果
                 player.Health += 1;
                 player.Weapon.AddRotationDegreePerSecond(-1, player.Size);
-                player.AddMovementSpeed(-1);
             }
         }
     };
@@ -72,12 +49,11 @@ public class Bonus(string name, Vector2 position)
     {
         Apply = (Player player) =>
         {
-            if (player.Weapon.AddBlade(bladeCountAmount, player.Size))
+            if (player.AddBlade(bladeCountAmount))
             {
                 // 只有增加了刀才应用负面效果
                 player.Health += 3;
                 player.Weapon.AddRotationDegreePerSecond(-4, player.Size);
-                player.AddMovementSpeed(-4);
             }
         }
     };
@@ -91,7 +67,6 @@ public class Bonus(string name, Vector2 position)
                 // 只有增加了刀长才应用负面效果
                 player.Health += 1;
                 player.Weapon.AddRotationDegreePerSecond(-1, player.Size);
-                player.AddMovementSpeed(-1);
             }
         }
     };
@@ -105,7 +80,6 @@ public class Bonus(string name, Vector2 position)
                 // 只有增加了刀长才应用负面效果
                 player.Health += 3;
                 player.Weapon.AddRotationDegreePerSecond(-4, player.Size);
-                player.AddMovementSpeed(-4);
             }
         }
     };
@@ -119,7 +93,6 @@ public class Bonus(string name, Vector2 position)
                 // 只有增加了刀伤才应用负面效果
                 player.Health += 1;
                 player.Weapon.AddRotationDegreePerSecond(-1, player.Size);
-                player.AddMovementSpeed(-1);
             }
         }
     };
@@ -130,7 +103,6 @@ public class Bonus(string name, Vector2 position)
         {
             player.Weapon.AddRotationDegreePerSecond(rotationDegreePerSecond, player.Size);
             player.Health += 1;
-            player.AddMovementSpeed(-1);
         }
     };
 
@@ -140,32 +112,58 @@ public class Bonus(string name, Vector2 position)
         {
             player.Weapon.AddRotationDegreePerSecond(rotationDegreePerSecond, player.Size);
             player.Health += 3;
-            player.AddMovementSpeed(-5);
         }
     };
 
     public static Bonus Random(Vector2 position) => new(BonusNames.Random, position)
     {
-        Apply = (Player player) => All[System.Random.Shared.Next(All.Length)](position).Apply(player)
+        Apply = (player) => CreateRandom(position)
     };
 
-    internal static Func<Vector2, Bonus>[] All =
-    [
-        p => Health(p),
-        p => Speed(p),
-        p => Speed20(p),
-        p => BladeCount(p),
-        p => BladeLength(p),
-        p => BladeLength20(p),
-        p => BladeDamage(p),
-        p => BladeSpeed(p),
-        p => BladeSpeed20(p),
-        p => Thin(p),
-        p => BladeCount3(p),
-        //Random,
-    ];
+    internal static BonusFactory CreateRandomFactory()
+    {
+        BonusChanceDef[] All =
+        [
+            new (p => Health(p)),
+            new (p => BladeLength(p)),
+            new (p => BladeLength20(p)),
+            new (p => BladeDamage(p), 0.1f),
+            new (p => BladeSpeed(p)),
+            new (p => BladeSpeed20(p)),
+            new (p => Thin(p)),
+            new (p => BladeCount(p), 0.2f),
+            new (p => BladeCount3(p)),
+            //Random,
+        ];
+        BonusChanceDef[] haveChances = All.Where(x => x.Chance.HasValue).ToArray();
+        BonusChanceDef[] noChances = All.Where(x => !x.Chance.HasValue).ToArray();
+        float haveChanceTotal = haveChances.Sum(x => x.Chance!.Value);
+        float noChanceTotal = 1 - haveChanceTotal;
+        float fromRandom = 0;
+        
+        List<BonusChance> bonusChances = new();
+        foreach (BonusChanceDef def in haveChances)
+        {
+            BonusChance bc = new(def.Factory, fromRandom, def.Chance!.Value);
+            bonusChances.Add(bc);
+            fromRandom = bc.ToRandom;
+        }
+        foreach (BonusChanceDef def in noChances)
+        {
+            BonusChance bc = new(def.Factory, fromRandom, noChanceTotal / noChances.Length);
+            bonusChances.Add(bc);
+            fromRandom = bc.ToRandom;
+        }
 
-    public static Bonus CreateRandom(Vector2 position) => All[System.Random.Shared.Next(All.Length)](position);
+        return (Vector2 position) =>
+        {
+            float random = System.Random.Shared.NextSingle();
+            BonusChance? chosen = bonusChances.First(x => x.FromRandom <= random && random < x.ToRandom);
+            return chosen.Factory(position);
+        };
+    }
+
+    public static BonusFactory CreateRandom { get; } = CreateRandomFactory();
 
     public PickableBonusDto ToDto()
     {
@@ -175,6 +173,14 @@ public class Bonus(string name, Vector2 position)
             Position = [Position.X, Position.Y]
         };
     }
+
+    private record BonusChanceDef(BonusFactory Factory, float? Chance = null);
+    private record BonusChance(BonusFactory Factory, float FromRandom, float Chance)
+    {
+        public float ToRandom => FromRandom + Chance;
+    }
 }
+
+public delegate Bonus BonusFactory(Vector2 position);
 
 public delegate void BonusApplier(Player player);

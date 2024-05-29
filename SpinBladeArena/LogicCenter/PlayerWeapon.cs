@@ -45,23 +45,7 @@ public class PlayerWeapon : List<Blade>
         RemoveAt(bladeIndex);
     }
 
-    internal bool AddBlade(int addBladeCount, float playerSize)
-    {
-        // 刀数量不能超过半径除以8（向上取值），默认半径30，最多3.75->4把刀，减肥时不掉刀
-        int maxBladeCount = (int)Math.Ceiling(playerSize / 7);
-        int toAdd = addBladeCount + Count > maxBladeCount ? maxBladeCount - Count : addBladeCount;
-
-        for (int i = 0; i < toAdd; ++i)
-        {
-            Add(new());
-        }
-
-        RearrangeBlades();
-
-        return toAdd > 0;
-    }
-
-    private void RearrangeBlades()
+    public void RearrangeBlades()
     {
         float initialAngle = Count == 0 ? 0 : this[0].RotationDegree;
         for (int i = 0; i < Count; ++i)

@@ -2,6 +2,7 @@ declare namespace signalR {
     class HubConnectionBuilder {
         withUrl(url: string, options: any): HubConnectionBuilder;
         withHubProtocol(protocol: any): HubConnectionBuilder;
+        withAutomaticReconnect(): HubConnectionBuilder;
         build(): HubConnection;
     }
 

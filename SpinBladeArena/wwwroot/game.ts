@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             accessTokenFactory: ensureToken
         })
         .withHubProtocol(new signalR.protocols.msgpack.MessagePackHubProtocol())
+        .withAutomaticReconnect()
         .build();
     connection.on('update', (resp: PushStateDto) => state.onPush(resp));
     await connection.start();
