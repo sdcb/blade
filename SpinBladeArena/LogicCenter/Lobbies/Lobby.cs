@@ -98,7 +98,7 @@ public abstract partial class Lobby(int id, LobbyCreateOptions CreateOptions, IS
     {
         if (Players.OfType<AIPlayer>().Any()) return;
 
-        int aiPlayerCount = ServiceProvider.GetRequiredKeyedService<int>("AIPlayerCount");
+        int aiPlayerCount = CreateOptions.RobotCount;
         HashSet<string> knownNames = [];
         for (int i = 0; i < aiPlayerCount; ++i)
         {

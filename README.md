@@ -13,13 +13,12 @@
 使用`Docker`部署游戏非常简单，只需要在服务器上安装`Docker`，然后执行以下命令即可：
 
 ```bash
-docker run --name blade -d --restart unless-stopped -p 8080:8080 -e ServerFPS=30 -e AIPlayerCount=3 sdflysha/blade
+docker run --name blade -d --restart unless-stopped -p 8080:8080 -e ServerFPS=30 sdflysha/blade
 ```
 
 其中：
 
 * `ServerFPS`是游戏服务器的帧率，默认为60，可以根据服务器性能和宽带调整。
-* `AIPlayerCount`是游戏中AI机器人的数量，默认为10，可以根据需要调整。
 
 ### 手动编译部署
 

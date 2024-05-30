@@ -12,4 +12,10 @@ public abstract record LobbyCreateOptions
     public int RewardCount { get; init; }
     public int CreateUserId { get; init; }
     public DateTime CreateTime { get; init; }
+
+    public int CalculateRewardCount(int totalPlayerCount)
+    {
+        if (RewardCount == 0) return totalPlayerCount * 2;
+        return RewardCount;
+    }
 }

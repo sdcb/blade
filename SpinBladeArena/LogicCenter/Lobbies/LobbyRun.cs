@@ -19,7 +19,7 @@ public partial class Lobby
         EnsureAIPlayers();
 
         const int DeadRespawnTimeInSeconds = 3;
-        float bonusSpawnCooldown = 1f;
+        float bonusSpawnCooldown = 0.6f;
         float bonusSpawnTimer = 0;
 
         Stopwatch allTimeStopwatch = Stopwatch.StartNew();
@@ -34,7 +34,7 @@ public partial class Lobby
             Thread.Sleep(Math.Max(1, (int)(1000.0 / ServerFPS - PerformanceManager.Latest.AllExceptSleep.TotalMilliseconds)));
             stat.RecordSleep();
             float dt = MathF.Min((float)stat.Sleep.TotalSeconds, 0.25f);
-            int maxBonusCount = (Players.Count + DeadPlayers.Count) * 2;
+            int maxBonusCount = CreateOptions.CalculateRewardCount(Players.Count + DeadPlayers.Count);
 
             // handle add player requests
             {
