@@ -41,7 +41,7 @@ class Bonus {
         }
 
         if (this.name === BonusNames.BladeSpeed || this.name === BonusNames.BladeSpeed20) {
-            // 刀速不能超过玩家半径的1.5倍（但不掉速度），起始10度每秒，半径30，最大45度每秒
+            // 刀速不能超过60（初始值10）
             // 前端没有刀速的显示，所以这个判断是暂时做不到的
         }
 

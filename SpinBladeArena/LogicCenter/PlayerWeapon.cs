@@ -13,9 +13,8 @@ public class PlayerWeapon : List<Blade>
 
     public bool AddRotationDegreePerSecond(float amountInDegree, float playerSize)
     {
-        // 刀速不能超过玩家半径的1.5倍（但不掉速度）
-        // 起始10度每秒，半径30，最大45度每秒
-        float maxSpeed = 1.5f * playerSize;
+        // 刀速不能超过60（初始值10）
+        float maxSpeed = 60;
         RotationDegreePerSecond = MathUtils.AbsAdd(RotationDegreePerSecond, amountInDegree);
         return LimitRotationDegreePerSecond(maxSpeed);
     }
