@@ -5,6 +5,9 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-container:
     runs-on: ubuntu-latest
@@ -37,7 +40,7 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/blade:$DATE
   
   windows-release:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
