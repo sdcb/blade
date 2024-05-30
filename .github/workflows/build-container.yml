@@ -35,3 +35,35 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/blade:latest
           DATE=$(date +'%Y%m%d')
           docker push ${{ secrets.DOCKER_USERNAME }}/blade:$DATE
+  
+  windows-release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Compile Program
+        run: |
+          dotnet publish SpinBladeArena\SpinBladeArena.csproj -c Release -r win-x64 --self-contained true -o .\Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+          7z a -tzip -mx=1 SpinBladeArena.zip .\Publish\*
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_id }}
+          release_name: Release-${{ github.run_number }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: SpinBladeArena.zip
+          asset_name: SpinBladeArena-${{ github.run_number }}
+          asset_content_type: application/octet-stream
