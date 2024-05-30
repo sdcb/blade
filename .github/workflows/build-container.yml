@@ -47,10 +47,10 @@ jobs:
 
       - name: Compile Program
         run: |
-          dotnet publish SpinBladeArena/SpinBladeArena.csproj -c Release -r win-x64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
           cd SpinBladeArena/wwwroot
           tsc
           cd ../../
+          dotnet publish SpinBladeArena/SpinBladeArena.csproj -c Release -r win-x64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
           7z a -tzip -mx=1 SpinBladeArena.zip ./Publish/*
 
       - name: Create Release
