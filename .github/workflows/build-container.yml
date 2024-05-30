@@ -38,14 +38,6 @@ jobs:
           DATE=$(date +'%Y%m%d')
           docker push ${{ secrets.DOCKER_USERNAME }}/blade:$DATE
           docker push ${{ secrets.DOCKER_USERNAME }}/blade:latest
-          
-      # Prepare release notes content
-      - name: Generate release notes
-        run: |
-          DATE=$(date +'%Y%m%d')
-          echo -e "Docker version: blade:$DATE\n\nHow to use in Linux:\n\`\`\`\ndocker run --name blade -d --restart unless-stopped -p 8080:8080 -e ServerFPS=30 ${{ secrets.DOCKER_USERNAME }}/blade:$DATE\n\`\`\`" > release_notes.md
-          CONTENT=$(cat release_notes.md)
-          echo "RELEASE_NOTES=$CONTENT" >> $GITHUB_ENV
   
   windows-release:
     runs-on: ubuntu-latest
@@ -66,7 +58,6 @@ jobs:
         with:
           tag_name: ${{ github.run_id }}
           release_name: Release-${{ github.run_number }}
-          body: ${{ env.RELEASE_NOTES }}
           draft: false
           prerelease: false
 
