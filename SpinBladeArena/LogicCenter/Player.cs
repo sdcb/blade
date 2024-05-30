@@ -11,7 +11,7 @@ public class Player(int userId, string userName, Vector2 position)
     public string UserName { get; } = userName;
     public Vector2 Position = position;
     public float Health = 10;
-    public float Size => MinSize + Health;
+    public float Size => Math.Clamp(MinSize + Health, 1, 300);
     public const float DefaultSize = 30;
     public const float MinSize = 20;
     public Vector2 Destination = position;

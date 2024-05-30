@@ -86,8 +86,8 @@ class Player {
     }
 
     getSize() {
-        const suggestedSize = Player.minSize + this.health;
-        return suggestedSize < 0 ? 0 : suggestedSize;
+        const suggestedSize = Math.min(Player.minSize + this.health, 300);
+        return Math.max(suggestedSize, 1);
     }
 
     // 平衡性设计：如果刀比较少，对刀时不减少伤害，此时刀的颜色为金色
