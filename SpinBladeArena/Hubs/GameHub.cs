@@ -12,7 +12,7 @@ public class GameHub(GameManager gameManager, CurrentUser user, UserManager user
     public void JoinLobby(int lobbyId)
     {
         Lobby lobby = gameManager.Lobbies[lobbyId];
-        lobby.AddPlayerToRandomPosition(new (user.Id));
+        lobby.AddPlayerToRandomPosition(new (user.Id, new StatInfo()));
         Groups.AddToGroupAsync(Context.ConnectionId, lobbyId.ToString());
         lobby.EnsureStart();
     }
@@ -40,4 +40,5 @@ public class GameHub(GameManager gameManager, CurrentUser user, UserManager user
 public interface IGameHubClient
 {
     Task Update(PushState pushState);
+    Task UpdateStats(StatInfoDto[] statInfos);
 }

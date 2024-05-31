@@ -2,7 +2,7 @@
 
 namespace SpinBladeArena.LogicCenter.AI;
 
-public class DefensiveAIPlayer(int userId, Vector2 position) : AIPlayer(userId, position)
+public class DefensiveAIPlayer(int userId, Vector2 position, StatInfo statInfo) : AIPlayer(userId, position, statInfo)
 {
     public override float ReactionTimeMS => 0.12f;
 

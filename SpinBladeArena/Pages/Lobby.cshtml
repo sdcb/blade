@@ -27,7 +27,7 @@
             position: absolute;
             right: 5px;
             bottom: 5px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.7);
             padding: 5px;
             font-size: 11px;
             color: black;
@@ -45,6 +45,43 @@
                 #ad a:hover {
                     text-decoration: underline;
                 }
+
+        .top-left-info {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 0 10px 10px 10px;
+            border-collapse: collapse;
+            font-family: Arial, sans-serif;
+        }
+
+            .top-left-info a {
+                font-size: 12px;
+                text-decoration: none;
+                color: white;
+                font-family: monospace
+            }
+
+                .top-left-info a:hover {
+                    text-decoration: underline;
+                }
+
+        #scoreboard {
+            font-size: 10px;
+        }
+
+            #scoreboard .me {
+                font-weight: bold;
+                color: yellow;
+            }
+
+            #scoreboard th,
+            #scoreboard td {
+                padding-right: 5px;
+                text-align: left;
+                border: none;
+            }
     </style>
 </head>
 <body>
@@ -52,6 +89,25 @@
         const initState = @Html.Raw(JsonSerializer.Serialize(Model.Lobby.PushManager.Latest, new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
     </script>
     <canvas id="canvas">您的浏览器不支持Canvas元素</canvas>
+
+    <!-- 玩家信息表格 -->
+    <div class="top-left-info">
+        <a href="/">&lt;返回首页</a>
+        <table id="scoreboard">
+            <thead>
+                <tr>
+                    <th>🏷️</th>
+                    <th>🏆</th>
+                    <th>💀</th>
+                    <th>🔪</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+
     <div id="ad">
         <strong>旋刃竞技场</strong>
         Github: <a href="https://github.com/sdcb/blade" target="_blank">sdcb/blade</a>

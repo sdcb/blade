@@ -17,4 +17,15 @@ public class PushManager(int lobbyId, IHubContext<GameHub, IGameHubClient> hub, 
         _states.Add(state);
         hub.Clients.Group(lobbyId.ToString()).Update(state);
     }
+
+    int statPushIndex = 0;
+    public void PushStats(StatInfoDto[] stats)
+    {
+        ++statPushIndex;
+        if (statPushIndex >= serverFps)
+        {
+            hub.Clients.Group(lobbyId.ToString()).UpdateStats(stats);
+            statPushIndex = 0;
+        }
+    }
 }

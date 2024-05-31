@@ -124,6 +124,6 @@ public abstract partial class Lobby(int id, LobbyCreateOptions CreateOptions, IS
     }
 }
 
-public record AddPlayerRequest(int UserId);
+public record AddPlayerRequest(int UserId, StatInfo StatInfo);
 
-public record AddAIPlayerRequest(AIPreference AIPreference, int UserId) : AddPlayerRequest(UserId);
+public record AddAIPlayerRequest(AIPreference AIPreference, int UserId, StatInfo StatInfo) : AddPlayerRequest(UserId, StatInfo);

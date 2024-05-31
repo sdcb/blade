@@ -9,9 +9,6 @@ public class PlayerDto
     [DataMember(Name = "u"), JsonPropertyName("u")]
     public required int UserId { get; init; }
 
-    [DataMember(Name = "s"), JsonPropertyName("s")]
-    public required int Score { get; init; }
-
     [DataMember(Name = "p"), JsonPropertyName("p")]
     public required float[] Position { get; init; }
 

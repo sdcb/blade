@@ -86,6 +86,22 @@ class UserNameCache {
 }
 const userNameCache = new UserNameCache();
 
+class StatInfo {
+    score: number = 1;
+    kills: number = 0;
+    deaths: number = 0;
+    destroyBlades: number = 0;
+    
+    constructor(raw: StatInfoDto | null = null) {
+        if (raw) {
+            this.score = raw.s;
+            this.kills = raw.k;
+            this.deaths = raw.d;
+            this.destroyBlades = raw.b;
+        }
+    }
+}
+
 class Player {
     static defaultSize = 30;
     static minSize = 20;
@@ -95,16 +111,16 @@ class Player {
     destination: number[];
     health: number;
     blades: Blade[];
-    score: number;
+    statInfo: StatInfo;
     bladeRotationSpeed: number;
 
-    constructor(raw: PlayerDto) {
+    constructor(raw: PlayerDto, statInfo: StatInfoDto | null) {
         this.userId = raw.u;
         this.position = raw.p;
         this.destination = raw.d;
         this.health = raw.h;
+        this.statInfo = new StatInfo(statInfo);
         this.blades = raw.b.map(bladeRaw => new Blade(bladeRaw));
-        this.score = raw.s;
         this.bladeRotationSpeed = raw.z;
     }
 
@@ -193,5 +209,13 @@ type PushStateDto = {
     b: BonusDto[]; // Array of pickable bonus data
     d: PlayerDto[]; // Array of dead player data
 };
+
+type StatInfoDto = {
+    i: number; // user id
+    s: number; // Score
+    k: number; // Kills
+    d: number; // Deaths
+    b: number; // DestroyBlades
+}
 
 declare var initState: PushStateDto;

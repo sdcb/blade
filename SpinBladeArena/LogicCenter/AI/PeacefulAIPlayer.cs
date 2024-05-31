@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter.AI;
 
-public class PeacefulAIPlayer(int userId, Vector2 position) : AIPlayer(userId, position)
+public class PeacefulAIPlayer(int userId, Vector2 position, StatInfo statInfo) : AIPlayer(userId, position, statInfo)
 {
     public override float ReactionTimeMS => 0.2f;
 

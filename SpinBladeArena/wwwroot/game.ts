@@ -23,11 +23,66 @@ class State {
         }
     }
 
+    findPlayer(userId: number) {
+        return this.players.find(p => p.userId === userId) || this.deadPlayers.find(p => p.userId === userId);
+    }
+
     onPush(dto: PushStateDto) {
-        this.players = dto.p.map(x => new Player(x));
+        this.players = dto.p.map(x => new Player(x, this.statInfoCache[x.u]));
         this.pickableBonus = dto.b.map(x => new Bonus(x));
-        this.deadPlayers = dto.d.map(x => new Player(x));
+        this.deadPlayers = dto.d.map(x => new Player(x, this.statInfoCache[x.u]));
         this.onUpdated();
+    }
+
+    statInfoCache: { [userId: number]: StatInfoDto } = {};
+    onPushState(stats: StatInfoDto[]) {
+        for (const stat of stats) {
+            this.statInfoCache[stat.i] = stat;
+        }
+        this.updateScoreboard();
+    }
+
+    updateScoreboard() {
+        // Find the scoreboard tbody
+        const tbody = document.querySelector("#scoreboard tbody");
+
+        if (!tbody) {
+            console.error("Scoreboard table body not found.");
+            return;
+        }
+
+        // Clear existing rows
+        while (tbody.firstChild) {
+            tbody.removeChild(tbody.firstChild);
+        }
+
+        // Append new rows for each player
+        this.players.concat(...this.deadPlayers)
+            .sort((a, b) => b.statInfo.kills - a.statInfo.kills)
+            .forEach(player => {
+                const isMe = player === this.me;
+
+                const row = document.createElement("tr");
+                if (isMe) row.className = "me";
+
+                const nameCell = document.createElement("td");
+                nameCell.textContent = player.userName;
+                row.appendChild(nameCell);
+
+                const scoreCell = document.createElement("td");
+                scoreCell.textContent = player.statInfo.score.toString();
+                row.appendChild(scoreCell);
+
+                const deathsCell = document.createElement("td");
+                deathsCell.textContent = player.statInfo.deaths.toString();
+                row.appendChild(deathsCell);
+
+                const killsCell = document.createElement("td");
+                killsCell.textContent = player.statInfo.kills.toString();
+                row.appendChild(killsCell);
+
+                tbody.appendChild(row);
+            });
     }
 
     constructor() {
@@ -71,6 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         .withAutomaticReconnect()
         .build();
     connection.on('update', (resp: PushStateDto) => state.onPush(resp));
+    connection.on('updateStats', (resp: StatInfoDto[]) => state.onPushState(resp));
     await connection.start();
 
     document.addEventListener('click', e => {
@@ -96,7 +152,6 @@ function render(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
     drawUnits(ctx);
     ctx.restore();
 
-    drawLeaderBoard(ctx);
     drawMiniMap(ctx, canvas);
 
     requestAnimationFrame(() => render(ctx, canvas));
@@ -123,34 +178,6 @@ function drawMiniMap(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
     ctx.scale(scale, scale);
     drawUnits(ctx, /* isMiniMap: */ true);
     ctx.restore();
-}
-
-function drawLeaderBoard(ctx: CanvasRenderingContext2D) {
-    ctx.save();
-    ctx.fillStyle = 'black';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.font = '30px Monospace';
-    ctx.fillStyle = 'white';
-    let y = 10;
-    ctx.fillText(`积分榜(${state.players.length + state.deadPlayers.length}人)`, 10, y);
-    y += 30;
-    ctx.font = '15px Monospace';
-    for (const p of state.players.concat().sort((a, b) => b.score - a.score)) {
-        drawPlayer(p, /* isDead */ false);
-    }
-    for (const p of state.deadPlayers) {
-        drawPlayer(p, /* isDead */ true);
-    }
-    ctx.restore();
-    return y;
-
-    function drawPlayer(p: Player, isDead: boolean) {
-        const isYou = p.userId === getUserId();
-        ctx.fillStyle = isDead ? 'darkgray' : isYou ? 'yellow' : 'white';
-        ctx.fillText(`${p.userName}: ${p.score}`, 10, y);
-        y += 15;
-    }
 }
 
 function drawUnits(ctx: CanvasRenderingContext2D, isMiniMap: boolean = false) {
@@ -267,7 +294,7 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, isDead: boole
             ctx.lineWidth = blade.damage;
             ctx.lineTo(player.position[0] + sin * len, player.position[1] + -cos * len);
             ctx.strokeStyle = isMiniMap ? miniMapRed : red;
-            
+
             if (player.isGoldBlade(blade)) {
                 ctx.strokeStyle = 'gold';
             }

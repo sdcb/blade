@@ -43,7 +43,7 @@ public partial class Lobby
                 foreach (AddPlayerRequest req in _addPlayerRequests.Values)
                 {
                     string userName = UserManager.GetUser(req.UserId)!.Name;
-                    Player newPlayer = req is AddAIPlayerRequest ai ? AIPlayer.CreateRespawn(ai, RandomPosition()) : new Player(req.UserId, RandomPosition())
+                    Player newPlayer = req is AddAIPlayerRequest ai ? AIPlayer.CreateRespawn(ai, RandomPosition(), req.StatInfo) : new Player(req.UserId, RandomPosition(), req.StatInfo)
                     {
                     };
                     Players.Add(newPlayer);
@@ -97,7 +97,7 @@ public partial class Lobby
                         if (Vector2.Distance(player.Position, bonus.Position) < player.Size)
                         {
                             bonus.Apply(player);
-                            player.Score += 1;
+                            player.StatInfo.Score += 1;
                             toRemove.Add(bonus);
                         }
 
@@ -157,16 +157,17 @@ public partial class Lobby
                 {
                     if (ki.DefenderDead)
                     {
-                        if (ki.Defender.Score < 3 && Random.Shared.NextDouble() < (1.0 / ki.Defender.Score))
+                        ki.Defender.StatInfo.Deaths++;
+                        ki.Attacker.StatInfo.Kills++;
+                        if (ki.Defender.StatInfo.Score < 3 && Random.Shared.NextDouble() < (1.0 / ki.Defender.StatInfo.Score))
                         {
                             PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Defender)));
                         }
-                        for (int i = 0; i < ki.Defender.Score / 3; ++i)
+                        for (int i = 0; i < ki.Defender.StatInfo.Score / 3; ++i)
                         {
                             PickableBonuses.Add(Bonus.CreateRandom(RandomPositionWithin(ki.Defender)));
                         }
                     }
-                    ki.Defender.BeenAttackedBalanceCheck(ki.Damage);
                 }
             }
             stat.RecordBonusSpawn();
@@ -191,6 +192,7 @@ public partial class Lobby
             stat.RecordPlayerSpawn();
 
             PushManager.Push(ToPushState());
+            PushManager.PushStats(ToStatInfos());
             stat.RecordDispatchMessage();
 
             PerformanceManager.Add(stat.ToPerformanceData(FrameId));
@@ -203,5 +205,10 @@ public partial class Lobby
         BonusDto[] pickableBonusDtos = PickableBonuses.Select(x => x.ToDto()).ToArray();
         PlayerDto[] deadPlayerDtos = DeadPlayers.Select(x => x.ToDto()).ToArray();
         return new PushState(FrameId, playerDtos, pickableBonusDtos, deadPlayerDtos);
+    }
+
+    private StatInfoDto[] ToStatInfos()
+    {
+        return Players.Concat(DeadPlayers).Select(p => p.StatInfo.ToDto(p.UserId)).ToArray();
     }
 }

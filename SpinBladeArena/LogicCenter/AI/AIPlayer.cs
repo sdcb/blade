@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter.AI;
 
-public abstract class AIPlayer(int userId, Vector2 position) : Player(userId, position)
+public abstract class AIPlayer(int userId, Vector2 position, StatInfo statInfo) : Player(userId, position, statInfo)
 {
     public abstract float ReactionTimeMS { get; }
 
@@ -12,21 +12,21 @@ public abstract class AIPlayer(int userId, Vector2 position) : Player(userId, po
 
     private float _accumulatedTime = 0;
 
-    public override AddPlayerRequest CreateRespawnRequest() => new AddAIPlayerRequest(Preference, UserId);
+    public override AddPlayerRequest CreateRespawnRequest() => new AddAIPlayerRequest(Preference, UserId, StatInfo.CopyResetScore());
 
     public static AIPlayer CreateFor(Vector2 position, UserInfo user)
     {
         AIPreference preference = _names.First(n => n.Value.Contains(user.Name)).Key;
-        return Create(position, preference, user.Id);
+        return Create(position, preference, user.Id, new StatInfo());
     }
 
-    private static AIPlayer Create(Vector2 position, AIPreference preference, int userId)
+    private static AIPlayer Create(Vector2 position, AIPreference preference, int userId, StatInfo statInfo)
     {
         return preference switch
         {
-            AIPreference.Peaceful => new PeacefulAIPlayer(userId, position),
-            AIPreference.Aggressive => new AggressiveAIPlayer(userId, position),
-            AIPreference.Defensive => new DefensiveAIPlayer(userId, position),
+            AIPreference.Peaceful => new PeacefulAIPlayer(userId, position, statInfo),
+            AIPreference.Aggressive => new AggressiveAIPlayer(userId, position, statInfo),
+            AIPreference.Defensive => new DefensiveAIPlayer(userId, position, statInfo),
             _ => throw new NotImplementedException()
         };
     }
@@ -45,9 +45,9 @@ public abstract class AIPlayer(int userId, Vector2 position) : Player(userId, po
         }
     }
 
-    public static AIPlayer CreateRespawn(AddAIPlayerRequest req, Vector2 position)
+    public static AIPlayer CreateRespawn(AddAIPlayerRequest req, Vector2 position, StatInfo statInfo)
     {
-        return Create(position, req.AIPreference, req.UserId);
+        return Create(position, req.AIPreference, req.UserId, statInfo);
     }
 
     private static readonly Dictionary<AIPreference, string[]> _names = new()

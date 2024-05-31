@@ -5,7 +5,7 @@ using SpinBladeArena.Primitives;
 
 namespace SpinBladeArena.LogicCenter;
 
-public class Player(int userId, Vector2 position)
+public class Player(int userId, Vector2 position, StatInfo statInfo)
 {
     public int UserId { get; } = userId;
     public Vector2 Position = position;
@@ -14,6 +14,7 @@ public class Player(int userId, Vector2 position)
     public const float DefaultSize = 30;
     public const float MinSize = 20;
     public Vector2 Destination = position;
+    public StatInfo StatInfo = statInfo;
 
     public const float DefaultMovementSpeedPerSecond = 90;
     public const float MaxMovementSpeedPerSecond = 120;
@@ -49,8 +50,6 @@ public class Player(int userId, Vector2 position)
     public double DeadTime = 0;
     public List<string> Connections { get; } = [];
 
-    public int Score = 1;
-
     public bool Dead => Health <= 0;
 
     public float SafeDistance => Size + Weapon.LongestBladeLength;
@@ -63,7 +62,7 @@ public class Player(int userId, Vector2 position)
     public Circle ToCircle() => new(Position, Size);
     public Circle ToSafeDistanceCircle() => new(Position, SafeDistance);
 
-    public virtual AddPlayerRequest CreateRespawnRequest() => new(UserId);
+    public virtual AddPlayerRequest CreateRespawnRequest() => new(UserId, StatInfo.CopyResetScore());
 
     public LineSegment GetBladeLineSegment(Blade blade)
     {
@@ -114,10 +113,6 @@ public class Player(int userId, Vector2 position)
         {
             Weapon.DestroyBladeAt(Weapon.Count - 1);
         }
-    }
-
-    public void BeenAttackedBalanceCheck(float damage)
-    {
     }
 
     internal bool AddBlade(int addBladeCount)
@@ -182,10 +177,12 @@ public class Player(int userId, Vector2 position)
                         // 平衡性设计：如果对方没有金刀，自己有金刀，对方的刀直接销毁，自己的金刀不消耗
                         if (p1.Weapon.IsGoldBlade(p1b) && !p2.Weapon.IsGoldBlade(p2b))
                         {
+                            p1.StatInfo.DestroyBlades++;
                             p2.Weapon.DestroyBladeAt(p2i--);
                         }
                         else if (!p1.Weapon.IsGoldBlade(p1b) && p2.Weapon.IsGoldBlade(p2b))
                         {
+                            p2.StatInfo.DestroyBlades++;
                             p1.Weapon.DestroyBladeAt(p1i--);
                         }
                         // 其它情况，伤害高的刀消耗低的刀，伤害高的刀只减少一半伤害
@@ -195,6 +192,7 @@ public class Player(int userId, Vector2 position)
                             p1b.Damage -= p2b.Damage / 2;
                             if (p1b.Damage < 0)
                             {
+                                p2.StatInfo.DestroyBlades++;
                                 p1.Weapon.DestroyBladeAt(p1i--);
                             }
                         }
@@ -204,12 +202,15 @@ public class Player(int userId, Vector2 position)
                             p2b.Damage -= p1b.Damage / 2;
                             if (p2b.Damage < 0)
                             {
+                                p1.StatInfo.DestroyBlades++;
                                 p2.Weapon.DestroyBladeAt(p2i--);
                             }
                         }
                         // 伤害相等，双方刀都销毁
                         else
                         {
+                            p1.StatInfo.DestroyBlades++;
+                            p2.StatInfo.DestroyBlades++;
                             p1.Weapon.DestroyBladeAt(p1i--);
                             p2.Weapon.DestroyBladeAt(p2i--);
                         }
@@ -250,7 +251,6 @@ public class Player(int userId, Vector2 position)
             Destination = [Destination.X, Destination.Y],
             Health = Health,
             Blades = Weapon.ToDto(),
-            Score = Score,
             BladeRotationSpeed = Weapon.RotationDegreePerSecond,
         };
     }
