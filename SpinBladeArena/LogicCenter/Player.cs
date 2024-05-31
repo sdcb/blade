@@ -11,7 +11,7 @@ public class Player(int userId, string userName, Vector2 position)
     public string UserName { get; } = userName;
     public Vector2 Position = position;
     public float Health = 10;
-    public float Size => Math.Clamp(MinSize + Health, 1, 300);
+    public float Size => Math.Clamp(MinSize + Health, 1, 250);
     public const float DefaultSize = 30;
     public const float MinSize = 20;
     public Vector2 Destination = position;
@@ -28,17 +28,17 @@ public class Player(int userId, string userName, Vector2 position)
         }
     }
 
-    private static float GetSuggestedMovementSpeedByPlayerSize(float size)
+    private static float GetSuggestedMovementSpeedByPlayerSize(float playerSize)
     {
-        if (size < 50)
+        if (playerSize < 50)
         {
             // 20~50 -> 120~70
-            return 120 - (size - 20) * (50.0f / 30);
+            return 120 - (playerSize - 20) * (50.0f / 30);
         }
-        if (size < 120)
+        if (playerSize < 120)
         {
             // 50~120 -> 70~30
-            return 70 - (size - 50) * (40.0f / 70);
+            return 70 - (playerSize - 50) * (40.0f / 70);
         }
         else
         {

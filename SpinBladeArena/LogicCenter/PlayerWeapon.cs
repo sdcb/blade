@@ -55,21 +55,22 @@ public class PlayerWeapon : List<Blade>
 
     public bool AddLength(float length, float playerSize)
     {
-        // 刀长不能超过玩家半径的3倍（但不掉长度），例如：默认刀长30，玩家半径30，最大刀长90
-        float maxLength = playerSize * 3;
+        // 在玩家半径为20时，刀长倍率为6，半径为200时，刀长倍率为3，非线性递减
+        float bladeLengthToPlayerSize = 4.5f * MathF.Exp(-0.02f * playerSize) + 2.9375f;
+        float maxBladeLength = playerSize * bladeLengthToPlayerSize;
         bool everApplied = false;
         for (int i = 0; i < Count; ++i)
         {
             float bladeLengthTarget = this[i].Length + length;
-            if (bladeLengthTarget < maxLength)
+            if (bladeLengthTarget < maxBladeLength)
             {
                 everApplied = true;
                 this[i].Length = bladeLengthTarget;
             }
-            else if (this[i].Length < maxLength)
+            else if (this[i].Length < maxBladeLength)
             {
                 everApplied = true;
-                this[i].Length = maxLength;
+                this[i].Length = maxBladeLength;
             }
         }
         return everApplied;
@@ -77,8 +78,8 @@ public class PlayerWeapon : List<Blade>
 
     public bool AddDamage(float damage, float playerSize)
     {
-        // 刀伤不能超过半径除以15，默认半径30，最多2伤，减肥时会掉刀伤
-        float maxDamage = playerSize / 15;
+        // 刀伤不能超过半径除以12，默认半径30，最多2.5伤，减肥时会掉刀伤
+        float maxDamage = playerSize / 12;
         bool everApplied = false;
         for (int i = 0; i < Count; ++i)
         {

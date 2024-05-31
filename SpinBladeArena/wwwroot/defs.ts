@@ -29,14 +29,15 @@ class Bonus {
         }
 
         if (this.name === BonusNames.BladeLength || this.name === BonusNames.BladeLength20) {
-            // 刀长不能超过玩家半径的3倍（但不掉长度），例如：默认刀长30，玩家半径30，最大刀长90
-            const maxBladeLength = player.getSize() * 3;
+            // 在玩家半径为20时，刀长倍率为6，半径为200时，刀长倍率为3，非线性递减
+            const bladeLengthToPlayerSize = 4.5 * Math.exp(-0.02 * player.getSize()) + 2.9375;
+            const maxBladeLength = player.getSize() * bladeLengthToPlayerSize;
             return player.blades.some(blade => blade.length < maxBladeLength);
         }
 
         if (this.name === BonusNames.BladeDamage) {
-            // 刀伤不能超过半径除以15，默认半径30，最多2伤，减肥时会掉刀伤
-            const maxBladeDamage = player.getSize() / 15;
+            // 刀伤不能超过半径除以12，默认半径30，最多2.5伤，减肥时会掉刀伤
+            const maxBladeDamage = player.getSize() / 12;
             return player.blades.some(blade => blade.damage < maxBladeDamage);
         }
 
@@ -86,7 +87,7 @@ class Player {
     }
 
     getSize() {
-        const suggestedSize = Math.min(Player.minSize + this.health, 300);
+        const suggestedSize = Math.min(Player.minSize + this.health, 250);
         return Math.max(suggestedSize, 1);
     }
 
