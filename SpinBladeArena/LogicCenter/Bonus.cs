@@ -125,13 +125,13 @@ public class Bonus(string name, Vector2 position)
         BonusChanceDef[] All =
         [
             new (BonusNames.Health, p => Health(p)),
-            new (BonusNames.BladeLength, p => BladeLength(p), 0.1f),
+            new (BonusNames.BladeLength, p => BladeLength(p), 0.15f),
             new (BonusNames.BladeLength20, p => BladeLength20(p)),
             new (BonusNames.BladeDamage, p => BladeDamage(p), 0.1f),
-            new (BonusNames.BladeSpeed, p => BladeSpeed(p), 0.1f),
+            new (BonusNames.BladeSpeed, p => BladeSpeed(p)),
             new (BonusNames.BladeSpeed20, p => BladeSpeed20(p)),
             new (BonusNames.Thin, p => Thin(p)),
-            new (BonusNames.BladeCount, p => BladeCount(p), 0.25f),
+            new (BonusNames.BladeCount, p => BladeCount(p), 0.225f),
             new (BonusNames.BladeCount3, p => BladeCount3(p)),
             //Random,
         ];
