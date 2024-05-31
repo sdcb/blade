@@ -1,4 +1,4 @@
-class Blade {
+ï»¿class Blade {
     angle: number;
     damage: number;
     length: number;
@@ -11,105 +11,172 @@ class Blade {
 }
 
 class Bonus {
-    name: string;
+    type: BonusType;
     position: number[];
 
     constructor(raw: BonusDto) {
-        this.name = raw.n;
+        this.type = raw.t;
         this.position = raw.p;
+    }
+
+    get name() {
+        return BonusNames.toDisplayString(this.type);
     }
 
     isUseable(player: Player | null) {
         if (!player) return true;
 
-        if (this.name === BonusNames.BladeCount || this.name === BonusNames.BladeCount3) {
-            // µ¶ÊıÁ¿²»ÄÜ³¬¹ı°ë¾¶³ıÒÔ8£¨ÏòÉÏÈ¡Öµ£©£¬Ä¬ÈÏ°ë¾¶30£¬×î¶à3.75->4°Ñµ¶£¬¼õ·ÊÊ±²»µôµ¶
-            const maxBladeCount = Math.ceil(player.getSize() / 8);
+        if (this.type === BonusType.BladeCount || this.type === BonusType.BladeCount3) {
+            // åˆ€æ•°é‡ä¸èƒ½è¶…è¿‡åŠå¾„é™¤ä»¥8ï¼ˆå‘ä¸Šå–å€¼ï¼‰ï¼Œé»˜è®¤åŠå¾„30ï¼Œæœ€å¤š3.75->4æŠŠåˆ€ï¼Œå‡è‚¥æ—¶ä¸æ‰åˆ€
+            const maxBladeCount = Math.ceil(player.size / 8);
             return player.blades.length < maxBladeCount;
         }
 
-        if (this.name === BonusNames.BladeLength || this.name === BonusNames.BladeLength20) {
-            // ÔÚÍæ¼Ò°ë¾¶Îª20Ê±£¬µ¶³¤±¶ÂÊÎª6£¬°ë¾¶Îª200Ê±£¬µ¶³¤±¶ÂÊÎª3£¬·ÇÏßĞÔµİ¼õ
-            const bladeLengthToPlayerSize = 4.5 * Math.exp(-0.02 * player.getSize()) + 2.9375;
-            const maxBladeLength = player.getSize() * bladeLengthToPlayerSize;
+        if (this.type === BonusType.BladeLength || this.type === BonusType.BladeLength20) {
+            // åœ¨ç©å®¶åŠå¾„ä¸º20æ—¶ï¼Œåˆ€é•¿å€ç‡ä¸º6ï¼ŒåŠå¾„ä¸º200æ—¶ï¼Œåˆ€é•¿å€ç‡ä¸º3ï¼Œéçº¿æ€§é€’å‡
+            const bladeLengthToPlayerSize = 4.5 * Math.exp(-0.02 * player.size) + 2.9375;
+            const maxBladeLength = player.size * bladeLengthToPlayerSize;
             return player.blades.some(blade => blade.length < maxBladeLength);
         }
 
-        if (this.name === BonusNames.BladeDamage) {
-            // µ¶ÉË²»ÄÜ³¬¹ı°ë¾¶³ıÒÔ12£¬Ä¬ÈÏ°ë¾¶30£¬×î¶à2.5ÉË£¬¼õ·ÊÊ±»áµôµ¶ÉË
-            const maxBladeDamage = player.getSize() / 12;
+        if (this.type === BonusType.BladeDamage) {
+            // åˆ€ä¼¤ä¸èƒ½è¶…è¿‡åŠå¾„é™¤ä»¥12ï¼Œé»˜è®¤åŠå¾„30ï¼Œæœ€å¤š2.5ä¼¤ï¼Œå‡è‚¥æ—¶ä¼šæ‰åˆ€ä¼¤
+            const maxBladeDamage = player.size / 12;
             return player.blades.some(blade => blade.damage < maxBladeDamage);
         }
 
-        if (this.name === BonusNames.BladeSpeed || this.name === BonusNames.BladeSpeed20) {
-            // µ¶ËÙ²»ÄÜ³¬¹ı60£¨³õÊ¼Öµ10£©
-            // Ç°¶ËÃ»ÓĞµ¶ËÙµÄÏÔÊ¾£¬ËùÒÔÕâ¸öÅĞ¶ÏÊÇÔİÊ±×ö²»µ½µÄ
+        if (this.type === BonusType.BladeSpeed || this.type === BonusType.BladeSpeed20) {
+            // åˆ€é€Ÿä¸èƒ½è¶…è¿‡60ï¼ˆåˆå§‹å€¼10ï¼‰
+            const maxBladeSpeed = 60;
+            return player.bladeRotationSpeed < maxBladeSpeed;
         }
 
         return true;
     }
 }
 
-class BonusNames {
-    public static readonly Health: string = "ÉúÃü";
-    public static readonly Thin: string = "¼õ·Ê";
-    public static readonly Speed: string = "ÒÆËÙ+5";
-    public static readonly Speed20: string = "ÒÆËÙ+20";
-    public static readonly BladeCount: string = "µ¶Êı";
-    public static readonly BladeCount3: string = "µ¶Êı+3";
-    public static readonly BladeLength: string = "µ¶³¤+5";
-    public static readonly BladeLength20: string = "µ¶³¤+20";
-    public static readonly BladeDamage: string = "µ¶ÉË";
-    public static readonly BladeSpeed: string = "µ¶ËÙ+5";
-    public static readonly BladeSpeed20: string = "µ¶ËÙ+20";
-    public static readonly Random: string = "Ëæ»ú";
+class UserNameCache {
+    names: { [userId: number]: string } = {};
+    ongoingRequests: { [userId: number]: Promise<any> | undefined } = {};
+
+    getUserNameASAP(userId: number) {
+        if (this.names[userId]) return this.names[userId];
+        if (!this.ongoingRequests[userId]) {
+            this.ongoingRequests[userId] = this.loadUserName(userId).then(name => {
+                this.names[userId] = name;
+                this.ongoingRequests[userId] = undefined;
+            });
+        }
+        
+        return userId.toString();
+    }
+
+    private async loadUserName(userId: number) {
+        // GET: /user/{userId}/name, need token
+        const response = await fetch(`/user/${userId}/name`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + await ensureToken()
+            }
+        });
+
+        return await response.text();
+    }
 }
+const userNameCache = new UserNameCache();
 
 class Player {
+    static defaultSize = 30;
+    static minSize = 20;
+
     userId: number;
-    userName: string;
     position: number[];
     destination: number[];
     health: number;
-    static defaultSize = 30;
-    static minSize = 20;
     blades: Blade[];
     score: number;
+    bladeRotationSpeed: number;
 
     constructor(raw: PlayerDto) {
         this.userId = raw.u;
-        this.userName = raw.n;
         this.position = raw.p;
         this.destination = raw.d;
         this.health = raw.h;
         this.blades = raw.b.map(bladeRaw => new Blade(bladeRaw));
         this.score = raw.s;
+        this.bladeRotationSpeed = raw.z;
     }
 
-    getSize() {
+    get userName(): string {
+        return userNameCache.getUserNameASAP(this.userId);
+    }
+
+    get size() {
         const suggestedSize = Math.min(Player.minSize + this.health, 250);
         return Math.max(suggestedSize, 1);
     }
 
-    // Æ½ºâĞÔÉè¼Æ£ºÈç¹ûµ¶±È½ÏÉÙ£¬¶Ôµ¶Ê±²»¼õÉÙÉËº¦£¬´ËÊ±µ¶µÄÑÕÉ«Îª½ğÉ«
+    // å¹³è¡¡æ€§è®¾è®¡ï¼šå¦‚æœåˆ€æ¯”è¾ƒå°‘ï¼Œå¯¹åˆ€æ—¶ä¸å‡å°‘ä¼¤å®³ï¼Œæ­¤æ—¶åˆ€çš„é¢œè‰²ä¸ºé‡‘è‰²
     isGoldBlade(blade: Blade) {
         return this.blades.length <= 2 && blade.damage >= 2;
     }
 }
+
 // Define the structure for player data
 type PlayerDto = {
     u: number;  // Unique user ID
-    n: string;  // Username
     s: number;  // Score of the player
     p: number[];  // Current position in the game world, usually an array of x, y, z coordinates
     d: number[];  // Destination position in the game world, similar to 'p'
     h: number;  // Health level of the player
+    z: number; // blade rotation speed degree in second
     b: BladeDto[];  // Array of blades the player has
 };
 
+enum BonusType {
+    Health,
+    Thin,
+    Speed,
+    Speed20,
+    BladeCount,
+    BladeCount3,
+    BladeLength,
+    BladeLength20,
+    BladeDamage,
+    BladeSpeed,
+    BladeSpeed20,
+    Random
+}
+
+class BonusNames {
+    private static bonusTypeToNameMap: Map<BonusType, string> = new Map<BonusType, string>([
+        [BonusType.Health, "ç”Ÿå‘½"],
+        [BonusType.Thin, "å‡è‚¥"],
+        [BonusType.Speed, "ç§»é€Ÿ+5"],
+        [BonusType.Speed20, "ç§»é€Ÿ+20"],
+        [BonusType.BladeCount, "åˆ€æ•°"],
+        [BonusType.BladeCount3, "åˆ€æ•°+3"],
+        [BonusType.BladeLength, "åˆ€é•¿+5"],
+        [BonusType.BladeLength20, "åˆ€é•¿+20"],
+        [BonusType.BladeDamage, "åˆ€ä¼¤"],
+        [BonusType.BladeSpeed, "åˆ€é€Ÿ+5"],
+        [BonusType.BladeSpeed20, "åˆ€é€Ÿ+20"],
+        [BonusType.Random, "éšæœº"]
+    ]);
+
+    public static toDisplayString(bonusType: BonusType): string {
+        const name = this.bonusTypeToNameMap.get(bonusType);
+        if (name !== undefined) {
+            return name;
+        }
+        throw new Error(`Invalid BonusType: ${bonusType}`);
+    }
+}
+
 // Define the structure for pickable bonuses in the game
 type BonusDto = {
-    n: string;  // Name of the bonus
+    t: BonusType;  // Type of the bonus
     p: number[];  // Position where the bonus is located, typically x, y, z coordinates
 };
 

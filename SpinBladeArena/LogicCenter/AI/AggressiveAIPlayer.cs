@@ -2,7 +2,7 @@
 
 namespace SpinBladeArena.LogicCenter.AI;
 
-public class AggressiveAIPlayer(int userId, string userName, Vector2 position) : AIPlayer(userId, userName, position)
+public class AggressiveAIPlayer(int userId, Vector2 position) : AIPlayer(userId, position)
 {
     public override float ReactionTimeMS => 0.1f;
 
@@ -27,7 +27,7 @@ public class AggressiveAIPlayer(int userId, string userName, Vector2 position) :
         }
 
         // get the closest bonus, prefer blade first
-        Bonus? bladeBonus = things.Bonuses.FirstOrDefault(b => b.Bonus.Name == BonusNames.BladeCount3 || b.Bonus.Name == BonusNames.BladeCount)?.Bonus;
+        Bonus? bladeBonus = things.Bonuses.FirstOrDefault(b => b.Bonus.Type == BonusType.BladeCount3 || b.Bonus.Type == BonusType.BladeCount)?.Bonus;
         if (bladeBonus != null)
         {
             Destination = bladeBonus.Position;

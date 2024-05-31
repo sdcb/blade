@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using SpinBladeArena.LogicCenter.AI;
 
 namespace SpinBladeArena.Users;
 
@@ -6,6 +6,12 @@ public class UserManager
 {
     readonly Dictionary<int, UserInfo> _users = [];
     int _nextUserId = 1;
+    public int AIUserCount { get; private set; } = 0;
+
+    public UserManager()
+    {
+        AIPlayer.EnsureAIUsers(this);
+    }
 
     public UserInfo EnsureUser(string userName, string password)
     {
@@ -14,34 +20,40 @@ public class UserManager
 
         if (user != null)
         {
-            user.Name = userName;
+            user = user with { Name = userName };
+            _users[user.Id] = user;
             return user;
         }
 
         int userId = Interlocked.Increment(ref _nextUserId);
-        UserInfo newUser = new(userId, userName, password, isOnline: false, DateTime.Now);
+        UserInfo newUser = new(userId, userName, password, IsOnline: false, DateTime.Now);
         _users[userId] = newUser;
         return newUser;
     }
 
+    public void AddAIUser(UserInfo user)
+    {
+        int userId = -++AIUserCount;
+        _users[userId] = user with { Id = userId };
+    }
+
     public UserInfo[] GetAllUsers() => [.. _users.Values];
 
-    public void OnUserConnected(int user)
+    public void OnUserConnected(int userId)
     {
-        UserInfo? userInfo = GetUser(user);
+        UserInfo? userInfo = GetUser(userId);
         if (userInfo != null)
         {
-            userInfo.IsOnline = true;
-            userInfo.LatestActive = DateTime.Now;
+            _users[userId] = userInfo with { IsOnline = true, LatestActive = DateTime.Now };
         }
     }
 
-    public void OnUserDisconnected(int user)
+    public void OnUserDisconnected(int userId)
     {
-        UserInfo? userInfo = GetUser(user);
+        UserInfo? userInfo = GetUser(userId);
         if (userInfo != null)
         {
-            userInfo.IsOnline = false;
+            _users[userId] = userInfo with { IsOnline = false };
         }
     }
 
@@ -58,7 +70,7 @@ public class UserManager
     {
         if (_users.TryGetValue(userId, out UserInfo? user))
         {
-            user.LatestActive = DateTime.Now;
+            _users[userId] = user with { LatestActive = DateTime.Now };
         }
     }
 

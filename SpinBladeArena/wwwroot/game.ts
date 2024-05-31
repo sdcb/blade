@@ -1,4 +1,4 @@
-﻿const lobbyId = parseInt(location.href.split('/').pop());
+﻿const lobbyId = parseInt(location.href.split('/').pop()!);
 const mapSize = 2000;
 
 class State {
@@ -14,12 +14,12 @@ class State {
 
     onUpdated() {
         const userId = getUserId();
-        this.me = this.players.find(p => p.userId === userId);
-        if (!this.me) this.me = this.deadPlayers.find(p => p.userId === userId);
+        this.me = this.players.find(p => p.userId === userId) || null;
+        if (!this.me) this.me = this.deadPlayers.find(p => p.userId === userId) || null;
 
         if (this.me) {
             this.center = { x: this.me.position[0], y: this.me.position[1] };
-            this.scale = getScale(this.me.getSize(), window.innerWidth, window.innerHeight);
+            this.scale = getScale(this.me.size, window.innerWidth, window.innerHeight);
         }
     }
 
@@ -34,14 +34,14 @@ class State {
         this.onPush(initState);
     }
 
-    me: Player = null;
+    me: Player | null = null;
 }
 const state = new State();
 
 // 确保在 DOM 加载完成后执行脚本
 document.addEventListener('DOMContentLoaded', async () => {
     const canvas = <HTMLCanvasElement>document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
 
     const resizeCanvas = () => {
         canvas.width = window.innerWidth;
@@ -207,7 +207,7 @@ function drawUnits(ctx: CanvasRenderingContext2D, isMiniMap: boolean = false) {
         drawPlayer(ctx, player, /* isDead: */ false, isMiniMap);
     }
 
-    if (state.me?.health <= 0 && !isMiniMap) {
+    if (state.me && state.me.health <= 0 && !isMiniMap) {
         // draw dead player
         ctx.font = '100px Arial';
         ctx.fillText('你挂了', state.center.x, state.center.y);
@@ -222,7 +222,7 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, isDead: boole
     const white = 'white';
 
     ctx.beginPath();
-    ctx.arc(player.position[0], player.position[1], player.getSize(), 0, Math.PI * 2);
+    ctx.arc(player.position[0], player.position[1], player.size, 0, Math.PI * 2);
     if (isDead) {
         ctx.fillStyle = 'gray';
     } else if (player.userId === currentUserId) {
@@ -242,7 +242,7 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, isDead: boole
     }
     ctx.fill();
     ctx.strokeStyle = isMiniMap ? miniMapWhite : white;
-    ctx.lineWidth = player.getSize() / Player.minSize;
+    ctx.lineWidth = player.size / Player.minSize;
     ctx.setLineDash([]);
     ctx.stroke();
 
@@ -262,8 +262,8 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, isDead: boole
             const cos = Math.cos(angle);
 
             ctx.beginPath();
-            ctx.moveTo(player.position[0] + sin * player.getSize(), player.position[1] + -cos * player.getSize());
-            const len = blade.length + player.getSize();
+            ctx.moveTo(player.position[0] + sin * player.size, player.position[1] + -cos * player.size);
+            const len = blade.length + player.size;
             ctx.lineWidth = blade.damage;
             ctx.lineTo(player.position[0] + sin * len, player.position[1] + -cos * len);
             ctx.strokeStyle = isMiniMap ? miniMapRed : red;

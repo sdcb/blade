@@ -11,7 +11,7 @@ public class PlayerWeapon : List<Blade>
 
     public float AbsRotationDegreePerSecond => Math.Abs(RotationDegreePerSecond);
 
-    public bool AddRotationDegreePerSecond(float amountInDegree, float playerSize)
+    public bool AddRotationSpeed(float amountInDegree, float playerSize)
     {
         // 刀速不能超过60（初始值10）
         float maxSpeed = 60;

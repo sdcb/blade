@@ -2,7 +2,7 @@
 
 namespace SpinBladeArena.LogicCenter.AI;
 
-public class DefensiveAIPlayer(int userId, string userName, Vector2 position) : AIPlayer(userId, userName, position)
+public class DefensiveAIPlayer(int userId, Vector2 position) : AIPlayer(userId, position)
 {
     public override float ReactionTimeMS => 0.12f;
 
@@ -19,7 +19,7 @@ public class DefensiveAIPlayer(int userId, string userName, Vector2 position) : 
         }
 
         // if I only have < 2 blade, get the closest blade bonus
-        Bonus? bladeBonus = things.GetPerferedBonus(BonusNames.BladeCount3, BonusNames.BladeCount);
+        Bonus? bladeBonus = things.GetPerferedBonus(BonusType.BladeCount3, BonusType.BladeCount);
         if (Weapon.Count < 2 && bladeBonus != null)
         {
             Destination = bladeBonus.Position;
@@ -46,7 +46,7 @@ public class DefensiveAIPlayer(int userId, string userName, Vector2 position) : 
         // if I have gold blade, get the closest blade bonus except BladeCount/BladeCount3/Random/Thin
         if (Weapon.Any(Weapon.IsGoldBlade))
         {
-            Bonus? b = things.GetPerferedBonus(BonusNames.Speed20, BonusNames.Speed, BonusNames.BladeLength20, BonusNames.BladeLength, BonusNames.Health);
+            Bonus? b = things.GetPerferedBonus(BonusType.Speed20, BonusType.Speed, BonusType.BladeLength20, BonusType.BladeLength, BonusType.Health);
             if (b != null)
             {
                 Destination = b.Position;
@@ -62,20 +62,4 @@ public class DefensiveAIPlayer(int userId, string userName, Vector2 position) : 
             return;
         }
     }
-
-    static HashSet<string> perferForGoldBlade =
-    [
-        BonusNames.BladeSpeed, 
-        BonusNames.BladeSpeed20,
-        BonusNames.BladeLength,
-        BonusNames.BladeLength20,
-    ];
-
-    static HashSet<string> exceptNamesForGoldBlade =
-    [
-        BonusNames.BladeCount,
-        BonusNames.BladeCount3,
-        BonusNames.Random,
-        BonusNames.Thin,
-    ];
 }

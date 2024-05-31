@@ -35,6 +35,9 @@ public class UserController(TokenValidationParameters _tvp, UserManager userMana
         };
     }
 
+    [HttpGet("user/{userId}/name")]
+    public string? GetUserNameFromId(int userId) => userManager.GetUser(userId)?.Name;
+
     [Route("userList")]
     public UserInfo[] UserList() => userManager.GetAllUsers();
 }

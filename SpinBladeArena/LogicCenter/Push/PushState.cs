@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
 [DataContract]
-public record PushState(long FrameId, PlayerDto[] Players, PickableBonusDto[] Bonuses, PlayerDto[] DeadPlayers)
+public record PushState(long FrameId, PlayerDto[] Players, BonusDto[] Bonuses, PlayerDto[] DeadPlayers)
 {
     [DataMember(Name = "i"), JsonPropertyName("i")]
     public long FrameId { get; init; } = FrameId;
@@ -13,7 +13,7 @@ public record PushState(long FrameId, PlayerDto[] Players, PickableBonusDto[] Bo
     public PlayerDto[] Players { get; set; } = Players;
 
     [DataMember(Name = "b"), JsonPropertyName("b")]
-    public PickableBonusDto[] Bonuses { get; set; } = Bonuses;
+    public BonusDto[] Bonuses { get; set; } = Bonuses;
 
     [DataMember(Name = "d"), JsonPropertyName("d")]
     public PlayerDto[] DeadPlayers { get; set; } = DeadPlayers;

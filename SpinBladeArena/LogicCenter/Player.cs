@@ -5,10 +5,9 @@ using SpinBladeArena.Primitives;
 
 namespace SpinBladeArena.LogicCenter;
 
-public class Player(int userId, string userName, Vector2 position)
+public class Player(int userId, Vector2 position)
 {
     public int UserId { get; } = userId;
-    public string UserName { get; } = userName;
     public Vector2 Position = position;
     public float Health = 10;
     public float Size => Math.Clamp(MinSize + Health, 1, 250);
@@ -28,17 +27,17 @@ public class Player(int userId, string userName, Vector2 position)
         }
     }
 
-    private static float GetSuggestedMovementSpeedByPlayerSize(float playerSize)
+    private static float GetSuggestedMovementSpeedByPlayerSize(float size)
     {
-        if (playerSize < 50)
+        if (size < 50)
         {
             // 20~50 -> 120~70
-            return 120 - (playerSize - 20) * (50.0f / 30);
+            return 120 - (size - 20) * (50.0f / 30);
         }
-        if (playerSize < 120)
+        if (size < 120)
         {
             // 50~120 -> 70~30
-            return 70 - (playerSize - 50) * (40.0f / 70);
+            return 70 - (size - 50) * (40.0f / 70);
         }
         else
         {
@@ -64,7 +63,7 @@ public class Player(int userId, string userName, Vector2 position)
     public Circle ToCircle() => new(Position, Size);
     public Circle ToSafeDistanceCircle() => new(Position, SafeDistance);
 
-    public virtual AddPlayerRequest CreateRespawnRequest() => new(UserId, UserName);
+    public virtual AddPlayerRequest CreateRespawnRequest() => new(UserId);
 
     public LineSegment GetBladeLineSegment(Blade blade)
     {
@@ -247,12 +246,12 @@ public class Player(int userId, string userName, Vector2 position)
         return new PlayerDto
         {
             UserId = UserId,
-            UserName = UserName,
             Position = [Position.X, Position.Y],
             Destination = [Destination.X, Destination.Y],
             Health = Health,
             Blades = Weapon.ToDto(),
-            Score = Score
+            Score = Score,
+            BladeRotationSpeed = Weapon.RotationDegreePerSecond,
         };
     }
 

@@ -12,7 +12,7 @@ public class GameHub(GameManager gameManager, CurrentUser user, UserManager user
     public void JoinLobby(int lobbyId)
     {
         Lobby lobby = gameManager.Lobbies[lobbyId];
-        lobby.AddPlayerToRandomPosition(new (user.Id, user.Name));
+        lobby.AddPlayerToRandomPosition(new (user.Id));
         Groups.AddToGroupAsync(Context.ConnectionId, lobbyId.ToString());
         lobby.EnsureStart();
     }

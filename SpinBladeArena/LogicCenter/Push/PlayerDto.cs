@@ -9,9 +9,6 @@ public class PlayerDto
     [DataMember(Name = "u"), JsonPropertyName("u")]
     public required int UserId { get; init; }
 
-    [DataMember(Name = "n"), JsonPropertyName("n")]
-    public required string UserName { get; init; }
-
     [DataMember(Name = "s"), JsonPropertyName("s")]
     public required int Score { get; init; }
 
@@ -23,6 +20,9 @@ public class PlayerDto
 
     [DataMember(Name = "h"), JsonPropertyName("h")]
     public required float Health { get; init; }
+
+    [DataMember(Name = "z"), JsonPropertyName("z")]
+    public required float BladeRotationSpeed { get; init; }
 
     [DataMember(Name = "b"), JsonPropertyName("b")]
     public required BladeDto[] Blades { get; init; }

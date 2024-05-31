@@ -1,58 +1,53 @@
 ﻿using SpinBladeArena.Primitives;
-using System.Linq;
+using SpinBladeArena.Users;
 using System.Numerics;
 
 namespace SpinBladeArena.LogicCenter.AI;
 
-public abstract class AIPlayer(int userId, string userName, Vector2 position) : Player(userId, userName, position)
+public abstract class AIPlayer(int userId, Vector2 position) : Player(userId, position)
 {
-    static int _nextAIUserId = -1;
-
     public abstract float ReactionTimeMS { get; }
 
     public abstract AIPreference Preference { get; }
 
     private float _accumulatedTime = 0;
 
-    public override AddPlayerRequest CreateRespawnRequest() => new AddAIPlayerRequest(Preference, UserId, UserName);
+    public override AddPlayerRequest CreateRespawnRequest() => new AddAIPlayerRequest(Preference, UserId);
 
-    public static AIPlayer CreateRandom(Vector2 position, HashSet<string> knownNames)
+    public static AIPlayer CreateFor(Vector2 position, UserInfo user)
     {
-        AIPreference preference = (AIPreference)Random.Shared.Next(_names.Count);
-        // for testing
-        // AIPreference preference = AIPreference.Peaceful;
-        string userName = RandomName(preference, knownNames);
-        int userId = _nextAIUserId--;
-        return Create(position, preference, userName, userId);
+        AIPreference preference = _names.First(n => n.Value.Contains(user.Name)).Key;
+        return Create(position, preference, user.Id);
     }
 
-    private static AIPlayer Create(Vector2 position, AIPreference preference, string userName, int userId)
+    private static AIPlayer Create(Vector2 position, AIPreference preference, int userId)
     {
         return preference switch
         {
-            AIPreference.Peaceful => new PeacefulAIPlayer(userId, userName, position),
-            AIPreference.Aggressive => new AggressiveAIPlayer(userId, userName, position),
-            AIPreference.Defensive => new DefensiveAIPlayer(userId, userName, position),
+            AIPreference.Peaceful => new PeacefulAIPlayer(userId, position),
+            AIPreference.Aggressive => new AggressiveAIPlayer(userId, position),
+            AIPreference.Defensive => new DefensiveAIPlayer(userId, position),
             _ => throw new NotImplementedException()
         };
     }
 
-    public static AIPlayer CreateRespawn(AddAIPlayerRequest req, Vector2 position)
+    public static void EnsureAIUsers(UserManager userManager)
     {
-        return Create(position, req.AIPreference, req.UserName, req.UserId);
+        lock (userManager)
+        {
+            foreach (string[] nameBatch in _names.Values)
+            {
+                foreach (string name in nameBatch)
+                {
+                    userManager.AddAIUser(new(0, name, "", true, DateTime.Now));
+                }
+            }
+        }
     }
 
-    private static string RandomName(AIPreference preference, HashSet<string> knownNames)
+    public static AIPlayer CreateRespawn(AddAIPlayerRequest req, Vector2 position)
     {
-        var nameBatch = _names[preference];
-        string name;
-        do
-        {
-            name = nameBatch[Random.Shared.Next(nameBatch.Length)];
-        } while (knownNames.Contains(name));
-
-        knownNames.Add(name);
-        return name;
+        return Create(position, req.AIPreference, req.UserId);
     }
 
     private static readonly Dictionary<AIPreference, string[]> _names = new()
@@ -72,7 +67,7 @@ public abstract class AIPlayer(int userId, string userName, Vector2 position) : 
         CloseastThings things = GetCloseastThings(lobby);
         if (Weapon.Count == 0 && things.Bonuses.Length != 0)
         {
-            Bonus target = things.GetPerferedBonus(BonusNames.BladeCount3, BonusNames.BladeCount, BonusNames.Health, BonusNames.BladeSpeed, BonusNames.BladeSpeed20)
+            Bonus target = things.GetPerferedBonus(BonusType.BladeCount3, BonusType.BladeCount, BonusType.Health, BonusType.BladeSpeed, BonusType.BladeSpeed20)
                 ?? things.Bonuses.First().Bonus;
             Destination = target.Position;
             return;

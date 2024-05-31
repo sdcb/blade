@@ -42,8 +42,8 @@ public partial class Lobby
                 Players.EnsureCapacity(destinationSize);
                 foreach (AddPlayerRequest req in _addPlayerRequests.Values)
                 {
-                    string userName = UserManager.GetUser(req.UserId)?.Name ?? req.UserName;
-                    Player newPlayer = req is AddAIPlayerRequest ai ? AIPlayer.CreateRespawn(ai, RandomPosition()) : new Player(req.UserId, userName, RandomPosition())
+                    string userName = UserManager.GetUser(req.UserId)!.Name;
+                    Player newPlayer = req is AddAIPlayerRequest ai ? AIPlayer.CreateRespawn(ai, RandomPosition()) : new Player(req.UserId, RandomPosition())
                     {
                     };
                     Players.Add(newPlayer);
@@ -200,7 +200,7 @@ public partial class Lobby
     private PushState ToPushState()
     {
         PlayerDto[] playerDtos = Players.Select(x => x.ToDto()).ToArray();
-        PickableBonusDto[] pickableBonusDtos = PickableBonuses.Select(x => x.ToDto()).ToArray();
+        BonusDto[] pickableBonusDtos = PickableBonuses.Select(x => x.ToDto()).ToArray();
         PlayerDto[] deadPlayerDtos = DeadPlayers.Select(x => x.ToDto()).ToArray();
         return new PushState(FrameId, playerDtos, pickableBonusDtos, deadPlayerDtos);
     }

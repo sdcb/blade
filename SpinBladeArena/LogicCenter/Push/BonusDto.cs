@@ -4,10 +4,10 @@ using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
 [DataContract]
-public class PickableBonusDto
+public class BonusDto
 {
-    [DataMember(Name = "n"), JsonPropertyName("n")]
-    public required string Name { get; init; }
+    [DataMember(Name = "t"), JsonPropertyName("t")]
+    public required int Type { get; init; }
 
     [DataMember(Name = "p"), JsonPropertyName("p")]
     public required float[] Position { get; init; }

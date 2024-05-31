@@ -1,6 +1,7 @@
 ﻿using SpinBladeArena.LogicCenter.AI;
 using SpinBladeArena.LogicCenter.Lobbies;
 using SpinBladeArena.Performance;
+using SpinBladeArena.Primitives;
 using SpinBladeArena.Users;
 using System.Numerics;
 
@@ -99,10 +100,11 @@ public abstract partial class Lobby(int id, LobbyCreateOptions CreateOptions, IS
         if (Players.OfType<AIPlayer>().Any()) return;
 
         int aiPlayerCount = CreateOptions.RobotCount;
-        HashSet<string> knownNames = [];
+        int[] userIds = RandomNumbersGenerator.GetRandomNumbers(-UserManager.AIUserCount, 0, aiPlayerCount);
         for (int i = 0; i < aiPlayerCount; ++i)
         {
-            Player aiPlayer = AIPlayer.CreateRandom(RandomPosition(), knownNames);
+            UserInfo user = UserManager.GetUser(userIds[i])!;
+            Player aiPlayer = AIPlayer.CreateFor(RandomPosition(), user);
             Players.Add(aiPlayer);
         }
     }
@@ -122,6 +124,6 @@ public abstract partial class Lobby(int id, LobbyCreateOptions CreateOptions, IS
     }
 }
 
-public record AddPlayerRequest(int UserId, string UserName);
+public record AddPlayerRequest(int UserId);
 
-public record AddAIPlayerRequest(AIPreference AIPreference, int UserId, string UserName) : AddPlayerRequest(UserId, UserName);
+public record AddAIPlayerRequest(AIPreference AIPreference, int UserId) : AddPlayerRequest(UserId);

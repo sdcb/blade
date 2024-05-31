@@ -17,5 +17,3 @@ public class GameManager(IServiceProvider ServiceProvider)
         return nextLobbyId;
     }
 }
-
-public record User(string Name);

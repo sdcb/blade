@@ -2,11 +2,11 @@
 
 public record CloseastThings(PlayerDistance[] Players, BonusDistance[] Bonuses)
 {
-    public Bonus? GetPerferedBonus(params string[] perferPriorities)
+    public Bonus? GetPerferedBonus(params BonusType[] perferPriorities)
     {
-        foreach (string perferPriority in perferPriorities)
+        foreach (BonusType perferPriority in perferPriorities)
         {
-            BonusDistance? perferedBonus = Bonuses.FirstOrDefault(b => b.Bonus.Name == perferPriority);
+            BonusDistance? perferedBonus = Bonuses.FirstOrDefault(b => b.Bonus.Type == perferPriority);
             if (perferedBonus != null)
             {
                 return perferedBonus.Bonus;
