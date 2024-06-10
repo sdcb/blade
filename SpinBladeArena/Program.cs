@@ -55,6 +55,13 @@ namespace SpinBladeArena
             // Add services to the container.
             services.AddHttpContextAccessor();
             services.AddScoped<CurrentUser>();
+            services.AddSingleton(sp =>
+            {
+                KeycloakConfig keycloakConfig = Activator.CreateInstance<KeycloakConfig>();
+                configuration.GetSection("KeycloakConfig").Bind(keycloakConfig);
+                return keycloakConfig;
+            });
+            services.AddSingleton<ServerUrlAccessor>();
             services.AddRazorPages()
 #if DEBUG
                 .AddRazorRuntimeCompilation()
@@ -62,6 +69,7 @@ namespace SpinBladeArena
                 ;
             services.AddSingleton<GameManager>();
             services.AddSingleton<UserManager>();
+            services.AddHttpClient("sso");
             services.AddKeyedSingleton(typeof(int), "ServerFPS", int.Parse(configuration["ServerFPS"] ?? "45"));
             TokenValidationParameters tvp = new()
             {
