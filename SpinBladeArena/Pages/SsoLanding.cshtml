@@ -1,13 +1,12 @@
 ﻿@page "/sso-landing"
+@using System.Text.Json
 @model SpinBladeArena.Pages.SsoLandingModel
 @{
 }
 <h1>登陆成功😀</h1>
 
 <script src="~/userManager.js"></script>
-@section scripts {
-    <script>
-        setToken('@Model.TokenDto.Token', @Model.UserInfo.Id, new Date('@Model.TokenDto.Expires.ToString("R")'))
-        location.href = '/';
-    </script>
-}
+<script>
+    setToken(@Html.Raw(JsonSerializer.Serialize(Model.TokenDto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase } )))
+    location.href = '/';
+</script>

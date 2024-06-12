@@ -12,7 +12,7 @@ public class UserController(UserManager userManager, KeycloakConfig ssoConfig, S
     {
         if (!string.IsNullOrEmpty(ssoConfig.ClientId))
         {
-            return BadRequest("SSO is enabled, use /sso-login instead");
+            return BadRequest("SSO is enabled");
         }
         userManager.EnsureUser(userName, uid);
         return userManager.CreateToken(userName);

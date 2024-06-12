@@ -7,10 +7,9 @@ namespace SpinBladeArena.Pages;
 public class SsoLandingModel : PageModel
 {
     public TokenDto TokenDto { get; set; } = null!;
-    public UserInfo UserInfo { get; set; } = null!;
 
-    public async Task<IActionResult> OnGet(string code, string state, string session_state, 
-        [FromServices] HttpClient http, [FromServices] KeycloakConfig ssoConfig, [FromServices] ServerUrlAccessor serverUrlAccessor, UserManager userManager)
+    public async Task<IActionResult> OnGet(string code, string state, /* string session_state, */
+        [FromServices] HttpClient http, [FromServices] KeycloakConfig ssoConfig, [FromServices] ServerUrlAccessor serverUrlAccessor, [FromServices] UserManager userManager)
     {
         if (string.IsNullOrEmpty(code))
         {
@@ -39,7 +38,7 @@ public class SsoLandingModel : PageModel
         SsoTokenDto resp = (await response.Content.ReadFromJsonAsync<SsoTokenDto>())!;
         AccessTokenInfo info = AccessTokenInfo.Decode(resp.AccessToken);
         string userName = info.FamilyName + info.GivenName;
-        UserInfo = userManager.EnsureUser(userName, info.Sub);
+        userManager.EnsureUser(userName, info.Sub);
         TokenDto = userManager.CreateToken(userName);
 
         return Page();

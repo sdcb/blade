@@ -4,7 +4,7 @@ using System.Security.Claims;
 
 namespace SpinBladeArena.Users;
 
-public class UserManager(TokenValidationParameters _tvp)
+public class UserManager(TokenValidationParameters tvp)
 {
     readonly Dictionary<int, UserInfo> _users = [];
     int _nextUserId = 1;
@@ -41,13 +41,13 @@ public class UserManager(TokenValidationParameters _tvp)
 
         DateTime expires = DateTime.UtcNow.AddHours(1);
         JwtSecurityToken token = new(
-            issuer: _tvp.ValidIssuer,
-            audience: _tvp.ValidAudience,
+            issuer: tvp.ValidIssuer,
+            audience: tvp.ValidAudience,
             expires: expires,
-            signingCredentials: new SigningCredentials((SymmetricSecurityKey)_tvp.IssuerSigningKey, SecurityAlgorithms.HmacSha256),
+            signingCredentials: new SigningCredentials((SymmetricSecurityKey)tvp.IssuerSigningKey, SecurityAlgorithms.HmacSha256),
             claims: claims);
 
-        return new TokenDto(user.Id, new JwtSecurityTokenHandler().WriteToken(token), expires);
+        return new TokenDto(user.Id, user.Name, new JwtSecurityTokenHandler().WriteToken(token), expires);
     }
 
     public UserInfo[] GetAllUsers() => [.. _users.Values];

@@ -1,4 +1,9 @@
 ﻿async function ensureToken(): Promise<string> {
+    const expires = localStorage.tokenExpire ? new Date(localStorage.tokenExpire) : new Date(0);
+    if (expires > new Date()) {
+        return localStorage.token;
+    }
+
     if (!localStorage.uid) {
         localStorage.uid = randomPassword();
     }
@@ -6,20 +11,29 @@
     let userName = localStorage.userName;
     while (!userName) {
         userName = prompt("请输入用户名", randomName());
-        localStorage.userName = userName;
     }
     
-    const resp = await fetch(`/token?userName=${encodeURIComponent(userName)}&uid=${encodeURIComponent(localStorage.password)}`);
-    const tokenObj = await resp.json();
-
-    localStorage.token = tokenObj.token;
-    localStorage.userId = tokenObj.userId;
-    return localStorage.token;
+    const resp = await fetch(`/token?userName=${encodeURIComponent(userName)}&uid=${encodeURIComponent(localStorage.uid)}`);
+    if (resp.status !== 200 && await resp.text() === 'SSO is enabled') {
+        location.href = '/sso-login';
+    } else if (resp.status === 200) {
+        const tokenObj = await resp.json();
+        setToken(tokenObj);
+    }
 }
 
-function setToken(token: string, expire: Date) {
-    localStorage.setItem("token", token);
-    localStorage.setItem("tokenExpire", expire.toISOString());
+type TokenDto = {
+    userId: number;
+    userName: string;
+    token: string;
+    expires: string;
+};
+
+function setToken(token: TokenDto) {
+    localStorage.token = token.token;
+    localStorage.userId = token.userId.toString();
+    localStorage.userName = token.userName;
+    localStorage.tokenExpire = new Date(token.expires);
 }
 
 function randomPassword(length = 20) {
