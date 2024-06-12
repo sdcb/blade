@@ -6,7 +6,7 @@ public class UserInfo(int id, string name, string password, bool isOnline, DateT
 
     public string Name { get; set; } = name;
 
-    public string Password { get; init; } = password;
+    public string UniqueIdentifier { get; init; } = password;
 
     public bool IsOnline { get; set; } = isOnline;
 

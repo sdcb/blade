@@ -2,7 +2,7 @@
 
 namespace SpinBladeArena.Users;
 
-public record TokenResponseDto
+public record SsoTokenDto
 {
     [JsonPropertyName("access_token")]
     public required string AccessToken { get; init; }

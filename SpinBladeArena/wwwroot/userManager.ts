@@ -1,6 +1,6 @@
 ﻿async function ensureToken(): Promise<string> {
-    if (!localStorage.password) {
-        localStorage.password = randomPassword();
+    if (!localStorage.uid) {
+        localStorage.uid = randomPassword();
     }
 
     let userName = localStorage.userName;
@@ -9,12 +9,17 @@
         localStorage.userName = userName;
     }
     
-    const resp = await fetch(`/token?userName=${encodeURIComponent(userName)}&password=${localStorage.password}`);
+    const resp = await fetch(`/token?userName=${encodeURIComponent(userName)}&uid=${encodeURIComponent(localStorage.password)}`);
     const tokenObj = await resp.json();
 
     localStorage.token = tokenObj.token;
     localStorage.userId = tokenObj.userId;
     return localStorage.token;
+}
+
+function setToken(token: string, expire: Date) {
+    localStorage.setItem("token", token);
+    localStorage.setItem("tokenExpire", expire.toISOString());
 }
 
 function randomPassword(length = 20) {

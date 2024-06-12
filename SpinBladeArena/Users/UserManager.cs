@@ -1,16 +1,18 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace SpinBladeArena.Users;
 
-public class UserManager
+public class UserManager(TokenValidationParameters _tvp)
 {
     readonly Dictionary<int, UserInfo> _users = [];
     int _nextUserId = 1;
 
-    public UserInfo EnsureUser(string userName, string password)
+    public UserInfo EnsureUser(string userName, string uid)
     {
         if (userName.Length > 10) throw new ArgumentException("User name is too long", nameof(userName));
-        UserInfo? user = _users.Values.FirstOrDefault(user => user.Password == password);
+        UserInfo? user = _users.Values.FirstOrDefault(user => user.UniqueIdentifier == uid);
 
         if (user != null)
         {
@@ -19,9 +21,33 @@ public class UserManager
         }
 
         int userId = Interlocked.Increment(ref _nextUserId);
-        UserInfo newUser = new(userId, userName, password, isOnline: false, DateTime.Now);
+        UserInfo newUser = new(userId, userName, uid, isOnline: false, DateTime.Now);
         _users[userId] = newUser;
         return newUser;
+    }
+
+    public TokenDto CreateToken(string userName)
+    {
+        UserInfo user = _users.Values.Single(user => user.Name == userName);
+
+        List<Claim> claims =
+        [
+            // Add any claims you need here
+            new Claim(JwtRegisteredClaimNames.Sub, user.UniqueIdentifier),
+            new Claim(JwtRegisteredClaimNames.Name, userName),
+            new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
+            // other claims
+        ];
+
+        DateTime expires = DateTime.UtcNow.AddHours(1);
+        JwtSecurityToken token = new(
+            issuer: _tvp.ValidIssuer,
+            audience: _tvp.ValidAudience,
+            expires: expires,
+            signingCredentials: new SigningCredentials((SymmetricSecurityKey)_tvp.IssuerSigningKey, SecurityAlgorithms.HmacSha256),
+            claims: claims);
+
+        return new TokenDto(user.Id, new JwtSecurityTokenHandler().WriteToken(token), expires);
     }
 
     public UserInfo[] GetAllUsers() => [.. _users.Values];

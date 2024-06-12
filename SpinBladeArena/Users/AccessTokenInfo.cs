@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace SpinBladeArena.Users;
 
-public record TokenInfo
+public record AccessTokenInfo
 {
     [JsonPropertyName("exp")]
     public required int Exp { get; init; }
@@ -72,7 +72,7 @@ public record TokenInfo
     [JsonPropertyName("email")]
     public required string Email { get; init; }
 
-    public static TokenInfo Decode(string token)
+    public static AccessTokenInfo Decode(string token)
     {
         if (string.IsNullOrEmpty(token))
             throw new ArgumentNullException(nameof(token));
@@ -83,7 +83,7 @@ public record TokenInfo
 
         string payload = parts[1];
         string decodedJson = Base64UrlDecode(payload);
-        return JsonSerializer.Deserialize<TokenInfo>(decodedJson) ?? throw new InvalidOperationException("Deserialization failed.");
+        return JsonSerializer.Deserialize<AccessTokenInfo>(decodedJson) ?? throw new InvalidOperationException("Deserialization failed.");
     }
 
     private static string Base64UrlDecode(string input)

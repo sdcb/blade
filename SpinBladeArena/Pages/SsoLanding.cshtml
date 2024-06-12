@@ -1,0 +1,13 @@
+﻿@page "/sso-landing"
+@model SpinBladeArena.Pages.SsoLandingModel
+@{
+}
+<h1>登陆成功😀</h1>
+
+<script src="~/userManager.js"></script>
+@section scripts {
+    <script>
+        setToken('@Model.TokenDto.Token', @Model.UserInfo.Id, new Date('@Model.TokenDto.Expires.ToString("R")'))
+        location.href = '/';
+    </script>
+}
